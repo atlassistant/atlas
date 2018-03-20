@@ -1,0 +1,18 @@
+{
+    "weather_forecast": {
+        "location": {
+            "required": true
+        },
+        "date": {
+            "required": false
+        }
+    },
+    "reminder": {
+        "reason": {
+            "required": true
+        },
+        "date": {
+            "required": true
+        }
+    }
+}
