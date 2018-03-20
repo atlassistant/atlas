@@ -88,6 +88,8 @@ if __name__ == "__main__":
 
     agt = Agent(data)
 
+    # print (agt.machine.events.keys())
+
     # agt.bag['location'] = 'Paris'
     agt.trigger('weather_forecast')
 
