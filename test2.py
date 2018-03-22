@@ -3,25 +3,31 @@ import json
 import paho.mqtt.client as mqtt
 
 def on_connect(client, userdata, flags, rc):
-    client.publish('/atlas/intents/register', json.dumps({
-        'intent': 'weather_forecast',
-        'slots': ['location', 'date'],
-    }))
-    client.subscribe('/atlas/intents/weather_forecast')
+    client.subscribe('atlas/intents/weather_forecast')
 
 def on_message(client, userdata, msg):
-    if msg.topic == '/atlas/intents/weather_forecast':
+    if msg.topic == 'atlas/intents/weather_forecast':
         data = json.loads(msg.payload)
 
         location = data.get('location')
+        date = data.get('date')
+        id = data['__id']
 
         if not location:
-            return client.publish('/atlas/dialog/ask', json.dumps({
-                'param': 'location',
-                'text': 'Pour quelle ville ?',
+            return client.publish('atlas/%s/dialog/ask' % id, json.dumps({
+                'slot': 'location',
+                'text': 'Pour quelle ville veux-tu la météo ?',
             }))
 
+        if not date:
+            return client.publish('atlas/%s/dialog/ask' % id, json.dumps({
+                'slot': 'date',
+                'text': 'Pour quelle date veux-tu la météo ?',
+            })) 
+
         print ("Ok, let'go for %s" % location)
+
+        client.publish('atlas/%s/dialog/terminate' % id)
 
 if __name__ == '__main__':
     client = mqtt.Client()

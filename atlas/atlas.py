@@ -1,13 +1,31 @@
-from . import Client
+from .agent import Agent
 import logging
 
 class Atlas:
-    def __init__(self):
+    def __init__(self, host, interpreter):
         self._log = logging.getLogger('atlas:core')
-        self._client = Client(on_intent_register=self._on_intent_registering)
+        self._host = host
+        self._interpreter = interpreter
+        self._agents = []
 
-    def _on_intent_registering(self, data):
-        self._log.debug('Registering request for %s' % data)
+    def create_agent(self, config):
+        self._log.info('Creating agent')
+        
+        agt = Agent(self._interpreter, config)
 
-    def run(self, host, port=1883):
-        self._client.run(host, port)
+        self._agents.append(agt)
+
+        agt.client.start(self._host)
+
+    def cleanup(self):
+        self._log.info('Exiting gracefuly')
+
+        for agt in self._agents:
+            agt.client.stop()
+
+    def run(self):
+        self._log.info('Atlas is running, press any key to exit')
+
+        input()
+
+        self.cleanup()

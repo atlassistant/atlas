@@ -2,66 +2,108 @@ import paho.mqtt.client as mqtt
 import logging, json
 
 class Client:
-    register_topic = '/atlas/intents/register'
-    parse_topic = '/atlas/dialog/parse'
-    ask_topic = '/atlas/dialog/ask'
-    say_topic = '/atlas/dialog/say'
+    """Client is a simple facade between an Agent and the MQTT broker.
 
-    def __init__(self, on_intent_register=None):
-        self._log = logging.getLogger('atlas:client')
-        self._on_intent_register = on_intent_register
-        self._client = mqtt.Client()
+    They define handler for all supported operations and expose available publications.
+
+    """
+
+    TERMINATE_TOPIC = 'atlas/%s/dialog/terminate'
+    PARSE_TOPIC = 'atlas/%s/dialog/parse'
+    ASK_TOPIC = 'atlas/%s/dialog/ask'
+    SHOW_TOPIC = 'atlas/%s/dialog/show'
+    INTENT_TOPIC = 'atlas/intents/%s'
+
+    CHANNEL_ASK_TOPIC = 'atlas/%s/channel/ask'
+    CHANNEL_SHOW_TOPIC = 'atlas/%s/channel/show'
+
+    def __init__(self, client_id):
+        self._log = logging.getLogger('atlas:client:%s' % client_id)
+
+        self.PARSE_TOPIC = Client.PARSE_TOPIC % client_id
+        self.ASK_TOPIC = Client.ASK_TOPIC % client_id
+        self.SHOW_TOPIC = Client.SHOW_TOPIC % client_id
+        self.TERMINATE_TOPIC = Client.TERMINATE_TOPIC % client_id
+        self.CHANNEL_ASK_TOPIC = Client.CHANNEL_ASK_TOPIC % client_id
+        self.CHANNEL_SHOW_TOPIC = Client.CHANNEL_SHOW_TOPIC % client_id
+
+        self._client = mqtt.Client(client_id)
         self._client.on_message = self._on_message
         self._client.on_connect = self._on_connect
-        self._subs = {}
 
-    def run(self, host, port=1883):
+        self.on_ask = self._handler_not_set
+        self.on_parse = self._handler_not_set
+        self.on_terminate = self._handler_not_set
+        self.on_show = self._handler_not_set
+
+    def _handler_not_set(self, data=None, raw=None):
+        self._log.warn('Handler not set correctly')
+
+    def start(self, host, port=1883):
         self._client.connect(host, port)
-        self._client.loop_forever()
+        self._client.loop_start()
+
+    def stop(self):
+        self._client.loop_stop()
+
+    def intent(self, intent, data):
+        """Publish a message to call the intent handler.
+
+        :param intent: Name of the intent to call
+        :type intent: str
+        :param data: Data to send to the intent handler
+        :type data: dict
+
+        """
+
+        self._client.publish(Client.INTENT_TOPIC % intent, json.dumps(data))
+
+    def ask(self, payload):
+        """Ask a question to the channel.
+
+        :param payload: message
+        :type payload: str
+
+        """
+
+        self._client.publish(self.CHANNEL_ASK_TOPIC, payload)
+
+    def show(self, payload):
+        """Show a message to the channel.
+
+        :param payload: message
+        :type payload: str
+
+        """
+
+        self._client.publish(self.CHANNEL_SHOW_TOPIC, payload)
 
     def _on_connect(self, client, userdata, flags, rc):
         self._log.info('Connected to broker')
-        self._client.subscribe(Client.register_topic)
-        self._client.subscribe(Client.parse_topic)
-        self._client.subscribe(Client.ask_topic)
-        self._client.subscribe(Client.say_topic)
+        self._client.subscribe(self.PARSE_TOPIC)
+        self._client.subscribe(self.ASK_TOPIC)
+        self._client.subscribe(self.SHOW_TOPIC)
+        self._client.subscribe(self.TERMINATE_TOPIC)
 
     def _on_message(self, client, userdata, msg):
         self._log.debug('Received message %s - %s' % (msg.topic, msg.payload))
-        
-        try:
-            data = json.loads(msg.payload)
-        except json.decoder.JSONDecodeError:
-            data = {}
-            self._log.warn('Could not decode payload %s' % msg.payload)
 
-        # Special case for intent registering
-        if msg.topic == Client.register_topic and self._on_intent_register:
-            self._on_intent_register(data)
-
-        sid = data.get('sid')
-
-        if sid:
-            subs = self._subs.get(msg.topic)
-            handler = subs.get(sid)
-
-            if handler:
-                handler(data)
+        # Some specific messages do not need the JSON load
+        if msg.topic == self.PARSE_TOPIC:
+            self.on_parse(msg.payload.decode('utf-8'))
+        elif msg.topic == self.TERMINATE_TOPIC:
+            self.on_terminate()
         else:
-            self._log.warn('No sid found!')
+            # Else, it should be a JSON object
+            try:
+                data = json.loads(msg.payload)
+            except json.decoder.JSONDecodeError:
+                data = {}
+                self._log.warn('Could not decode payload %s' % msg.payload)
 
-    def subscribe(self, sid, topic, handler):
-        self._log.info('Subscribing to "%s" for sid "%s"' % (topic, sid))
-        top = self._subs.get(topic)
-
-        if not top:
-            self._subs[topic] = { sid: handler }
-        else:
-            self._subs[top][sid] = handler
-    
-    def unsubscribe(self, sid, topic):
-        self._log.info('Unsubscribing from "%s" for sid "%s"' % (topic, sid))
-        top = self._subs.get(topic)
-        
-        if top:
-            top.pop(sid)
+            if msg.topic == self.ASK_TOPIC:
+                self.on_ask(data, msg.payload)
+            elif msg.topic == self.SHOW_TOPIC:
+                self.on_show(data, msg.payload)
+            else:
+                self._log.warn('No handler found for %s' % msg.topic)
