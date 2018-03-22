@@ -8,6 +8,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
 
     atlas = Atlas('localhost', DummyInterpreter())
+    
     atlas.create_agent(AgentConfig('joe'))
 
     atlas.run()

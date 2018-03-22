@@ -6,18 +6,24 @@ from transitions.extensions.states import add_state_features, Timeout
 
 @add_state_features(Timeout)
 class AtlasMachine(Machine):
+    """Custom transitions Machine to add state features.
+    """
+    
     pass
 
 class AgentConfig:
-    def __init__(self, id):
+    def __init__(self, id, ask_timeout=30):
         """Constructs a new configuration for the given parameters.
 
         :param id: Client ID used to represents the agent
         :type id: str
+        :param ask_timeout: Timeout in seconds where the agent should go back to its asleep state when requiring user inputs
+        :type ask_timeout: int
 
         """
 
         self.id = id
+        self.ask_timeout = ask_timeout
 
     def wrap(self, data):
         """Merge data with specific keys for this configuration.
@@ -55,7 +61,7 @@ class Agent:
         """
         
         self.config = config
-        self._log = logging.getLogger('atlas:agent:%s' % self.config.id)
+        self._log = logging.getLogger('atlas.agent.%s' % self.config.id)
 
         self.interpreter = interpreter
 
@@ -74,24 +80,29 @@ class Agent:
         metadata = self.interpreter.get_metadata()
 
         ask_states = list(set([self._to_ask_state(slot) for _, meta in metadata.items() for slot in meta]))
-        states = [Agent.STATE_ASLEEP] + list(metadata.keys()) + ask_states
+        states = [Agent.STATE_ASLEEP] + list(metadata.keys()) + [{ 'name': o, 'timeout': self.config.ask_timeout, 'on_timeout': self._on_timeout } for o in ask_states]
 
         self._log.info('Registering with states %s' % states)
 
-        self._machine = AtlasMachine(self, states=states, initial=Agent.STATE_ASLEEP, send_event=True)
-        self._machine.add_transition(Agent.STATE_ASLEEP, '*', Agent.STATE_ASLEEP, after='reset')
+        self._machine = AtlasMachine(self, 
+            states=states, 
+            initial=Agent.STATE_ASLEEP, 
+            send_event=True, 
+            after_state_change=lambda e: self._log.info('Entered state %s' % e.transition.dest))
+
+        self._machine.add_transition(Agent.STATE_ASLEEP, '*', Agent.STATE_ASLEEP, after=self.reset)
 
         ask_transitions_source = { k: [] for k in ask_states }
 
         for intent, slots in metadata.items():
             converted_slots = [self._to_ask_state(s) for s in slots]
-            self._machine.add_transition(intent, [Agent.STATE_ASLEEP] + converted_slots, intent, after='_call_intent')
+            self._machine.add_transition(intent, [Agent.STATE_ASLEEP] + converted_slots, intent, after=self._call_intent)
 
             for slot in converted_slots:
                 ask_transitions_source[slot].append(intent)
 
         for k, v in ask_transitions_source.items():
-            self._machine.add_transition(k, v, k, after='_on_asked')
+            self._machine.add_transition(k, v, k, after=self._on_asked)
 
     def _to_ask_state(self, slot):
         """Converts to an ask state.
@@ -160,6 +171,19 @@ class Agent:
 
         self.client.ask(payload)
 
+    def _on_timeout(self, event):
+        """Called when a state timeout has been reached.
+
+        :param event: Machine event
+        :type event: EventData
+
+        """
+
+        self._safe_trigger(Agent.STATE_ASLEEP)
+
+        # TODO Inform client of a timeout
+        # self.client.show()
+
     def parse(self, msg):
         """Parse a raw message.
 
@@ -170,6 +194,9 @@ class Agent:
 
         self._log.debug('Parsing "%s"' % msg)
 
+        # TODO if intent is "cancel", returns to asleep
+
+        # Start by checking if we are in a ask* state
         if self.state.startswith(Agent.PREFIX_ASK) and self._cur_asked_param: # pylint: disable=E1101
             self._cur_slots[self._cur_asked_param] = self.interpreter.parse_entity(msg, self._cur_intent, self._cur_asked_param)
 
@@ -187,7 +214,7 @@ class Agent:
     def ask(self, data, raw_msg):
         """Ask required by the skill intent.
 
-        :param data: Data sent by the intent
+        :param data: Data sent by the intent, it should at least contains the key "slot"
         :type data: dict
         :param raw_msg: Raw payload received
         :type raw_msg: str
@@ -209,7 +236,7 @@ class Agent:
         self.client.show(raw_msg)
 
     def terminate(self):
-        """Terminates a dialog.
+        """Terminates a dialog and returns to the asleep state.
         """
 
         self._safe_trigger(Agent.STATE_ASLEEP)

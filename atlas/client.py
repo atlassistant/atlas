@@ -4,7 +4,7 @@ import logging, json
 class Client:
     """Client is a simple facade between an Agent and the MQTT broker.
 
-    They define handler for all supported operations and expose available publications.
+    It defines handler for all supported operations and exposes available publications.
 
     """
 
@@ -12,13 +12,14 @@ class Client:
     PARSE_TOPIC = 'atlas/%s/dialog/parse'
     ASK_TOPIC = 'atlas/%s/dialog/ask'
     SHOW_TOPIC = 'atlas/%s/dialog/show'
+    
     INTENT_TOPIC = 'atlas/intents/%s'
 
     CHANNEL_ASK_TOPIC = 'atlas/%s/channel/ask'
     CHANNEL_SHOW_TOPIC = 'atlas/%s/channel/show'
 
     def __init__(self, client_id):
-        self._log = logging.getLogger('atlas:client:%s' % client_id)
+        self._log = logging.getLogger('atlas.client.%s' % client_id)
 
         self.PARSE_TOPIC = Client.PARSE_TOPIC % client_id
         self.ASK_TOPIC = Client.ASK_TOPIC % client_id

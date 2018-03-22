@@ -25,8 +25,10 @@ def on_message(client, userdata, msg):
                 'text': 'Pour quelle date veux-tu la météo ?',
             })) 
 
-        print ("Ok, let'go for %s" % location)
-
+        
+        client.publish('atlas/%s/dialog/show' % id, json.dumps({
+            'text': 'Ok, je recherche la météo de %s pour %s' % (location, date)
+        }))
         client.publish('atlas/%s/dialog/terminate' % id)
 
 if __name__ == '__main__':

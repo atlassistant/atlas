@@ -13,6 +13,6 @@ class DummyInterpreter(Interpreter):
             'text': msg,
             'intent': 'weather_forecast',
             'slots': {
-                
+                'date': 'tomorrow'
             }
         }]
