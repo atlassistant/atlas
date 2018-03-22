@@ -9,18 +9,21 @@ class Atlas:
 
     """
 
-    def __init__(self, host, interpreter):
+    def __init__(self, interpreter, host='localhost', port=1883):
         """Constructs a new Atlas engine.
         
-        :param host: Host of the message broker
-        :type host: str
         :param interpreter: Interpreter implementation to use
         :type interpreter: Interpreter
+        :param host: Host of the message broker
+        :type host: str
+        :param port: Port of the message broker
+        :type port: int
 
         """
 
         self._log = logging.getLogger('atlas.core')
         self._host = host
+        self._port = port
         self._interpreter = interpreter
         self._agents = []
 
