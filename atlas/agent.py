@@ -61,7 +61,9 @@ class Agent:
         """
         
         self.config = config
+
         self._log = logging.getLogger('atlas.agent.%s' % self.config.id)
+        self._intent_queue = []
 
         self.interpreter = interpreter
 
@@ -88,7 +90,7 @@ class Agent:
             states=states, 
             initial=Agent.STATE_ASLEEP, 
             send_event=True, 
-            after_state_change=lambda e: self._log.info('Entered state %s' % e.transition.dest))
+            before_state_change=lambda e: self._log.info('Entering state %s' % e.transition.dest))
 
         self._machine.add_transition(Agent.STATE_ASLEEP, '*', Agent.STATE_ASLEEP, after=self.reset)
 
@@ -125,6 +127,8 @@ class Agent:
         self._cur_asked_param = None
         self._cur_intent = None
         self._cur_slots = {}
+
+        self._process_next_intent()
 
     def go(self, trigger_name, **kwargs):
         """Safely call a trigger and catch errors
@@ -202,19 +206,23 @@ class Agent:
 
             self.go(self._cur_intent)
         else:
-            if self.state != Agent.STATE_ASLEEP: # pylint: disable=E1101
-                # TODO another intent is running, ask for confirmation? maybe?
-                self._log.warn('Forcing terminate of %s, new intent requested' % self.state) # pylint: disable=E1101
-                self.terminate()
-
             data = self.interpreter.parse(msg)
 
-            # TODO multiple intents in the same sentence, make a queue and pop when returning to asleep
+            self._intent_queue.extend(data)
 
-            if len(data) > 0:
-                intent = data[0]
-                self._cur_slots = intent['slots']
-                self.go(intent['intent'])
+            if self.state == Agent.STATE_ASLEEP: # pylint: disable=E1101
+                self._process_next_intent()
+
+            # TODO another intent is running, ask for confirmation? maybe?
+
+    def _process_next_intent(self):
+        """Process the intent queue if any left.
+        """
+
+        if len(self._intent_queue) > 0:
+            intent = self._intent_queue.pop(0)
+            self._cur_slots = intent['slots']
+            self.go(intent['intent'])
 
     def ask(self, data, raw_msg):
         """Ask required by the skill intent.

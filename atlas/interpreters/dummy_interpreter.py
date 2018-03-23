@@ -15,4 +15,11 @@ class DummyInterpreter(Interpreter):
             'slots': {
                 'date': 'tomorrow'
             }
+        }, {
+           'text': msg,
+            'intent': 'reminder',
+            'slots': {
+                'subject': 'Sortir les poubelles',
+                'date': 'tomorrow'
+            } 
         }]
