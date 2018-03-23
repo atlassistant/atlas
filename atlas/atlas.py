@@ -1,4 +1,6 @@
 from .agent import Agent, AgentConfig
+from .broker import BrokerConfig
+from .version import __version__
 from .interpreters import Interpreter
 import logging
 
@@ -9,7 +11,7 @@ class Atlas:
 
     """
 
-    def __init__(self, interpreter, host='localhost', port=1883):
+    def __init__(self, interpreter, broker_config=BrokerConfig()):
         """Constructs a new Atlas engine.
         
         :param interpreter: Interpreter implementation to use
@@ -22,8 +24,7 @@ class Atlas:
         """
 
         self._log = logging.getLogger('atlas.core')
-        self._host = host
-        self._port = port
+        self._broker_config = broker_config
         self._interpreter = interpreter
         self._agents = []
 
@@ -41,13 +42,13 @@ class Atlas:
 
         self._agents.append(agt)
 
-        agt.client.start(self._host)
+        agt.client.start(self._broker_config)
 
     def cleanup(self):
         """Cleanups this engine instance.
         """
 
-        self._log.info('Exiting gracefuly')
+        self._log.info('Exiting Atlas %s gracefuly' % __version__)
 
         for agt in self._agents:
             agt.client.stop()
@@ -56,7 +57,7 @@ class Atlas:
         """Runs this instance!
         """
 
-        self._log.info('Atlas is running, press any key to exit')
+        self._log.info('Atlas %s is running, press any key to exit' % __version__)
 
         input()
 

@@ -1,3 +1,4 @@
+from .broker import BrokerConfig
 import paho.mqtt.client as mqtt
 import logging, json
 
@@ -40,11 +41,25 @@ class Client:
     def _handler_not_set(self, data=None, raw=None):
         self._log.warn('Handler not set correctly')
 
-    def start(self, host, port=1883):
-        self._client.connect(host, port)
+    def start(self, config):
+        """Starts the broker client.
+
+        :param config: Broker configuration
+        :type config: BrokerConfig
+
+        """
+
+        self._client.connect(config.host, config.port)
+
+        if config.username and config.password:
+            self._client.username_pw_set(config.username, config.password)
+
         self._client.loop_start()
 
     def stop(self):
+        """Stops the broker client.
+        """
+        
         self._client.loop_stop()
 
     def intent(self, intent, data):

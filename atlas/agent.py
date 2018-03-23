@@ -5,7 +5,7 @@ from transitions import Machine, EventData, MachineError
 from transitions.extensions.states import add_state_features, Timeout
 
 @add_state_features(Timeout)
-class AtlasMachine(Machine):
+class AgentMachine(Machine):
     """Custom transitions Machine to add state features.
     """
     
@@ -84,7 +84,7 @@ class Agent:
 
         self._log.info('Registering with states %s' % states)
 
-        self._machine = AtlasMachine(self, 
+        self._machine = AgentMachine(self, 
             states=states, 
             initial=Agent.STATE_ASLEEP, 
             send_event=True, 
