@@ -1,13 +1,13 @@
 from atlas import Atlas
 from atlas.agent import AgentConfig
 from atlas.client import Client
-from atlas.interpreters.dummy_interpreter import DummyInterpreter
+from atlas.interpreters.snips_interpreter import SnipsInterpreter
 import logging
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
 
-    atlas = Atlas(DummyInterpreter())
+    atlas = Atlas(SnipsInterpreter())
 
     atlas.create_agent(AgentConfig('joe'))
 
