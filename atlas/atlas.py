@@ -89,6 +89,8 @@ class Atlas:
         for agt in self._agents:
             agt.client.stop()
 
+        self._executor.cleanup()
+
     def run(self):
         """Runs this instance!
         """

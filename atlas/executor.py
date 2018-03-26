@@ -15,6 +15,32 @@ class ExecutorConfig:
 
         self.path = os.path.abspath(path)
 
+class ExecutorProcess:
+    
+    def __init__(self, skill):
+        """Represents a single executing process for a skill backend.
+
+        :param skill: Skill related to this process
+        :type skill: Skill
+        """
+
+        self.skill = skill
+        self._popen = None
+
+    def run(self):
+        """Runs this process.
+        """
+
+        self._popen = subprocess.Popen(self.skill.cmd, cwd=os.path.dirname(self.skill.path))
+
+    def terminate(self):
+        """Terminates this process.
+        """
+
+        if self._popen:
+            self._popen.terminate()
+            self._popen = None
+
 class Executor:
     """Executor launch atlas skills.
 
@@ -31,16 +57,34 @@ class Executor:
         """
 
         self._log = logging.getLogger('atlas.executor')
+        self._processes = []
         self._config = config
 
     def run(self):
+        """Run discover skills and run them.
+        """
+
         self._log.info('Running executor in: %s' % self._config.path)
 
         for skill_config_path in glob.glob(self._config.path + '/**/atlas.yml'):
+
             with open(skill_config_path) as f:
-                skill_info = Skill(**yaml.safe_load(f))
+                skill_info = Skill(path=skill_config_path, **yaml.safe_load(f))
 
-            self._log.info('Loaded %s %s by %s' % (skill_info.name, skill_info.version, skill_info.author))
+            self._log.info('Loaded %s' % skill_info)
 
-            # t = threading.Thread(target=lambda: subprocess.run(skill_info.cmd.split(' '), cwd=os.path.dirname(skill_config_path)), daemon=True)
-            # t.start()
+            p = ExecutorProcess(skill_info)
+
+            self._processes.append(p)
+
+            p.run()
+
+    def cleanup(self):
+        """Stops spawned processes.
+        """
+
+        self._log.info('Stopping processes')
+
+        for process in self._processes:
+            process.terminate()
+            self._log.info('Stopped %s' % process.skill)

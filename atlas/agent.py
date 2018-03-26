@@ -12,17 +12,20 @@ class AgentMachine(Machine):
     pass
 
 class AgentConfig:
-    def __init__(self, id, ask_timeout=30):
+    def __init__(self, id, lang, ask_timeout=30):
         """Constructs a new configuration for the given parameters.
 
         :param id: Client ID used to represents the agent
         :type id: str
+        :param lang: Language of the client
+        :type lang: str
         :param ask_timeout: Timeout in seconds where the agent should go back to its asleep state when requiring user inputs
         :type ask_timeout: int
 
         """
 
         self.id = id
+        self.lang = lang
         self.ask_timeout = ask_timeout
 
     def wrap(self, data):
@@ -35,6 +38,7 @@ class AgentConfig:
 
         data.update({
             '__id': self.id,
+            '__lang': self.lang,
         })
 
         return data
