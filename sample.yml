@@ -1,0 +1,11 @@
+interpreter: 
+  type: 'atlas.interpreters.dummy_interpreter.DummyInterpreter'
+executor:
+  path: 'skills'
+logs:
+  level: 'INFO'
+broker:
+  host: 'localhost'
+  port: 1883
+  username:
+  password:

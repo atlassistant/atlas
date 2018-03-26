@@ -2,6 +2,9 @@ from . import Interpreter
 
 class DummyInterpreter(Interpreter):
 
+    def __init__(self, **kwargs):
+        pass
+
     def get_metadata(self):
         return {
             'weather_forecast': ['location', 'date'],

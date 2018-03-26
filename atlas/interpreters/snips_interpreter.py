@@ -5,7 +5,7 @@ import io, json
 
 class SnipsInterpreter(Interpreter):
     
-    def __init__(self):
+    def __init__(self, **kwargs):
 
         # TODO replace those ugly test code!
 
@@ -44,6 +44,7 @@ class SnipsInterpreter(Interpreter):
         # TODO safely retrieve values
 
         return [{
+            'text': msg,
             'intent': parsed['intent']['intentName'],
             'slots': { s['slotName']: s['value']['value'] for s in parsed['slots'] }
         }]
