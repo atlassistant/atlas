@@ -4,6 +4,9 @@ executor:
   path: 'skills'
 logs:
   level: 'INFO'
+server:
+  host: 'localhost'
+  port: 5000
 broker:
   host: 'localhost'
   port: 1883

@@ -71,7 +71,7 @@ class Executor:
             with open(skill_config_path) as f:
                 skill_info = Skill(path=skill_config_path, **yaml.safe_load(f))
 
-            self._log.info('Loaded %s' % skill_info)
+            self._log.info('Launching %s with command "%s"' % (skill_info, skill_info.cmd))
 
             p = ExecutorProcess(skill_info)
 

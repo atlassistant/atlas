@@ -1,6 +1,7 @@
 from .agent import Agent, AgentConfig
 from .broker import BrokerConfig
 from .version import __version__
+from .web import Server, ServerConfig
 from .interpreters import Interpreter
 from .executor import Executor, ExecutorConfig
 import logging, yaml
@@ -44,6 +45,10 @@ class AtlasConfig:
 
         self.executor = ExecutorConfig(**data.get('executor', {}))
 
+        # Server config
+
+        self.server = ServerConfig(**data.get('server', {}))
+
 class Atlas:
     """Entry point for this assistant system.
 
@@ -63,6 +68,7 @@ class Atlas:
         self._config = config
         self._agents = []
         self._executor = Executor(self._config.executor)
+        self._server = Server(self._config.server)
 
     def create_agent(self, config):
         """Creates a new agent attached to this engine.
@@ -97,7 +103,6 @@ class Atlas:
 
         self._log.info('Atlas %s is running, press any key to exit' % __version__)
         self._executor.run()
-
-        input()
+        self._server.run()
 
         self.cleanup()
