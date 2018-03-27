@@ -1,5 +1,13 @@
 from flask import Flask, render_template
+from flask_restful import Api, Resource
 import logging, subprocess, os
+
+app = Flask('atlas.web', static_folder='./public')
+api = Api(app)
+
+@app.route('/')
+def index():
+    return app.send_static_file('index.html')
 
 class ServerConfig:
     """Holds settings related to the web server.
@@ -21,7 +29,9 @@ class ServerConfig:
         self.port = port
         self.debug = debug
 
-app = Flask('atlas.web', static_folder='./public')
+class HelloWorld(Resource):
+    def get(self):
+        return {'hello': 'world'}
 
 class Server:
     """Web server for the atlas interface.
@@ -38,10 +48,7 @@ class Server:
         self._log = logging.getLogger('atlas.server')
         self._config = config
 
-    # TODO structure!
-    @app.route('/')
-    def index():
-        return app.send_static_file('index.html')
+        api.add_resource(HelloWorld, '/hello')
 
     def run(self):
         """Starts the web server.
@@ -54,7 +61,7 @@ class Server:
             self._log.info('Started webpack')
 
         self._log.info('Starting web server on %s:%s' % (self._config.host, self._config.port))
-        app.run(self._config.host, self._config.port)
+        app.run(self._config.host, self._config.port)#, debug=self._config.debug)
 
         # And terminate the process once done
         if self._config.debug:

@@ -13,16 +13,24 @@ module.exports = {
         path: path.resolve(__dirname, DIST_FOLDER)
     },
     module: {
-        rules: [{
-            test: /\.scss$/,
-            use: [{
-                loader: "style-loader"
-            }, {
-                loader: "css-loader"
-            }, {
-                loader: "sass-loader"
-            }]
-        }]
+        rules: [
+            {
+                test: /\.scss$/,
+                use: [{
+                    loader: "style-loader"
+                }, {
+                    loader: "css-loader"
+                }, {
+                    loader: "sass-loader"
+                }]
+            },
+            {
+                test: /\.vue$/,
+                use: [{
+                    loader: "vue-loader"
+                }]
+            }
+        ]
     },
     plugins: [
         new CleanWebpackPlugin([DIST_FOLDER]),
