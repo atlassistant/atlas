@@ -16,5 +16,6 @@ atlas.create_agent(AgentConfig('dummy', 'en')) # TODO Removes it!
 
 try:
     atlas.run()
-except:
+except Exception as e:
+    print (e)
     atlas.cleanup()

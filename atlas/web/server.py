@@ -1,24 +1,27 @@
 from flask import Flask, render_template
-import logging
+import logging, subprocess, os
 
 class ServerConfig:
     """Holds settings related to the web server.
     """
 
-    def __init__(self, host='localhost', port=5000):
+    def __init__(self, host='localhost', port=5000, debug=True):
         """Constructs a new ServerConfig.
 
         :param host: Host to bind to
         :type host: str
         :param port: Port to bind to
         :type port: int
+        :param debug: Determines if we should run the web & webpack watch command
+        :type debug: bool
 
         """
 
         self.host = host
         self.port = port
+        self.debug = debug
 
-app = Flask('atlas.web', static_folder='./web/dist', template_folder='./web')
+app = Flask('atlas.web', static_folder='./public')
 
 class Server:
     """Web server for the atlas interface.
@@ -38,11 +41,22 @@ class Server:
     # TODO structure!
     @app.route('/')
     def index():
-        return 'hello'
+        return app.send_static_file('index.html')
 
     def run(self):
         """Starts the web server.
         """
+        
+        # When in a debug mode, start webpack in watch mode automatically
+        # This help makes the development easier
+        if self._config.debug:
+            p = subprocess.Popen('npm run start', cwd=os.path.dirname(__file__), shell=True)
+            self._log.info('Started webpack')
 
         self._log.info('Starting web server on %s:%s' % (self._config.host, self._config.port))
         app.run(self._config.host, self._config.port)
+
+        # And terminate the process once done
+        if self._config.debug:
+            p.terminate()
+            self._log.info('Stopped webpack')
