@@ -1,5 +1,5 @@
 import logging
-from .client import Client
+from .client import AgentClient
 from .interpreters import Interpreter
 from transitions import Machine, EventData, MachineError
 from transitions.extensions.states import add_state_features, Timeout
@@ -73,7 +73,7 @@ class Agent:
 
         # Configure the client facade
 
-        self.client = Client(self.config.id)
+        self.client = AgentClient(self.config.id)
         self.client.on_parse = self.parse
         self.client.on_ask = self.ask
         self.client.on_terminate = self.terminate
