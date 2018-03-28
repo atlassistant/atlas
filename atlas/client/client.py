@@ -54,8 +54,8 @@ class Client:
         """Stops the broker client.
         """
         
+        self._client.disconnect()
         self._client.loop_stop()
-        self.log.info('Disconnected')
 
     def publish(self, topic, payload):
         """Publish a message to the given topic.
@@ -124,6 +124,9 @@ class Client:
 
     def on_connect(self, client, userdata, flags, rc):
         self.log.info('Connected to broker')
+
+    def on_disconnect(self, client, userdata, rc):
+        self.log.info('Disconnected')
 
     def on_message(self, client, userdata, msg):
         self.log.debug('Received message %s - %s' % (msg.topic, msg.payload))

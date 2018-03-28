@@ -38,6 +38,7 @@ class Prompt(Cmd):
     def do_exit(self, args):
         self._client.publish('atlas/%s/channel/destroy' % self._client_id)
 
+        self._client.disconnect()
         self._client.loop_stop()
 
         raise SystemExit
