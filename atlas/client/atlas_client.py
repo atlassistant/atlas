@@ -6,16 +6,27 @@ class AtlasClient(Client):
     """MQTT client used to create and destroy Agent upon channel creation / destruction.
 
     This one is special.
-    
+
     """
 
     def __init__(self):
+        """Constructs a new AtlasClient.
+        """
+
         super(AtlasClient, self).__init__()
 
         self.on_create = self.handler_not_set
         self.on_destroy = self.handler_not_set
 
     def _get_client_id_and_operation(self, topic):
+        """Split the topic to get the client_id and the operation name.
+
+        :param topic: Message topic
+        :type topic: str
+        :rtype: str
+        
+        """
+
         r = re.search('atlas/(.*?)/channel/(.*)', topic)
 
         return (r.group(1), r.group(2))

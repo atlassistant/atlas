@@ -74,6 +74,21 @@ class Atlas:
         self._client.on_create = lambda id: self.create_agent(AgentConfig(id, self._config.interpreter.lang))
         self._client.on_destroy = self.delete_agent
 
+    def find_agent(self, id):
+        """Try to find an agent in this engine.
+
+        :param id: Id of the agent
+        :type id: str
+        :rtype: Agent
+        """
+
+        agts = list(filter(lambda a: a.config.id == id, self._agents))[:1]
+
+        if agts:
+            return agts[0]
+        else:
+            return None
+
     def create_agent(self, config):
         """Creates a new agent attached to this engine.
 
@@ -82,13 +97,16 @@ class Atlas:
 
         """
 
-        self._log.info('Creating agent %s' % config.id)
-        
-        agt = Agent(self._config.interpreter, config)
+        if self.find_agent(config.id):
+            self._log.info('Reusing existing agent %s' % config.id)
+        else:
+            self._log.info('Creating agent %s' % config.id)
+            
+            agt = Agent(self._config.interpreter, config)
 
-        self._agents.append(agt)
+            self._agents.append(agt)
 
-        agt.client.start(self._config.broker)
+            agt.client.start(self._config.broker)
 
     def delete_agent(self, id):
         """Deletes an agent from this engine.
@@ -98,14 +116,14 @@ class Atlas:
 
         """
 
-        self._log.info('Deleting agent %s' % id)
+        agt = self.find_agent(id)
 
-        agts = list(filter(lambda a: a.config.id == id, self._agents))[:1]
-
-        if agts:
-            agt = agts[0]
+        if agt:
+            self._log.info('Deleting agent %s' % id)
             agt.cleanup()
             self._agents.remove(agt)
+        else:
+            self._log.info('No agent found %s' % id)
 
     def cleanup(self):
         """Cleanups this engine instance.
@@ -114,7 +132,7 @@ class Atlas:
         self._log.info('Exiting Atlas %s gracefuly' % __version__)
 
         for agt in self._agents:
-            agt.client.cleanup()
+            agt.cleanup()
 
         self._client.stop()
         self._executor.cleanup()
