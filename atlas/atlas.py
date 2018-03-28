@@ -3,6 +3,7 @@ from .broker import BrokerConfig
 from .version import __version__
 from .web import Server, ServerConfig
 from .interpreters import Interpreter
+from .client import AtlasClient
 from .executor import Executor, ExecutorConfig
 import logging, yaml
 
@@ -69,6 +70,9 @@ class Atlas:
         self._agents = []
         self._executor = Executor(self._config.executor)
         self._server = Server(self._config.server)
+        self._client = AtlasClient()
+        self._client.on_create = lambda id: self.create_agent(AgentConfig(id, self._config.interpreter.lang))
+        self._client.on_destroy = self.delete_agent
 
     def create_agent(self, config):
         """Creates a new agent attached to this engine.
@@ -78,13 +82,30 @@ class Atlas:
 
         """
 
-        self._log.info('Creating agent')
+        self._log.info('Creating agent %s' % config.id)
         
         agt = Agent(self._config.interpreter, config)
 
         self._agents.append(agt)
 
         agt.client.start(self._config.broker)
+
+    def delete_agent(self, id):
+        """Deletes an agent from this engine.
+
+        :param id: Id of the agent to remove
+        :type id: str
+
+        """
+
+        self._log.info('Deleting agent %s' % id)
+
+        agts = list(filter(lambda a: a.config.id == id, self._agents))[:1]
+
+        if agts:
+            agt = agts[0]
+            agt.cleanup()
+            self._agents.remove(agt)
 
     def cleanup(self):
         """Cleanups this engine instance.
@@ -93,8 +114,9 @@ class Atlas:
         self._log.info('Exiting Atlas %s gracefuly' % __version__)
 
         for agt in self._agents:
-            agt.client.stop()
+            agt.client.cleanup()
 
+        self._client.stop()
         self._executor.cleanup()
 
     def run(self):
@@ -102,6 +124,7 @@ class Atlas:
         """
 
         self._log.info('Atlas %s is running, press any key to exit' % __version__)
+        self._client.start(self._config.broker)
         self._executor.run()
         self._server.run()
 

@@ -9,6 +9,8 @@ class SnipsInterpreter(Interpreter):
 
         # TODO replace those ugly test code!
 
+        self.lang = 'en'
+
         load_resources('en')
 
         try:

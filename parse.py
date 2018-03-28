@@ -17,6 +17,7 @@ class Prompt(Cmd):
 
     def _on_connect(self, client, userdata, flags, rc):
         print ('Connected!')
+        client.publish('atlas/%s/channel/create' % self._client_id)
         client.subscribe('atlas/%s/channel/ask' % self._client_id)
         client.subscribe('atlas/%s/channel/show' % self._client_id)
 
@@ -25,6 +26,9 @@ class Prompt(Cmd):
 
         print (data['text'])
 
+    def do_destroy(self, arg):
+        self._client.publish('atlas/%s/channel/destroy' % self._client_id)
+
     def default(self, arg):
         self._client.publish('atlas/%s/dialog/parse' % self._client_id, arg)
 
@@ -32,6 +36,8 @@ class Prompt(Cmd):
         self._client.publish('atlas/%s/dialog/terminate' % self._client_id)
 
     def do_exit(self, args):
+        self._client.publish('atlas/%s/channel/destroy' % self._client_id)
+
         self._client.loop_stop()
 
         raise SystemExit

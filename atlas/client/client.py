@@ -19,7 +19,7 @@ class Client:
     """
 
     def __init__(self, client_id=None):
-        self.log = logging.getLogger('atlas.client.%s' % client_id)
+        self.log = logging.getLogger('atlas.client.%s' % (client_id or __class__.__name__))
 
         self._client = mqtt.Client(client_id)
         self._client.on_message = self.on_message
@@ -55,6 +55,7 @@ class Client:
         """
         
         self._client.loop_stop()
+        self.log.info('Disconnected')
 
     def publish(self, topic, payload):
         """Publish a message to the given topic.

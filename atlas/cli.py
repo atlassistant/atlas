@@ -12,8 +12,6 @@ config_path = os.path.abspath(args.config or 'atlas.yml')
 
 atlas = Atlas(AtlasConfig(config_path))
 
-atlas.create_agent(AgentConfig('dummy', 'en')) # TODO Removes it!
-
 try:
     atlas.run()
 except Exception as e:

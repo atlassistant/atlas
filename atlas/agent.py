@@ -257,3 +257,15 @@ class Agent:
         """
 
         self.go(Agent.STATE_ASLEEP)
+
+    def cleanup(self):
+        """Cleanup the agent.
+        """
+
+        # TODO Find a way to remove it cleanly
+
+        self._machine.remove_model(self)
+        self.client.stop()
+
+    def __str__(self):
+        return 'Agent %s - %s' % (self.config.id, self.config.lang)
