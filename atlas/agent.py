@@ -85,7 +85,7 @@ class Agent:
 
         metadata = self.interpreter.get_metadata()
 
-        ask_states = list(set([self._to_ask_state(slot) for _, meta in metadata.items() for slot in meta]))
+        ask_states = list(set([self._to_ask_state(slot) for meta in metadata.values() for slot in meta]))
         states = [Agent.STATE_ASLEEP] + list(metadata.keys()) + [{ 'name': o, 'timeout': self.config.ask_timeout, 'on_timeout': self._on_timeout } for o in ask_states]
 
         self._log.info('Registering with states %s' % states)
@@ -131,6 +131,8 @@ class Agent:
         self._cur_asked_param = None
         self._cur_intent = None
         self._cur_slots = {}
+
+        self.client.terminate()
 
         self._process_next_intent()
 
@@ -257,7 +259,6 @@ class Agent:
         """
 
         self.go(Agent.STATE_ASLEEP)
-        self.client.terminate()
 
     def cleanup(self):
         """Cleanup the agent.

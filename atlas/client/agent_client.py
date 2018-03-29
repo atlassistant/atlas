@@ -12,6 +12,8 @@ class AgentClient(Client):
     def __init__(self, client_id, on_ask=None, on_parse=None, on_terminate=None, on_show=None):
         """Constructs a new AgentClient.
 
+        :param client_id: ID of the client manages by this agent
+        :type client_id: str
         :param on_ask: Handler when a skill wants to ask something
         :type on_ask: callable
         :param on_parse: Handler when a channel wants to parse a message
@@ -23,7 +25,7 @@ class AgentClient(Client):
 
         """
 
-        super(AgentClient, self).__init__(client_id)
+        super(AgentClient, self).__init__() # Do not pass the client_id here!
 
         self.PARSE_TOPIC = PARSE_TOPIC % client_id
         self.ASK_TOPIC = ASK_TOPIC % client_id
