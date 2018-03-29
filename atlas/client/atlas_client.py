@@ -9,14 +9,20 @@ class AtlasClient(Client):
 
     """
 
-    def __init__(self):
+    def __init__(self, on_create=None, on_destroy=None):
         """Constructs a new AtlasClient.
+
+        :param on_create: Handler when a channel has been created
+        :type on_create: callable
+        :param on_destroy: Handler when a channel has been destroyed
+        :type on_destroy: callable
+
         """
 
         super(AtlasClient, self).__init__()
 
-        self.on_create = self.handler_not_set
-        self.on_destroy = self.handler_not_set
+        self.on_create = on_create or self.handler_not_set
+        self.on_destroy = on_destroy or self.handler_not_set
 
     def _get_client_id_and_operation(self, topic):
         """Split the topic to get the client_id and the operation name.

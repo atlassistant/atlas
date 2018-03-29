@@ -3,7 +3,7 @@ from . import Interpreter
 class DummyInterpreter(Interpreter):
 
     def __init__(self, **kwargs):
-        self.lang = 'en'
+        super(DummyInterpreter, self).__init__('en')
 
     def get_metadata(self):
         return {

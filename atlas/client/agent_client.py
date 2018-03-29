@@ -1,5 +1,5 @@
 from .client import Client, \
-    PARSE_TOPIC, ASK_TOPIC, SHOW_TOPIC, TERMINATE_TOPIC, CHANNEL_ASK_TOPIC, CHANNEL_SHOW_TOPIC, INTENT_TOPIC
+    PARSE_TOPIC, ASK_TOPIC, SHOW_TOPIC, TERMINATE_TOPIC, CHANNEL_ASK_TOPIC, CHANNEL_SHOW_TOPIC, INTENT_TOPIC, CHANNEL_TERMINATE_TOPIC
 import json
 
 class AgentClient(Client):
@@ -9,7 +9,20 @@ class AgentClient(Client):
 
     """
 
-    def __init__(self, client_id):
+    def __init__(self, client_id, on_ask=None, on_parse=None, on_terminate=None, on_show=None):
+        """Constructs a new AgentClient.
+
+        :param on_ask: Handler when a skill wants to ask something
+        :type on_ask: callable
+        :param on_parse: Handler when a channel wants to parse a message
+        :type on_parse: callable
+        :param on_terminate: Handler when a skill wants to terminate the dialog
+        :type on_terminate: callable
+        :param on_show: Handler when a skill wants to show something
+        :type on_show: callable
+
+        """
+
         super(AgentClient, self).__init__(client_id)
 
         self.PARSE_TOPIC = PARSE_TOPIC % client_id
@@ -18,11 +31,12 @@ class AgentClient(Client):
         self.TERMINATE_TOPIC = TERMINATE_TOPIC % client_id
         self.CHANNEL_ASK_TOPIC = CHANNEL_ASK_TOPIC % client_id
         self.CHANNEL_SHOW_TOPIC = CHANNEL_SHOW_TOPIC % client_id
+        self.CHANNEL_TERMINATE_TOPIC = CHANNEL_TERMINATE_TOPIC % client_id
 
-        self.on_ask = self.handler_not_set
-        self.on_parse = self.handler_not_set
-        self.on_terminate = self.handler_not_set
-        self.on_show = self.handler_not_set
+        self.on_ask = on_ask or self.handler_not_set
+        self.on_parse = on_parse or self.handler_not_set
+        self.on_terminate = on_terminate or self.handler_not_set
+        self.on_show = on_show or self.handler_not_set
 
     def on_connect(self, client, userdata, flags, rc):
         super(AgentClient, self).on_connect(client, userdata, flags, rc)
@@ -53,6 +67,12 @@ class AgentClient(Client):
         """
 
         self.publish(self.CHANNEL_ASK_TOPIC, payload)
+
+    def terminate(self):
+        """Inform the channel that atlas has stopped its work.
+        """
+
+        self.publish(self.CHANNEL_TERMINATE_TOPIC)
 
     def show(self, payload):
         """Show a message to the channel.

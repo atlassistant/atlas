@@ -11,6 +11,7 @@ INTENT_TOPIC = 'atlas/intents/%s'
 
 CHANNEL_ASK_TOPIC = 'atlas/%s/channel/ask'
 CHANNEL_SHOW_TOPIC = 'atlas/%s/channel/show'
+CHANNEL_TERMINATE_TOPIC = 'atlas/%s/channel/terminate'
 CHANNEL_CREATE_TOPIC = 'atlas/%s/channel/create'
 CHANNEL_DESTROY_TOPIC = 'atlas/%s/channel/destroy'
 
@@ -57,7 +58,7 @@ class Client:
         self._client.disconnect()
         self._client.loop_stop()
 
-    def publish(self, topic, payload):
+    def publish(self, topic, payload=None):
         """Publish a message to the given topic.
 
         You must transform the payload before calling this method.

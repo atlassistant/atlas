@@ -8,6 +8,16 @@ class Interpreter:
     
     """
 
+    def __init__(self, lang):
+        """Constructs a new interpreter.
+
+        :param lang: Language of the interpreter
+        :type lang: str
+        
+        """
+
+        self.lang = lang
+
     def get_metadata(self):
         """Gets interpreter metadata as a dict such as
         {

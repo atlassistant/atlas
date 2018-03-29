@@ -6,10 +6,9 @@ import io, json
 class SnipsInterpreter(Interpreter):
     
     def __init__(self, **kwargs):
+        super(SnipsInterpreter, self).__init__('en')
 
         # TODO replace those ugly test code!
-
-        self.lang = 'en'
 
         load_resources('en')
 

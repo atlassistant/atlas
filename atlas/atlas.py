@@ -42,6 +42,10 @@ class AtlasConfig:
         log_level = logs.get('level', 'INFO')
         logging.basicConfig(level=getattr(logging, log_level))
 
+        # Disable transitions logging
+        transitions_logger = logging.getLogger('transitions')
+        transitions_logger.setLevel(logging.WARNING)
+
         # Executor config
 
         self.executor = ExecutorConfig(**data.get('executor', {}))
@@ -70,9 +74,9 @@ class Atlas:
         self._agents = []
         self._executor = Executor(self._config.executor)
         self._server = Server(self._config.server)
-        self._client = AtlasClient()
-        self._client.on_create = lambda id: self.create_agent(AgentConfig(id, self._config.interpreter.lang))
-        self._client.on_destroy = self.delete_agent
+        self._client = AtlasClient(
+            on_create=lambda id: self.create_agent(AgentConfig(id, self._config.interpreter.lang)),
+            on_destroy=self.delete_agent)
 
     def find_agent(self, id):
         """Try to find an agent in this engine.
@@ -100,7 +104,7 @@ class Atlas:
         if self.find_agent(config.id):
             self._log.info('Reusing existing agent %s' % config.id)
         else:
-            self._log.info('Creating agent %s' % config.id)
+            self._log.info('🙌  Creating agent %s' % config.id)
             
             agt = Agent(self._config.interpreter, config)
 
@@ -119,7 +123,7 @@ class Atlas:
         agt = self.find_agent(id)
 
         if agt:
-            self._log.info('Deleting agent %s' % id)
+            self._log.info('🗑️  Deleting agent %s' % id)
             agt.cleanup()
             self._agents.remove(agt)
         else:

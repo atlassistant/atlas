@@ -73,11 +73,11 @@ class Agent:
 
         # Configure the client facade
 
-        self.client = AgentClient(self.config.id)
-        self.client.on_parse = self.parse
-        self.client.on_ask = self.ask
-        self.client.on_terminate = self.terminate
-        self.client.on_show = self.show
+        self.client = AgentClient(self.config.id,
+            on_parse=self.parse,
+            on_ask=self.ask,
+            on_terminate=self.terminate,
+            on_show=self.show)
 
         self.reset()
 
@@ -94,7 +94,7 @@ class Agent:
             states=states, 
             initial=Agent.STATE_ASLEEP, 
             send_event=True, 
-            before_state_change=lambda e: self._log.info('Entering state %s' % e.transition.dest))
+            before_state_change=lambda e: self._log.info('⚡  %s: %s -> %s' % (e.event.name, e.transition.source, e.transition.dest) ))
 
         self._machine.add_transition(Agent.STATE_ASLEEP, '*', Agent.STATE_ASLEEP, after=self.reset)
 
@@ -257,6 +257,7 @@ class Agent:
         """
 
         self.go(Agent.STATE_ASLEEP)
+        self.client.terminate()
 
     def cleanup(self):
         """Cleanup the agent.
