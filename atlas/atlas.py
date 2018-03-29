@@ -73,7 +73,7 @@ class Atlas:
         self._config = config
         self._agents = []
         self._executor = Executor(self._config.executor)
-        self._server = Server(self._config.server)
+        self._server = Server(self._config.server, self._config.broker)
         self._client = AtlasClient(
             on_create=lambda id: self.create_agent(AgentConfig(id, self._config.interpreter.lang)),
             on_destroy=self.delete_agent)

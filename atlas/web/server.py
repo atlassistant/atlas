@@ -1,9 +1,13 @@
-from flask import Flask, render_template
+from flask import Flask, request
 from flask_restful import Api, Resource
+from flask_socketio import SocketIO, Namespace, emit
 import logging, subprocess, os
+from ..broker import BrokerConfig
+from ..client import ChannelClient
 
 app = Flask('atlas.web', static_folder='./public')
 api = Api(app)
+socketio = SocketIO(app, logger=True)
 
 @app.route('/')
 def index():
@@ -33,15 +37,45 @@ class HelloWorld(Resource):
     def get(self):
         return {'hello': 'world'}
 
+class HelloWS(Namespace):
+
+    def __init__(self, config, namespace=None):
+        super(HelloWS, self).__init__(namespace)
+
+        self._config = config
+        self._channels = {}
+
+    def on_connect(self):
+        client_id = request.sid
+
+        channel = ChannelClient(client_id,
+            on_ask=lambda d, _: socketio.emit('ask', d, namespace=self.namespace, room=client_id),
+            on_show=lambda d, _: socketio.emit('show', d, namespace=self.namespace, room=client_id),
+            on_terminate=lambda: socketio.emit('terminate', namespace=self.namespace, room=client_id))
+        
+        self._channels[client_id] = channel
+
+        channel.start(self._config)
+
+    def on_disconnect(self):
+        self._channels[request.sid].stop()
+
+        del self._channels[request.sid]
+
+    def on_parse(self, data):
+        self._channels[request.sid].parse(data)
+
 class Server:
     """Web server for the atlas interface.
     """
 
-    def __init__(self, config):
+    def __init__(self, config, broker_config):
         """Constructs a new Server with the given config.
 
         :param config: Configuration of the web server
         :type config: ServerConfig
+        :param broker_config: Broker configuration
+        :type broker_config: BrokerConfig
 
         """
 
@@ -49,6 +83,7 @@ class Server:
         self._config = config
 
         api.add_resource(HelloWorld, '/hello')
+        socketio.on_namespace(HelloWS(broker_config, '/ws'))
 
     def run(self):
         """Starts the web server.
@@ -61,7 +96,9 @@ class Server:
             self._log.info('Started webpack')
 
         self._log.info('Starting web server on %s:%s' % (self._config.host, self._config.port))
-        app.run(self._config.host, self._config.port)#, debug=self._config.debug)
+        # app.run(self._config.host, self._config.port)#, debug=self._config.debug)
+
+        socketio.run(app, self._config.host, self._config.port)
 
         # And terminate the process once done
         if self._config.debug:

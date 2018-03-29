@@ -6,6 +6,7 @@
         "start": "webpack -d --watch --config webpack.config.js"
     },
     "dependencies": {
+        "socket.io-client": "^2.0.4",
         "vue": "^2.5.16"
     },
     "devDependencies": {
