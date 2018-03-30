@@ -205,6 +205,7 @@ class Agent:
         self._log.debug('Parsing "%s"' % msg)
 
         # TODO if intent is "cancel", returns to asleep
+        # In the future we want every message coming after the cancellation and with a conversation_start_date to be dismissed
 
         # Start by checking if we are in a ask* state
         if self.state.startswith(Agent.PREFIX_ASK) and self._cur_asked_param: # pylint: disable=E1101
@@ -265,8 +266,8 @@ class Agent:
         """
 
         # TODO Find a way to remove it cleanly
-
-        self._machine.remove_model(self)
+        # self._machine.remove_model(self)
+        
         self.client.stop()
 
     def __str__(self):

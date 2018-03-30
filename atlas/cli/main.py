@@ -1,6 +1,9 @@
+import eventlet
 from .. import Atlas, AtlasConfig, __version__
 from ..agent import AgentConfig
 import os, sys, argparse
+
+eventlet.monkey_patch()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Atlas CLI %s' % __version__)

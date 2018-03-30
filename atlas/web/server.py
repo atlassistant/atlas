@@ -7,7 +7,7 @@ from ..client import ChannelClient
 
 app = Flask('atlas.web', static_folder='./public')
 api = Api(app)
-socketio = SocketIO(app, logger=True)
+socketio = SocketIO(app)
 
 @app.route('/')
 def index():
