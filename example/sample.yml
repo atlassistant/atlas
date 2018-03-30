@@ -1,7 +1,7 @@
 interpreter: 
   type: 'atlas.interpreters.dummy_interpreter.DummyInterpreter'
 executor:
-  path: 'skills'
+  path: 'example/skills'
 logs:
   level: 'INFO'
 server:

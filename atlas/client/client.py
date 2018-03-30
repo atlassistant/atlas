@@ -19,8 +19,17 @@ class Client:
     """Client is an helper class to handler messages management.
     """
 
-    def __init__(self, client_id=None):
-        self.log = logging.getLogger('atlas.client.%s' % (client_id or __class__.__name__))
+    def __init__(self, client_id=None, name=None):
+        """Constructs a new Client.
+
+        :param client_id: Client ID to use when connecting
+        :type client_id: str
+        :param name: Name used by the logger
+        :type name: str
+
+        """
+
+        self.log = logging.getLogger('atlas.client.%s' % (name or client_id or __class__.__name__))
 
         self._client = mqtt.Client(client_id)
         self._client.on_message = self.on_message

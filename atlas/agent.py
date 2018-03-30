@@ -1,4 +1,5 @@
 import logging
+from .version import __version__
 from .client import AgentClient
 from .interpreters import Interpreter
 from transitions import Machine, EventData, MachineError
@@ -39,6 +40,7 @@ class AgentConfig:
         data.update({
             '__id': self.id,
             '__lang': self.lang,
+            '__version': __version__,
         })
 
         return data
@@ -190,9 +192,6 @@ class Agent:
         """
 
         self.go(Agent.STATE_ASLEEP)
-
-        # TODO Inform client of a timeout
-        # self.client.show()
 
     def parse(self, msg):
         """Parse a raw message.

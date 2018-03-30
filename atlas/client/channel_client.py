@@ -19,7 +19,7 @@ class ChannelClient(Client):
 
         """
 
-        super(ChannelClient, self).__init__(client_id)
+        super(ChannelClient, self).__init__(client_id, 'channel.' + client_id)
 
         self.CHANNEL_CREATE_TOPIC = CHANNEL_CREATE_TOPIC % client_id
         self.CHANNEL_DESTROY_TOPIC = CHANNEL_DESTROY_TOPIC % client_id

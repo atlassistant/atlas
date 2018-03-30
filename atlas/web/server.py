@@ -17,9 +17,11 @@ class ServerConfig:
     """Holds settings related to the web server.
     """
 
-    def __init__(self, host='localhost', port=5000, debug=True):
+    def __init__(self, broker_config, host='localhost', port=5000, debug=True):
         """Constructs a new ServerConfig.
 
+        :param broker_config: Broker config used by the web server for websocket channels
+        :type broker_config: BrokerConfig
         :param host: Host to bind to
         :type host: str
         :param port: Port to bind to
@@ -32,58 +34,66 @@ class ServerConfig:
         self.host = host
         self.port = port
         self.debug = debug
+        self.broker = broker_config
 
 class HelloWorld(Resource):
     def get(self):
         return {'hello': 'world'}
 
-class HelloWS(Namespace):
+class Server:
+    """Web server for the atlas interface.
+    """
 
-    def __init__(self, config, namespace=None):
-        super(HelloWS, self).__init__(namespace)
+    def __init__(self, config):
+        """Constructs a new Server with the given config.
 
-        self._config = config
+        :param config: Configuration of the web server
+        :type config: ServerConfig
+
+        """
+
+        self._log = logging.getLogger('atlas.server')
         self._channels = {}
+        self._config = config
+
+        api.add_resource(HelloWorld, '/hello')
+
+        socketio.on_event('connect', self.on_connect)
+        socketio.on_event('disconnect', self.on_disconnect)
+        socketio.on_event('parse', self.on_parse)
 
     def on_connect(self):
+        """Called when a connection has been made by a websocket.
+        """
+
         client_id = request.sid
 
         channel = ChannelClient(client_id,
-            on_ask=lambda d, _: socketio.emit('ask', d, namespace=self.namespace, room=client_id),
-            on_show=lambda d, _: socketio.emit('show', d, namespace=self.namespace, room=client_id),
-            on_terminate=lambda: socketio.emit('terminate', namespace=self.namespace, room=client_id))
+            on_ask=lambda d, _: socketio.emit('ask', d, room=client_id),
+            on_show=lambda d, _: socketio.emit('show', d, room=client_id),
+            on_terminate=lambda: socketio.emit('terminate', room=client_id))
         
         self._channels[client_id] = channel
 
-        channel.start(self._config)
+        channel.start(self._config.broker)
 
     def on_disconnect(self):
+        """Called when a websocket has disconnected.
+        """
+
         self._channels[request.sid].stop()
 
         del self._channels[request.sid]
 
     def on_parse(self, data):
-        self._channels[request.sid].parse(data)
+        """Called when a websocket client wants to parse data.
 
-class Server:
-    """Web server for the atlas interface.
-    """
-
-    def __init__(self, config, broker_config):
-        """Constructs a new Server with the given config.
-
-        :param config: Configuration of the web server
-        :type config: ServerConfig
-        :param broker_config: Broker configuration
-        :type broker_config: BrokerConfig
+        :param data: Data received
+        :type data: str
 
         """
 
-        self._log = logging.getLogger('atlas.server')
-        self._config = config
-
-        api.add_resource(HelloWorld, '/hello')
-        socketio.on_namespace(HelloWS(broker_config, '/ws'))
+        self._channels[request.sid].parse(data)
 
     def run(self):
         """Starts the web server.

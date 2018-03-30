@@ -1,5 +1,5 @@
 from transitions import Machine
-import json
+import json, time
 import paho.mqtt.client as mqtt
 
 def on_connect(client, userdata, flags, rc):
@@ -25,6 +25,7 @@ def on_message(client, userdata, msg):
                 'text': 'Pour quelle date veux-tu la météo ?',
             })) 
 
+        time.sleep(4)
         
         client.publish('atlas/%s/dialog/show' % id, json.dumps({
             'text': 'Ok, je recherche la météo de %s pour %s' % (location, date)

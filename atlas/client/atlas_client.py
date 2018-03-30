@@ -19,7 +19,7 @@ class AtlasClient(Client):
 
         """
 
-        super(AtlasClient, self).__init__()
+        super(AtlasClient, self).__init__(name='atlas')
 
         self.on_create = on_create or self.handler_not_set
         self.on_destroy = on_destroy or self.handler_not_set

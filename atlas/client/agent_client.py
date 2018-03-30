@@ -25,7 +25,7 @@ class AgentClient(Client):
 
         """
 
-        super(AgentClient, self).__init__() # Do not pass the client_id here!
+        super(AgentClient, self).__init__(name='agent.' + client_id) # Do not pass the client_id here!
 
         self.PARSE_TOPIC = PARSE_TOPIC % client_id
         self.ASK_TOPIC = ASK_TOPIC % client_id
