@@ -1,9 +1,11 @@
 $palette: (
-    brand: #FF5722,
-    accent: #0277BD,
+    brand: #63bb67,
+    accent: #44aef3,
     // danger: #FF5722,
-    background: (3%, #F5F5F5, #fff),
+    background: (3%, #f5f6f8, #fff),
     divider: rgba(black, 0.12),
+    shadow: rgba(black, 0.06),
+    icon: (3%, rgba(black, 0.54), rgba(black, 0.38)),
     text: (black, rgba(black, 0.87), rgba(black, 0.54)),
     text-inverse: (20%, 10%, white, rgba(white, 0.54), rgba(black, 0.04)),
 );
