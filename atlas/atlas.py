@@ -78,6 +78,8 @@ class Atlas:
             on_create=lambda id: self.create_agent(AgentConfig(id, self._config.interpreter.lang)),
             on_destroy=self.delete_agent)
 
+        # TODO discovery task every n seconds
+
     def find_agent(self, id):
         """Try to find an agent in this engine.
 
@@ -104,7 +106,7 @@ class Atlas:
         if self.find_agent(config.id):
             self._log.info('Reusing existing agent %s' % config.id)
         else:
-            self._log.info('🙌  Creating agent %s' % config.id)
+            self._log.info('🙌 Creating agent %s' % config.id)
             
             agt = Agent(self._config.interpreter, config)
 
@@ -123,7 +125,7 @@ class Atlas:
         agt = self.find_agent(id)
 
         if agt:
-            self._log.info('🗑️  Deleting agent %s' % id)
+            self._log.info('🗑️ Deleting agent %s' % id)
             agt.cleanup()
             self._agents.remove(agt)
         else:

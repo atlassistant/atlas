@@ -88,7 +88,11 @@ class Agent:
         metadata = self.interpreter.get_metadata()
 
         ask_states = list(set([self._to_ask_state(slot) for meta in metadata.values() for slot in meta]))
-        states = [Agent.STATE_ASLEEP] + list(metadata.keys()) + [{ 'name': o, 'timeout': self.config.ask_timeout, 'on_timeout': self._on_timeout } for o in ask_states]
+        states = [Agent.STATE_ASLEEP] + list(metadata.keys()) + [{ 
+            'name': o, 
+            'timeout': self.config.ask_timeout, 
+            'on_timeout': self._on_timeout 
+        } for o in ask_states]
 
         self._log.info('Registering with states %s' % states)
 
@@ -96,7 +100,7 @@ class Agent:
             states=states, 
             initial=Agent.STATE_ASLEEP, 
             send_event=True, 
-            before_state_change=lambda e: self._log.info('⚡  %s: %s -> %s' % (e.event.name, e.transition.source, e.transition.dest) ))
+            before_state_change=lambda e: self._log.info('⚡ %s: %s -> %s' % (e.event.name, e.transition.source, e.transition.dest) ))
 
         self._machine.add_transition(Agent.STATE_ASLEEP, '*', Agent.STATE_ASLEEP, after=self.reset)
 
@@ -159,6 +163,10 @@ class Agent:
 
         """
 
+        # TODO when the discovery will be done, agents should know if an intent
+        # could not be reached because no skill can answered to it so let the user
+        # know!
+
         self._cur_intent = event.transition.dest
         
         data = self.config.wrap(self._cur_slots)
@@ -213,6 +221,8 @@ class Agent:
             self.go(self._cur_intent)
         else:
             data = self.interpreter.parse(msg)
+
+            # TODO if no intent was found, let it know
 
             self._intent_queue.extend(data)
 

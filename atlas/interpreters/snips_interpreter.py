@@ -1,30 +1,36 @@
 from . import Interpreter
 from snips_nlu import load_resources, SnipsNLUEngine
 from snips_nlu.builtin_entities import BuiltinEntityParser
-import io, json
+import io, json, os
 
 class SnipsInterpreter(Interpreter):
     
-    def __init__(self, **kwargs):
-        super(SnipsInterpreter, self).__init__('en')
+    def __init__(self, path, **kwargs):
 
-        # TODO replace those ugly test code!
+        abspath = os.path.abspath(path)
+        working_dir = os.path.dirname(abspath)
+        filename, _ = os.path.splitext(os.path.basename(path))
 
-        load_resources('en')
+        trained_path = os.path.join(working_dir, '%s.trained.json' % filename)
 
+        with open(abspath) as f:
+            training_data = json.load(f)
+            language_code = training_data['language']
+            load_resources(language_code)
+        
         try:
-            with open('trained.json') as f:
+            with open(trained_path) as f:
                 self._engine = SnipsNLUEngine.from_dict(json.load(f))
         except FileNotFoundError:
             self._engine = SnipsNLUEngine()
+            self._engine.fit(training_data)
 
-            with open('sample_dataset.json') as f:
-                self._engine.fit(json.load(f))
-
-            with open('trained.json', mode='w') as f:
+            with open(trained_path, mode='w') as f:
                 json.dump(self._engine.to_dict(), f)
 
-        self._entity_parser = BuiltinEntityParser('en')
+        super(SnipsInterpreter, self).__init__(language_code)
+
+        self._entity_parser = BuiltinEntityParser(language_code)
 
     def get_metadata(self):
         meta = self._engine._dataset_metadata['slot_name_mappings']
@@ -32,6 +38,7 @@ class SnipsInterpreter(Interpreter):
         return { k: list(v.keys()) for k, v in meta.items() }
 
     def parse_entity(self, msg, intent, slot):
+        # TODO check if builtin entity type for performance
         parsed = self._entity_parser.parse(msg)
 
         if parsed:
@@ -42,7 +49,8 @@ class SnipsInterpreter(Interpreter):
     def parse(self, msg):
         parsed = self._engine.parse(msg)
 
-        # TODO safely retrieve values
+        if parsed['intent'] == None:
+            return []
 
         return [{
             'text': msg,

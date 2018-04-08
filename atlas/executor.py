@@ -31,7 +31,7 @@ class ExecutorProcess:
         """Runs this process.
         """
 
-        self._popen = subprocess.Popen(self.skill.cmd, cwd=os.path.dirname(self.skill.path))
+        self._popen = subprocess.Popen(self.skill.cmd, cwd=os.path.dirname(self.skill.path), shell=True)
 
     def terminate(self):
         """Terminates this process.

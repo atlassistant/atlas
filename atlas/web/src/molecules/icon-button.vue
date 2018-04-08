@@ -44,6 +44,7 @@ export default {
   background-color: transparent;
   border: 0;
   cursor: pointer;
+  outline: none;
   padding: baseline(0.5);
   transition: all 0.2s;
 

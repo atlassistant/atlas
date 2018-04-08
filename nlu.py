@@ -3,7 +3,7 @@ from snips_nlu.builtin_entities import BuiltinEntityParser
 from snips_nlu.nlu_engine.utils import resolve_slots
 import io, json
 
-with open('./sample_dataset.json') as f:
+with open('./example/sample_dataset.json') as f:
   data = json.load(f)
 
 load_resources('en')
@@ -20,5 +20,7 @@ parsed = engine.parse("tomorrow", "sampleGetWeather")
                 
 #print (engine.intent_parsers[1].slot_fillers['sampleGetWeather'].get_slots('today'))
 
-p = BuiltinEntityParser('en')
-print(p.parse('5 degree'))
+print (engine.parse('ceci est un test'))
+
+# p = BuiltinEntityParser('en')
+# print(p.parse('5 degree'))

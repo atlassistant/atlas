@@ -21,14 +21,46 @@ export default {
     IconButton,
     Spinner,
   },
+  props: {
+    lang: {
+      type: String,
+      required: true,
+    },
+  },
   data() {
     return {
       isListening: false,
     };
   },
+  mounted() {
+    // this.speaker = new SpeechSynthesisUtterance();
+    // this.speaker.lang = 'fr-FR';
+    // this.speaker.text = 'Pour quelle ville voulez-vous la météo ?'
+    
+    // speechSynthesis.speak(this.speaker);
+
+    this.recognition = new webkitSpeechRecognition();
+    this.recognition.lang = this.lang;
+    this.recognition.onresult = (evt) => {
+      this.isListening = false;
+
+      if (evt.results.length > 0) {
+        const r = evt.results[0];
+
+        if (r.length > 0 && r.isFinal) {
+          this.$emit('input', r[0].transcript);
+        }
+      }
+    }
+  },
   methods: {
     startListening() {
       this.isListening = true;
+      this.recognition.start();
+    },
+    stopListening() {
+      this.isListening = false;
+      this.recognition.abort();
     },
   },
 }

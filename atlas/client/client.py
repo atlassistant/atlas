@@ -16,7 +16,7 @@ CHANNEL_CREATE_TOPIC = 'atlas/%s/channel/create'
 CHANNEL_DESTROY_TOPIC = 'atlas/%s/channel/destroy'
 
 class Client:
-    """Client is an helper class to handler messages management.
+    """Client is an helper class to handle messages management.
     """
 
     def __init__(self, client_id=None, name=None):
