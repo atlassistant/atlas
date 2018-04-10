@@ -7,14 +7,16 @@
 
 <script>
 import {
-  ChatInput,
   MessagesList,
 } from './../molecules';
+import {
+  ChatInput,
+} from './../organisms';
 import io from 'socket.io-client';
 
 export default {
   name: 'Chat',
-  components: { 
+  components: {
     ChatInput,
     MessagesList,
   },
@@ -71,6 +73,7 @@ export default {
 
 .chat {
   @include col($x: stretch);
+  overflow: hidden;
   flex: 1;
 
   &__list {

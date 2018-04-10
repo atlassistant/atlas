@@ -1,0 +1,16 @@
+interpreter: 
+  type: 'atlas.interpreters.dummy_interpreter.DummyInterpreter'
+  path: 'example/sample_dataset.json'
+executor:
+  path: 'example/skills'
+logs:
+  level: 'INFO'
+server:
+  host: '0.0.0.0'
+  port: 5000
+  debug: true
+broker:
+  host: 'localhost'
+  port: 1883
+  username:
+  password:

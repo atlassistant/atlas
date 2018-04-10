@@ -9,6 +9,7 @@
 @import "./../_vars.scss";
 
 .spinner {
+  box-sizing: content-box;
   width: baseline();
   height: baseline();
   padding: baseline(0.5);
