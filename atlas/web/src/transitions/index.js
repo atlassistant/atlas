@@ -1,5 +1,5 @@
-import Pop from './pop.vue';
+import PopGroup from './pop-group.vue';
 
 export {
-  Pop,
+  PopGroup,
 };

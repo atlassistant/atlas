@@ -101,6 +101,7 @@ export default {
   @include row($x: space-between, $y: center);
 
   background-color: color(background, 1);
+  border-top: 1px solid color(divider);
   box-shadow: 0 0 10px color(shadow);
   padding: baseline(0.5);
 

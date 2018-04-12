@@ -1,12 +1,12 @@
 <template>
-  <pop class="messages-list">
+  <pop-group class="messages-list">
     <message v-for="item in messages" :key="item.id" :text="item.text" :client="item.client" />
-  </pop>
+  </pop-group>
 </template>
 
 <script>
 import {
-  Pop,
+  PopGroup,
 } from './../transitions';
 import {
   Message,
@@ -16,15 +16,15 @@ export default {
   name: 'MessagesList',
   components: { 
     Message,
-    Pop,
+    PopGroup,
   },
   props: {
     messages: Array,
   },
   watch: {
     messages() {
-      // TODO, scroll to bottom !
-    }
+      setTimeout(() => this.$el.scrollTo(0, this.$el.scrollHeight), 50);
+    },
   },
 }
 </script>

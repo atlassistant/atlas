@@ -6,7 +6,7 @@
 
 <script>
 export default {
-  name: 'Pop',
+  name: 'PopGroup',
   props: {
     tag: {
       type: String,
