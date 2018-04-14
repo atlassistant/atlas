@@ -1,17 +1,20 @@
-from flask import Flask, request
+from flask import Flask, request, render_template
 from flask_restful import Api, Resource
 from flask_socketio import SocketIO, Namespace, emit
 import logging, subprocess, os
 from ..broker import BrokerConfig
 from ..client import ChannelClient
 
-app = Flask('atlas.web', static_folder='./public')
+app = Flask('atlas.web', static_folder='./public', template_folder='./public')
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+
 api = Api(app)
 socketio = SocketIO(app)
 
 @app.route('/')
 def index():
-    return app.send_static_file('index.html')
+    # TODO language from user settings
+    return render_template('index.html', lang='fr-FR')
 
 class ServerConfig:
     """Holds settings related to the web server.

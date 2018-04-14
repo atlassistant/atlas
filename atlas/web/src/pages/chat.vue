@@ -1,7 +1,7 @@
 <template>
   <div class="chat">
-    <messages-list class="chat__list" :messages="messages" />
-    <chat-input lang="en-US" ref="chatInput" class="chat__input" @input="onInput" />
+    <messages-list :show-thinking="isThinking" class="chat__list" :messages="messages" />
+    <chat-input :lang="lang" ref="chatInput" class="chat__input" @input="onInput" />
   </div>
 </template>
 
@@ -22,30 +22,37 @@ export default {
   },
   data() {
     return {
+      isThinking: false,
+      lang: window.LANG,
       messages: [],
     };
   },
   mounted() {
     this.speaker = new SpeechSynthesisUtterance();
-    this.speaker.lang = 'fr-FR';
+    this.speaker.lang = this.lang;
 
     this.socket = io();
     this.socket.on('ask', (data) => this.processMessage(data, true));
     this.socket.on('show', (data) => this.processMessage(data));
-    this.socket.on('terminate', () => this.$refs.chatInput.stopListening());
+    this.socket.on('terminate', () => this.onTerminate());
   },
   methods: {
     onInput(text) {
       this.messages.push({
         client: true,
-        id: this.messages.length,
+        id: this.messages.length + 1,
         text,
       });
+      this.isThinking = true;
       this.socket.emit('parse', text);
+    },
+    onTerminate() {
+      this.$refs.chatInput.stopListening();
+      this.isThinking = false;
     },
     processMessage(data, requiresUserInput) {
       this.messages.push({
-        id: this.messages.length,
+        id: this.messages.length + 1,
         ...data,
       });
 
@@ -53,6 +60,7 @@ export default {
         this.speaker.text = data.text;
 
         if (requiresUserInput) {
+          this.isThinking = false;
           this.speaker.onend = () => {
             this.$refs.chatInput.startListening();
             this.speaker.onend = null;

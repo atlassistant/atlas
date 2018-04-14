@@ -1,6 +1,7 @@
 <template>
   <pop-group class="messages-list">
     <message v-for="item in messages" :key="item.id" :text="item.text" :client="item.client" />
+    <message v-if="showThinking" text="..." :key="0" />
   </pop-group>
 </template>
 
@@ -20,6 +21,7 @@ export default {
   },
   props: {
     messages: Array,
+    showThinking: Boolean,
   },
   watch: {
     messages() {
@@ -36,6 +38,7 @@ export default {
   @include col($x: flex-start);
   overflow: auto;
   padding: baseline(1);
+  padding-bottom: 0;
 }
 </style>
 

@@ -5,10 +5,42 @@
         {
           "data": [
             {
-              "text": "give me the weather forecast for "
+              "text": "peux-tu me donner la météo de "
             },
             {
-              "text": "los angeles",
+              "text": "bourg-achard",
+              "entity": "location",
+              "slot_name": "location"
+            },
+            {
+              "text": " pour "
+            },
+            {
+              "text": "demain",
+              "entity": "snips/datetime",
+              "slot_name": "date"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "va t-il faire beau "
+            },
+            {
+              "text": "demain",
+              "entity": "snips/datetime",
+              "slot_name": "date"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "va t-il pleuvoir à "
+            },
+            {
+              "text": "Rouen",
               "entity": "location",
               "slot_name": "location"
             },
@@ -16,7 +48,7 @@
               "text": " "
             },
             {
-              "text": "this weekend",
+              "text": "samedi",
               "entity": "snips/datetime",
               "slot_name": "date"
             }
@@ -25,33 +57,10 @@
         {
           "data": [
             {
-              "text": "What kind of weather should I expect "
+              "text": "dois-je prévoir un parapluie à "
             },
             {
-              "text": "today",
-              "entity": "snips/datetime",
-              "slot_name": "date"
-            },
-            {
-              "text": " in "
-            },
-            {
-              "text": "rio de janeiro",
-              "entity": "location",
-              "slot_name": "location"
-            },
-            {
-              "text": " ? "
-            }
-          ]
-        },
-        {
-          "data": [
-            {
-              "text": "Will it be sunny in "
-            },
-            {
-              "text": "Tokyo",
+              "text": "Saint-Ouen",
               "entity": "location",
               "slot_name": "location"
             },
@@ -59,146 +68,49 @@
               "text": " "
             },
             {
-              "text": "at the end of the day",
+              "text": "mardi",
+              "entity": "snips/datetime",
+              "slot_name": "date"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "quel temps va t-il faire "
+            },
+            {
+              "text": "demain",
               "entity": "snips/datetime",
               "slot_name": "date"
             },
             {
-              "text": " ?"
+              "text": " à "
+            },
+            {
+              "text": "Rouen",
+              "entity": "location",
+              "slot_name": "location"
             }
           ]
         },
         {
           "data": [
             {
-              "text": "What will be the weather in "
+              "text": "donne moi la météo de "
             },
             {
-              "text": "London",
-              "entity": "location",
-              "slot_name": "location"
-            },
-            {
-              "text": ", "
-            },
-            {
-              "text": "tomorrow morning",
+              "text": "demain",
               "entity": "snips/datetime",
               "slot_name": "date"
             },
             {
-              "text": "?"
-            }
-          ]
-        },
-        {
-          "data": [
-            {
-              "text": "Tell me if it is going to rain "
+              "text": " sur "
             },
             {
-              "text": "this afternoon",
-              "entity": "snips/datetime",
-              "slot_name": "date"
-            },
-            {
-              "text": " in "
-            },
-            {
-              "text": "tel aviv",
+              "text": "le Touquet",
               "entity": "location",
               "slot_name": "location"
-            },
-            {
-              "text": ", please"
-            }
-          ]
-        },
-        {
-          "data": [
-            {
-              "text": "What is the weather in "
-            },
-            {
-              "text": "Paris",
-              "entity": "location",
-              "slot_name": "location"
-            },
-            {
-              "text": "?"
-            }
-          ]
-        }
-      ]
-    },
-    "turn_light_on": {
-      "utterances": [
-        {
-          "data": [
-            {
-              "text": "The "
-            },
-            {
-              "text": "bedroom",
-              "entity": "room",
-              "slot_name": "room"
-            },
-            {
-              "text": " is dark, please turn on the light !"
-            }
-          ]
-        },
-        {
-          "data": [
-            {
-              "text": "Can you enlight the "
-            },
-            {
-              "text": "living room",
-              "entity": "room",
-              "slot_name": "room"
-            },
-            {
-              "text": " ?"
-            }
-          ]
-        },
-        {
-          "data": [
-            {
-              "text": "I need some light in the "
-            },
-            {
-              "text": "basement",
-              "entity": "room",
-              "slot_name": "room"
-            },
-            {
-              "text": " please"
-            }
-          ]
-        },
-        {
-          "data": [
-            {
-              "text": "Please put some lights in the "
-            },
-            {
-              "text": "bathroom",
-              "entity": "room",
-              "slot_name": "room"
-            }
-          ]
-        },
-        {
-          "data": [
-            {
-              "text": "Turn on the lights in the "
-            },
-            {
-              "text": "kitchen",
-              "entity": "room",
-              "slot_name": "room"
             }
           ]
         }
@@ -206,31 +118,41 @@
     }
   },
   "entities": {
-    "location": {
-      "data": [],
-      "use_synonyms": true,
-      "automatically_extensible": true
-    },
     "snips/datetime": {},
-    "room": {
+    "location": {
       "data": [
         {
-          "value": "basement",
-          "synonyms": [
-            "cellar"
-          ]
+          "value": "Rouen",
+          "synonyms": []
         },
         {
-          "value": "living room",
-          "synonyms": [
-            "lounge",
-            "family room"
-          ]
+          "value": "Bourg-Achard",
+          "synonyms": []
+        },
+        {
+          "value": "Londres",
+          "synonyms": []
+        },
+        {
+          "value": "Paris",
+          "synonyms": []
+        },
+        {
+          "value": "Saint-Etienne du Rouvray",
+          "synonyms": []
+        },
+        {
+          "value": "Petit-Quevilly",
+          "synonyms": []
+        },
+        {
+          "value": "Mont-Saint-Aignan",
+          "synonyms": []
         }
       ],
-      "use_synonyms": true,
-      "automatically_extensible": false
+      "automatically_extensible": true,
+      "use_synonyms": false
     }
   },
-  "language": "en"
+  "language": "fr"
 }

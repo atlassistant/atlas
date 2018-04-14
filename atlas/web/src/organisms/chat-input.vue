@@ -51,8 +51,9 @@ export default {
     if ('webkitSpeechRecognition' in window) {
       this.recognition = new webkitSpeechRecognition();
       this.recognition.lang = this.lang;
+      this.recognition.onend = this.recognition.onerror = () => this.isListening = false;
       this.recognition.onresult = (evt) => {
-        this.isListening = false;
+        // this.isListening = false;
 
         if (evt.results.length > 0) {
           const r = evt.results[0];

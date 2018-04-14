@@ -3,6 +3,10 @@ from snips_nlu import load_resources, SnipsNLUEngine
 from snips_nlu.builtin_entities import BuiltinEntityParser
 import io, json, os
 
+def get_entity_value(entity, default_value=None):
+    return entity.get('value', entity.get('from', default_value))
+
+
 class SnipsInterpreter(Interpreter):
     
     def __init__(self, path, **kwargs):
@@ -12,6 +16,8 @@ class SnipsInterpreter(Interpreter):
         filename, _ = os.path.splitext(os.path.basename(path))
 
         trained_path = os.path.join(working_dir, '%s.trained.json' % filename)
+
+        # TODO use checksums to decide if a training is needed
 
         with open(abspath) as f:
             training_data = json.load(f)
@@ -42,7 +48,7 @@ class SnipsInterpreter(Interpreter):
         parsed = self._entity_parser.parse(msg)
 
         if parsed:
-            return parsed[0]['entity']['value']
+            return get_entity_value(parsed[0]['entity'], msg)
 
         return msg
 
@@ -55,5 +61,5 @@ class SnipsInterpreter(Interpreter):
         return [{
             'text': msg,
             'intent': parsed['intent']['intentName'],
-            'slots': { s['slotName']: s['value']['value'] for s in parsed['slots'] }
+            'slots': { s['slotName']: get_entity_value(s['value']) for s in parsed['slots'] }
         }]
