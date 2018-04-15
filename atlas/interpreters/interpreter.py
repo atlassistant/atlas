@@ -1,4 +1,27 @@
-class Interpreter:
+import os
+
+class InterpreterConfig():
+  """Holds information about the interpreter configuration.
+  """
+
+  def __init__(self, type, path):
+    """Constructs a new interpreter config.
+    
+    :param type: Type of the interpreter
+    :type type: str
+    :param path: Path where to look for training files
+    :type path: str
+
+    """
+
+    interpreter_parts = type.split('.')
+    interpreter_klass = interpreter_parts[-1:][0]
+    mod = __import__('.'.join(interpreter_parts[:-1]), fromlist=[interpreter_klass])
+
+    self.interpreter_class = getattr(mod, interpreter_klass)
+    self.path = os.path.abspath(path)
+
+class Interpreter():
   """Interpreters convert natural language sentences to parsed structures used by atlas.
 
   There multiple open-source NLU libraries out there so it should be fairly easy to write a tiny abstraction

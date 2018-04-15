@@ -1,6 +1,8 @@
 interpreter: 
   type: 'atlas.interpreters.snips_interpreter.SnipsInterpreter'
-  path: 'example/sample_dataset.json'
+  path: 'example/training'
+env:
+  path: 'example/env'
 executor:
   path: 'example/skills'
 logs:

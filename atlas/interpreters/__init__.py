@@ -1,1 +1,1 @@
-from .interpreter import Interpreter
+from .interpreter import Interpreter, InterpreterConfig

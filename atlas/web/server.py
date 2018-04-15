@@ -2,7 +2,7 @@ from flask import Flask, request, render_template
 from flask_restful import Api, Resource
 from flask_socketio import SocketIO, Namespace, emit
 import logging, subprocess, os
-from ..broker import BrokerConfig
+from atlas_sdk.broker import BrokerConfig
 from ..client import ChannelClient
 
 app = Flask('atlas.web', static_folder='./public', template_folder='./public')

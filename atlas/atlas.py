@@ -1,155 +1,156 @@
 from .agent import Agent, AgentConfig
-from .broker import BrokerConfig
+from .utils import find
+from atlas_sdk.broker import BrokerConfig
 from .version import __version__
 from .web import Server, ServerConfig
-from .interpreters import Interpreter
+from .interpreters import Interpreter, InterpreterConfig
 from .client import AtlasClient
 from .executor import Executor, ExecutorConfig
+from .env import EnvConfig
 import logging, yaml
 
 class AtlasConfig:
-    """Represents the global Atlas configuration.
+  """Represents the global Atlas configuration.
+  """
+
+  def __init__(self, path):
+    """Constructs a new AtlasConfig for the given yml filepath.
+
+    :param path: Path to the YAML configuration file
+    :type path: str
+
     """
 
-    def __init__(self, path):
-        """Constructs a new AtlasConfig for the given yml filepath.
+    with open(path) as f:
+      data = yaml.safe_load(f)
 
-        :param path: Path to the YAML configuration file
-        :type path: str
+    # Broker configuration
 
-        """
+    self.broker = BrokerConfig(**data.get('broker', {}))
 
-        with open(path) as f:
-            data = yaml.safe_load(f)
+    # Interpreter configuration
 
-        # Broker configuration
+    self.interpreter =  InterpreterConfig(**data.get('interpreter', {
+      'type': 'atlas.interpreter.Interpreter'
+    }))
 
-        self.broker = BrokerConfig(**data.get('broker', {}))
+    # Env configuration
 
-        # Interpreter configuration
+    self.env = EnvConfig(**data.get('env', {}))
 
-        interp =  data.get('interpreter', {})
-        interpreter_parts = interp.get('type', 'atlas.interpreter.Interpreter').split('.')
-        interpreter_klass = interpreter_parts[-1:][0]
-        mod = __import__('.'.join(interpreter_parts[:-1]), fromlist=[interpreter_klass])
-        klass = getattr(mod, interpreter_klass)
+    # Logging level
 
-        self.interpreter = klass(**interp)
+    logs = data.get('logs', {})
+    log_level = logs.get('level', 'INFO')
+    logging.basicConfig(level=getattr(logging, log_level))
 
-        # Logging level
+    # Disable transitions logging
+    transitions_logger = logging.getLogger('transitions')
+    transitions_logger.setLevel(logging.WARNING)
 
-        logs = data.get('logs', {})
-        log_level = logs.get('level', 'INFO')
-        logging.basicConfig(level=getattr(logging, log_level))
+    # Executor config
 
-        # Disable transitions logging
-        transitions_logger = logging.getLogger('transitions')
-        transitions_logger.setLevel(logging.WARNING)
+    self.executor = ExecutorConfig(**data.get('executor', {}))
 
-        # Executor config
+    # Server config
 
-        self.executor = ExecutorConfig(**data.get('executor', {}))
-
-        # Server config
-
-        self.server = ServerConfig(broker_config=self.broker, **data.get('server', {}))
+    self.server = ServerConfig(broker_config=self.broker, **data.get('server', {}))
 
 class Atlas:
-    """Entry point for this assistant system.
+  """Entry point for this assistant system.
 
-    Atlas manages agents (representing multiple users and devices) and dialog states.
+  Atlas manages agents (representing multiple users and devices) and dialog states.
+
+  """
+
+  def __init__(self, config):
+    """Constructs a new Atlas engine.
+    
+    :param config: Atlas configuration
+    :type config: AtlasConfig
 
     """
 
-    def __init__(self, config):
-        """Constructs a new Atlas engine.
-        
-        :param config: Atlas configuration
-        :type config: AtlasConfig
+    self._log = logging.getLogger('atlas.core')
+    self._config = config
+    self._agents = []
+    
+    self._envs = {}
+    self._interpreters = {}
 
-        """
+    self._executor = Executor(self._config.executor)
+    self._server = Server(self._config.server)
+    self._client = AtlasClient(
+      on_create=lambda id: self.create_agent(AgentConfig(id, self._config.interpreter.lang)),
+      on_destroy=self.delete_agent)
 
-        self._log = logging.getLogger('atlas.core')
-        self._config = config
-        self._agents = []
-        self._executor = Executor(self._config.executor)
-        self._server = Server(self._config.server)
-        self._client = AtlasClient(
-            on_create=lambda id: self.create_agent(AgentConfig(id, self._config.interpreter.lang)),
-            on_destroy=self.delete_agent)
+    # TODO discovery task every n seconds
 
-        # TODO discovery task every n seconds
+  def find_agent(self, id):
+    """Try to find an agent in this engine.
 
-    def find_agent(self, id):
-        """Try to find an agent in this engine.
+    :param id: Id of the agent
+    :type id: str
+    :rtype: Agent
+    """
 
-        :param id: Id of the agent
-        :type id: str
-        :rtype: Agent
-        """
+    return find(self._agents, lambda a: a.config.id == id)
 
-        agts = list(filter(lambda a: a.config.id == id, self._agents))[:1]
+  def create_agent(self, config):
+    """Creates a new agent attached to this engine.
 
-        if agts:
-            return agts[0]
-        else:
-            return None
+    :param config: Configuration of the agent
+    :type config: AgentConfig
 
-    def create_agent(self, config):
-        """Creates a new agent attached to this engine.
+    """
 
-        :param config: Configuration of the agent
-        :type config: AgentConfig
-
-        """
-
-        if self.find_agent(config.id):
-            self._log.info('Reusing existing agent %s' % config.id)
-        else:
-            self._log.info('🙌 Creating agent %s' % config.id)
+    if self.find_agent(config.id):
+      self._log.info('Reusing existing agent %s' % config.id)
+    else:
+      self._log.info('🙌 Creating agent %s' % config.id)
             
-            agt = Agent(self._config.interpreter, config)
+      agt = Agent(self._config.interpreter, config)
 
-            self._agents.append(agt)
+      self._agents.append(agt)
 
-            agt.client.start(self._config.broker)
+      agt.client.start(self._config.broker)
 
-    def delete_agent(self, id):
-        """Deletes an agent from this engine.
+  def delete_agent(self, id):
+    """Deletes an agent from this engine.
 
-        :param id: Id of the agent to remove
-        :type id: str
+    :param id: Id of the agent to remove
+    :type id: str
 
-        """
+    """
 
-        agt = self.find_agent(id)
+    agt = self.find_agent(id)
 
-        if agt:
-            self._log.info('🗑️ Deleting agent %s' % id)
-            agt.cleanup()
-            self._agents.remove(agt)
-        else:
-            self._log.info('No agent found %s' % id)
+    if agt:
+      self._log.info('🗑️ Deleting agent %s' % id)
+      agt.cleanup()
+      self._agents.remove(agt)
+    else:
+      self._log.info('No agent found %s' % id)
 
-    def cleanup(self):
-        """Cleanups this engine instance.
-        """
+  def cleanup(self):
+    """Cleanups this engine instance.
+    """
 
-        self._log.info('Exiting Atlas %s gracefuly' % __version__)
+    self._log.info('Exiting Atlas %s gracefuly' % __version__)
 
-        for agt in self._agents:
-            agt.cleanup()
+    for agt in self._agents:
+      agt.cleanup()
 
-        self._client.stop()
-        self._executor.cleanup()
+    self._client.stop()
+    self._executor.cleanup()
 
-    def run(self):
-        """Runs this instance!
-        """
+  def run(self):
+    """Runs this instance!
+    """
 
-        self._log.info('Atlas %s is running, press any key to exit' % __version__)
-        self._client.start(self._config.broker)
-        self._executor.run()
-        self._server.run()
+    self._log.info('Atlas %s is running, press any key to exit' % __version__)
+    self._client.start(self._config.broker)
+    self._executor.run()
+    self._server.run()
 
-        self.cleanup()
+    self.cleanup()
