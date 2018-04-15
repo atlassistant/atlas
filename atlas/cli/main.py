@@ -4,24 +4,24 @@ import os, sys, argparse
 
 # Monkey patch with eventlet
 try:
-    import eventlet
-    eventlet.monkey_patch()
+  import eventlet
+  eventlet.monkey_patch()
 except:
-    pass
+  pass
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Atlas CLI %s' % __version__)
+  parser = argparse.ArgumentParser(description='Atlas CLI %s' % __version__)
 
-    parser.add_argument('-c', '--config')
+  parser.add_argument('-c', '--config', help='Path to the configuration yaml file')
 
-    args = parser.parse_args(sys.argv[1:])
+  args = parser.parse_args(sys.argv[1:])
 
-    config_path = os.path.abspath(args.config or 'atlas.yml')
+  config_path = os.path.abspath(args.config or 'atlas.yml')
 
-    atlas = Atlas(AtlasConfig(config_path))
+  atlas = Atlas(AtlasConfig(config_path))
 
-    try:
-        atlas.run()
-    except Exception as e:
-        print (e)
-        atlas.cleanup()
+  try:
+    atlas.run()
+  except Exception as e:
+    print (e)
+    atlas.cleanup()

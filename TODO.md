@@ -8,3 +8,4 @@
 - [ ] Checksum interpréteur
 - [ ] Configuration des skills
 - [ ] Gestion multi users, passer un ui à l'Agent + la config de l'env pour cet utilisateur
+- [ ] SDK python
