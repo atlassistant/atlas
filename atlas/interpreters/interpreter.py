@@ -1,16 +1,18 @@
-import os
+import os, logging
 
 class InterpreterConfig():
   """Holds information about the interpreter configuration.
   """
 
-  def __init__(self, type, path):
+  def __init__(self, type, path, trained_path, **kwargs):
     """Constructs a new interpreter config.
     
     :param type: Type of the interpreter
     :type type: str
     :param path: Path where to look for training files
     :type path: str
+    :param trained_path: Path where are stored trained interpreter files
+    :type trained_path: str
 
     """
 
@@ -20,6 +22,14 @@ class InterpreterConfig():
 
     self.interpreter_class = getattr(mod, interpreter_klass)
     self.path = os.path.abspath(path)
+    self.trained_path = os.path.abspath(trained_path)
+    self.kwargs = kwargs
+
+  def construct(self):
+    """Constructs a new interpreter related to this configuration instance.
+    """
+
+    return self.interpreter_class(**self.kwargs)
 
 class Interpreter():
   """Interpreters convert natural language sentences to parsed structures used by atlas.
@@ -31,7 +41,7 @@ class Interpreter():
 
   """
 
-  def __init__(self, lang):
+  def __init__(self):
     """Constructs a new interpreter.
 
     :param lang: Language of the interpreter
@@ -39,7 +49,8 @@ class Interpreter():
 
     """
 
-    self.lang = lang
+    self._log = logging.getLogger(__class__.__name__)
+    self.lang = 'en' # Default to en
 
   def get_metadata(self):
     """Gets interpreter metadata as a dict such as

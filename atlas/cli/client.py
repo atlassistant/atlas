@@ -1,7 +1,6 @@
 from cmd import Cmd
 import sys
-from ..client.channel_client import ChannelClient
-from ..broker import BrokerConfig
+from atlas_sdk import ChannelClient, BrokerConfig
 
 class Prompt(Cmd):
   def __init__(self, client_id):
@@ -9,7 +8,7 @@ class Prompt(Cmd):
 
     self.prompt = '> '
     self.client_id = client_id
-    self.client = ChannelClient(self.client_id, 
+    self.client = ChannelClient(self.client_id, 0, 
       on_ask=self.show_message, 
       on_show=self.show_message, 
       on_terminate=self.has_terminated

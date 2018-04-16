@@ -1,5 +1,4 @@
 from .. import Atlas, AtlasConfig, __version__
-from ..agent import AgentConfig
 import os, sys, argparse
 
 # Monkey patch with eventlet

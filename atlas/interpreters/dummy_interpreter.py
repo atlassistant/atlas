@@ -1,14 +1,11 @@
 from . import Interpreter
 
 class DummyInterpreter(Interpreter):
-
-    def __init__(self, **kwargs):
-        super(DummyInterpreter, self).__init__('en')
-
+    
     def get_metadata(self):
         return {
             'weather_forecast': ['location', 'date'],
-            'reminder': ['date', 'subject']
+            'reminder': ['date', 'subject', 'message']
         }
 
     def parse(self, msg):

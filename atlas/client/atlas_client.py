@@ -1,6 +1,19 @@
 from atlas_sdk.client import Client, \
   CHANNEL_CREATE_TOPIC, CHANNEL_DESTROY_TOPIC
-import re
+import re, json
+
+def split_client_id_and_operation(topic):
+  """Split the topic to get the client_id and the operation name.
+
+  :param topic: Message topic
+  :type topic: str
+  :rtype: str
+  
+  """
+
+  r = re.search('atlas/(.*?)/channel/(.*)', topic)
+
+  return (r.group(1), r.group(2))
 
 class AtlasClient(Client):
   """MQTT client used to create and destroy Agent upon channel creation / destruction.
@@ -24,29 +37,24 @@ class AtlasClient(Client):
     self.on_create = on_create or self.handler_not_set
     self.on_destroy = on_destroy or self.handler_not_set
 
-    def _get_client_id_and_operation(self, topic):
-      """Split the topic to get the client_id and the operation name.
+  def on_connect(self, client, userdata, flags, rc):
+    super(AtlasClient, self).on_connect(client, userdata, flags, rc)
 
-      :param topic: Message topic
-      :type topic: str
-      :rtype: str
-      
-      """
+    client.subscribe(CHANNEL_CREATE_TOPIC % '+')
+    client.subscribe(CHANNEL_DESTROY_TOPIC % '+')
 
-      r = re.search('atlas/(.*?)/channel/(.*)', topic)
+  def on_message(self, client, userdata, msg):
+    id, op = split_client_id_and_operation(msg.topic)
 
-      return (r.group(1), r.group(2))
+    if op == 'create':
+      try:
+        data = json.loads(msg.payload)
+      except json.decoder.JSONDecodeError:
+        data = {}
+        self.log.warn('Could not decode payload %s' % msg.payload)
 
-    def on_connect(self, client, userdata, flags, rc):
-      super(AtlasClient, self).on_connect(client, userdata, flags, rc)
+      data.update({ 'id': id })
 
-      client.subscribe(CHANNEL_CREATE_TOPIC % '+')
-      client.subscribe(CHANNEL_DESTROY_TOPIC % '+')
-
-    def on_message(self, client, userdata, msg):
-      id, op = self._get_client_id_and_operation(msg.topic)
-
-      if op == 'create':
-        self.on_create(id)
-      elif op == 'destroy':
-        self.on_destroy(id)
+      self.on_create(data)
+    elif op == 'destroy':
+      self.on_destroy(id)

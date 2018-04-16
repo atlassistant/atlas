@@ -1,4 +1,4 @@
-from .agent import Agent, AgentConfig
+from .agent import Agent
 from .utils import find
 from atlas_sdk.broker import BrokerConfig
 from .version import __version__
@@ -7,7 +7,7 @@ from .interpreters import Interpreter, InterpreterConfig
 from .client import AtlasClient
 from .executor import Executor, ExecutorConfig
 from .env import EnvConfig
-import logging, yaml
+import logging, yaml, os, configparser
 
 class AtlasConfig:
   """Represents the global Atlas configuration.
@@ -78,13 +78,55 @@ class Atlas:
     self._envs = {}
     self._interpreters = {}
 
-    self._executor = Executor(self._config.executor)
+    self._load_envs(self._config.env)
+    self._load_interpreters(self._config.interpreter)
+
+    # self._executor = Executor(self._config.executor)
     self._server = Server(self._config.server)
     self._client = AtlasClient(
-      on_create=lambda id: self.create_agent(AgentConfig(id, self._config.interpreter.lang)),
+      on_create=lambda d: self.create_agent(d.get('id'), d.get('uid')),
       on_destroy=self.delete_agent)
 
     # TODO discovery task every n seconds
+
+  def _load_envs(self, config):
+    """Load user environments variables. Filenames should match the user ID.
+    
+    :param config: Configuration to use
+    :type config: EnvConfig
+    
+    """
+
+    self._log.info('Loading user envs from %s' % config.path)
+
+    for env_file_path in os.listdir(config.path):
+      with open(os.path.join(config.path, env_file_path)) as f:
+        config_string = '[DEFAULT]\n' + f.read() # Add a default section since the file is a plain empty one
+        config = configparser.ConfigParser()
+        config.optionxform = str
+        config.read_string(config_string)
+
+        uid, _ = os.path.splitext(env_file_path)
+
+        self._envs[uid] = dict(config['DEFAULT'])
+
+  def _load_interpreters(self, config):
+    """Load user interpreters. Filenames should match the user ID.
+
+    :param config: Configuration to use
+    :type config: InterpreterConfig
+
+    """
+
+    self._log.info('Loading user interpreters from training files %s' % config.path)
+
+    for training_file_path in os.listdir(config.path):
+      uid, _ = os.path.splitext(training_file_path)
+
+      interpreter = config.construct()
+      interpreter.fit(os.path.join(config.path, training_file_path))
+
+      self._interpreters[uid] = interpreter
 
   def find_agent(self, id):
     """Try to find an agent in this engine.
@@ -94,26 +136,36 @@ class Atlas:
     :rtype: Agent
     """
 
-    return find(self._agents, lambda a: a.config.id == id)
+    return find(self._agents, lambda a: a.id == id)
 
-  def create_agent(self, config):
+  def create_agent(self, id, uid):
     """Creates a new agent attached to this engine.
 
-    :param config: Configuration of the agent
-    :type config: AgentConfig
+    :param id: Channel id for the agent
+    :type id: str
+    :param uid: User ID for the agent, it determines which interpreter and envs would be loaded in the Agent
+    :type uid: str
 
     """
 
-    if self.find_agent(config.id):
-      self._log.info('Reusing existing agent %s' % config.id)
+    if id:
+      if self.find_agent(id):
+        self._log.info('Reusing existing agent %s for user %s' % (id, uid))
+      else:
+        self._log.info('🙌 Creating agent %s for user %s' % (id, uid))
+              
+        agt = Agent(
+          id,
+          uid,
+          self._interpreters.get(uid, self._interpreters.get('default')),
+          self._envs.get(uid, self._envs.get('default'))
+        )
+
+        self._agents.append(agt)
+
+        agt.client.start(self._config.broker)
     else:
-      self._log.info('🙌 Creating agent %s' % config.id)
-            
-      agt = Agent(self._config.interpreter, config)
-
-      self._agents.append(agt)
-
-      agt.client.start(self._config.broker)
+      self._log.error('No id defined, could not create the agent')
 
   def delete_agent(self, id):
     """Deletes an agent from this engine.
@@ -130,7 +182,7 @@ class Atlas:
       agt.cleanup()
       self._agents.remove(agt)
     else:
-      self._log.info('No agent found %s' % id)
+      self._log.info('No agent found for %s' % id)
 
   def cleanup(self):
     """Cleanups this engine instance.
@@ -142,15 +194,15 @@ class Atlas:
       agt.cleanup()
 
     self._client.stop()
-    self._executor.cleanup()
+    # self._executor.cleanup()
 
   def run(self):
     """Runs this instance!
     """
 
-    self._log.info('Atlas %s is running, press any key to exit' % __version__)
+    self._log.info('Atlas %s is running!' % __version__)
     self._client.start(self._config.broker)
-    self._executor.run()
+    # self._executor.run()
     self._server.run()
 
     self.cleanup()
