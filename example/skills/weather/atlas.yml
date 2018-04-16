@@ -1,6 +1,0 @@
-name: 'Weather'
-description: 'Gives weather forecast from an external API'
-version: '0.1.0'
-author: 'Julien LEICHER'
-cmd: 'python weather.py'
-meta:

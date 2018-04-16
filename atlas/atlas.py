@@ -1,6 +1,7 @@
 from .agent import Agent
 from .utils import find
 from atlas_sdk.broker import BrokerConfig
+from .discovery import Discovery, DiscoveryConfig
 from .version import __version__
 from .web import Server, ServerConfig
 from .interpreters import Interpreter, InterpreterConfig
@@ -38,6 +39,10 @@ class AtlasConfig:
 
     self.env = EnvConfig(**data.get('env', {}))
 
+    # Discovery configuration
+
+    self.discovery = DiscoveryConfig(**data.get('discovery', {}))
+
     # Logging level
 
     logs = data.get('logs', {})
@@ -50,7 +55,7 @@ class AtlasConfig:
 
     # Executor config
 
-    self.executor = ExecutorConfig(**data.get('executor', {}))
+    self.executor = ExecutorConfig(broker_config=self.broker, **data.get('executor', {}))
 
     # Server config
 
@@ -81,13 +86,13 @@ class Atlas:
     self._load_envs(self._config.env)
     self._load_interpreters(self._config.interpreter)
 
-    # self._executor = Executor(self._config.executor)
+    self._executor = Executor(self._config.executor)
+    self._discovery = Discovery(self._config.discovery)
     self._server = Server(self._config.server)
     self._client = AtlasClient(
       on_create=lambda d: self.create_agent(d.get('id'), d.get('uid')),
-      on_destroy=self.delete_agent)
-
-    # TODO discovery task every n seconds
+      on_destroy=self.delete_agent
+    )
 
   def _load_envs(self, config):
     """Load user environments variables. Filenames should match the user ID.
@@ -188,21 +193,24 @@ class Atlas:
     """Cleanups this engine instance.
     """
 
-    self._log.info('Exiting Atlas %s gracefuly' % __version__)
+    self._log.info('Exiting ATLAS %s gracefuly' % __version__)
+
+    self._discovery.cleanup()
 
     for agt in self._agents:
       agt.cleanup()
 
     self._client.stop()
-    # self._executor.cleanup()
+    self._executor.cleanup()
 
   def run(self):
     """Runs this instance!
     """
 
-    self._log.info('Atlas %s is running!' % __version__)
+    self._log.info('ATLAS %s is running!' % __version__)
     self._client.start(self._config.broker)
-    # self._executor.run()
+    self._discovery.start(self._config.broker)
+    self._executor.run()
     self._server.run()
 
     self.cleanup()

@@ -1,40 +1,34 @@
-from transitions import Machine
-import json, time
-import paho.mqtt.client as mqtt
+from atlas_sdk import SkillClient, Intent, Slot, Env, Request, Message
 
-def on_connect(client, userdata, flags, rc):
-    client.subscribe('atlas/intents/weather_forecast')
+def get_forecasts(request, message):
+  """
+  :type request: Request
+  :type message: Message
 
-def on_message(client, userdata, msg):
-    if msg.topic == 'atlas/intents/weather_forecast':
-        data = json.loads(msg.payload)
+  """
 
-        location = data.get('location')
-        date = data.get('date')
-        id = data['__id']
+  date = message.slot('date')
 
-        if not location:
-            return client.publish('atlas/%s/dialog/ask' % id, json.dumps({
-                'slot': 'location',
-                'text': 'Pour quelle ville veux-tu la météo ?',
-            }))
+  if not date:
+    return request.ask('date', 'Pour quelle date veux-tu la météo ?')
 
-        if not date:
-            return client.publish('atlas/%s/dialog/ask' % id, json.dumps({
-                'slot': 'date',
-                'text': 'Pour quelle date veux-tu la météo ?',
-            })) 
+  location = message.slot('location')
 
-        time.sleep(4)
-        
-        client.publish('atlas/%s/dialog/show' % id, json.dumps({
-            'text': 'Ok, je recherche la météo de %s pour %s' % (location, date)
-        }))
-        client.publish('atlas/%s/dialog/terminate' % id)
+  if not location:
+    return request.ask('location', 'Pour quel endroit veux-tu la météo ?')
+
+  request.show('Très bien, je recherche la météo pour %s le %s' % (location, date), terminate=True)
 
 if __name__ == '__main__':
-    client = mqtt.Client()
-    client.on_connect = on_connect
-    client.on_message = on_message
-    client.connect('localhost')
-    client.loop_forever()
+  weather_skill = SkillClient(
+    name='weather',
+    version='1.0.0',
+    author='Julien LEICHER',
+    description='Gives some weather forecasts',
+    intents=[
+      Intent('weather_forecast', get_forecasts, [Slot('date'), Slot('location')])
+    ],
+    env=[Env('WEATHER_API_KEY')]
+  )
+
+  weather_skill.run()

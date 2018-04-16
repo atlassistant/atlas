@@ -1,90 +1,68 @@
-from .skill import Skill
-import os, logging, glob, yaml, subprocess, threading
+from atlas_sdk.broker import BrokerConfig
+import os, logging, glob, subprocess
 
 class ExecutorConfig:
-    """Configuration for an Executor.
+  """Configuration for an Executor.
+  """
+
+  def __init__(self, path, broker_config):
+    """Constructs a new ExecutorConfig.
+    
+    :param path: Path of the skills directory
+    :type path: str
+    :param broker_config: Broker configuration used to start the skills on the specific message broker
+    :type broker_config: BrokerConfig
+
     """
 
-    def __init__(self, path):
-        """Constructs a new ExecutorConfig.
-        
-        :param path: Path of the skills directory
-        :type path: str
-
-        """
-
-        self.path = os.path.abspath(path)
-
-class ExecutorProcess:
-    
-    def __init__(self, skill):
-        """Represents a single executing process for a skill backend.
-
-        :param skill: Skill related to this process
-        :type skill: Skill
-        """
-
-        self.skill = skill
-        self._popen = None
-
-    def run(self):
-        """Runs this process.
-        """
-
-        self._popen = subprocess.Popen(self.skill.cmd, cwd=os.path.dirname(self.skill.path), shell=True)
-
-    def terminate(self):
-        """Terminates this process.
-        """
-
-        if self._popen:
-            self._popen.terminate()
-            self._popen = None
+    self.path = os.path.abspath(path)
+    self.broker = broker_config
 
 class Executor:
-    """Executor launch atlas skills.
+  """Executor is a handy utility used to launch skill placed in a specific directory.
 
-    With an executor, we can keep track of which skill backend are actually running.
+  It looks for directories with an "atlas" file containing the command to run and executes it with the configurated
+  broker configuration.
+
+  """
+
+  def __init__(self, config):
+    """Constructs a new executor for the given skills folder.
+    
+    :param config: Executor configuration
+    :type config: ExecutorConfig
 
     """
 
-    def __init__(self, config):
-        """Constructs a new executor for the given skills folder.
-        
-        :param config: Executor configuration
-        :type config: ExecutorConfig
+    self._log = logging.getLogger('atlas.executor')
+    self._processes = []
+    self._config = config
 
-        """
+  def run(self):
+    """Run discover skills and run them.
+    """
 
-        self._log = logging.getLogger('atlas.executor')
-        self._processes = []
-        self._config = config
+    self._log.info('Running executor in: %s' % self._config.path)
 
-    def run(self):
-        """Run discover skills and run them.
-        """
+    for p in glob.glob(self._config.path + '/**/atlas'):
 
-        self._log.info('Running executor in: %s' % self._config.path)
+      with open(p) as f:
+        # Constructs the command line to run
+        cmd = "%s -H %s -p %d" % (f.read(), self._config.broker.host, self._config.broker.port)
 
-        for skill_config_path in glob.glob(self._config.path + '/**/atlas.yml'):
+        if self._config.broker.is_secured():
+          cmd += " -u %s:%s" % (self._config.broker.username, self._config.broker.password)
 
-            with open(skill_config_path) as f:
-                skill_info = Skill(path=skill_config_path, **yaml.safe_load(f))
+        process = subprocess.Popen(cmd, cwd=os.path.dirname(p), shell=True)
+        self._processes.append(process)
+        self._log.info('Started %s' % cmd)
 
-            self._log.info('Launching %s with command "%s"' % (skill_info, skill_info.cmd))
+  def cleanup(self):
+    """Stops spawned processes.
+    """
 
-            p = ExecutorProcess(skill_info)
+    self._log.info('Stopping processes')
 
-            self._processes.append(p)
-
-            p.run()
-
-    def cleanup(self):
-        """Stops spawned processes.
-        """
-
-        self._log.info('Stopping processes')
-
-        for process in self._processes:
-            process.terminate()
-            self._log.info('Stopped %s' % process.skill)
+    for process in self._processes:
+      process.terminate()
+      self._log.info('Stopped %s' % process.args)
