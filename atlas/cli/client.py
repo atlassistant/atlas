@@ -11,12 +11,16 @@ class Prompt(Cmd):
     self.client = ChannelClient(self.client_id, 0, 
       on_ask=self.show_message, 
       on_show=self.show_message, 
-      on_terminate=self.has_terminated
+      on_terminate=self.has_terminated,
+      on_work=self.on_work
     )
     self.client.start(BrokerConfig())
 
   def show_message(self, data, raw):
     print (data.get('text'))
+
+  def on_work(self):
+    print('-- work has started')
   
   def has_terminated(self):
     print ('-- intent has terminated')
