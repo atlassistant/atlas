@@ -13,7 +13,7 @@ Have a look at the [📚 documentation folder](documentation).
 
 `git clone` this repository and run `pip install -r requirements.txt`.
 
-For development, you will also need to `git clone https://github.com/atlassistant/atlas-sdk atlas_sdk` and install it using [its instruction](https://github.com/atlassistant/atlas-sdk).
+If you want an optimal development workflow, you will also need to `git clone https://github.com/atlassistant/atlas-sdk atlas_sdk` and install it using [its instruction](https://github.com/atlassistant/atlas-sdk).
 
 ### NLU backends
 
