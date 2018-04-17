@@ -45,7 +45,7 @@ class AgentClient(Client):
   def on_connect(self, client, userdata, flags, rc):
     super(AgentClient, self).on_connect(client, userdata, flags, rc)
 
-    self.subscribe_void(self.DIALOG_TERMINATE_TOPIC, self.on_terminate)
+    self.subscribe_json(self.DIALOG_TERMINATE_TOPIC, self.on_terminate)
     self.subscribe_json(self.DIALOG_ASK_TOPIC, self.on_ask)
     self.subscribe_json(self.DIALOG_SHOW_TOPIC, self.on_show)
     self.subscribe_raw(self.DIALOG_PARSE_TOPIC, self.on_parse)

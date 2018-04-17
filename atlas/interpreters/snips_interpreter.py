@@ -16,18 +16,27 @@ def get_entity_value(entity, default_value=None):
   return entity.get('value', entity.get('from', default_value))
 
 class SnipsInterpreter(Interpreter):
+
+  def __init__(self):
+    super(SnipsInterpreter, self).__init__()
     
-  def __init__(self, path, **kwargs):
+    self._meta = None
+    self._engine = None
+    self._entity_parser = None
 
-    abspath = os.path.abspath(path)
-    working_dir = os.path.dirname(abspath)
-    filename, _ = os.path.splitext(os.path.basename(path))
+  def get_metadata(self):
+    return self._meta
 
-    trained_path = os.path.join(working_dir, '%s.trained.json' % filename)
+  def fit(self, training_file_path, trained_directory_path):
+    super(SnipsInterpreter, self).fit(training_file_path, trained_directory_path)
+
+    filename, _ = os.path.splitext(os.path.basename(training_file_path))
+
+    trained_path = os.path.join(trained_directory_path, '%s.trained.json' % filename)
 
     # TODO use checksums to decide if a training is needed
 
-    with open(abspath) as f:
+    with open(training_file_path) as f:
       training_data = json.load(f)
       language_code = training_data['language']
       load_resources(language_code)
@@ -42,14 +51,8 @@ class SnipsInterpreter(Interpreter):
       with open(trained_path, mode='w') as f:
         json.dump(self._engine.to_dict(), f)
 
-    super(SnipsInterpreter, self).__init__(language_code)
-
     self._entity_parser = BuiltinEntityParser(language_code)
-
-  def get_metadata(self):
-    meta = self._engine._dataset_metadata['slot_name_mappings']
-
-    return { k: list(v.keys()) for k, v in meta.items() }
+    self._meta = { k: list(v.keys()) for k, v in self._engine._dataset_metadata['slot_name_mappings'].items() }
 
   def parse_entity(self, msg, intent, slot):
     # TODO check if builtin entity type for performance

@@ -1,10 +1,11 @@
 import logging
 from .version import __version__
 from .client import AgentClient
-from atlas_sdk.request import SID_KEY, UID_KEY, ENV_KEY, VERSION_KEY, LANG_KEY
+from atlas_sdk.request import SID_KEY, UID_KEY, ENV_KEY, VERSION_KEY, LANG_KEY, CID_KEY
 from .interpreters import Interpreter
 from transitions import Machine, EventData, MachineError
 from transitions.extensions.states import add_state_features, Timeout
+import uuid
 
 STATE_ASLEEP = 'asleep'
 INTENT_CANCEL = 'cancel' # TODO handle it :)
@@ -19,6 +20,14 @@ def to_ask_state(slot):
   """
 
   return PREFIX_ASK + slot
+
+def generate_hash():
+  """Generates a random hash.
+
+  :rtype: str
+  """
+
+  return uuid.uuid4().hex
 
 @add_state_features(Timeout)
 class AgentMachine(Machine):
@@ -70,7 +79,7 @@ class Agent:
     self.client = AgentClient(id,
       on_parse=self.parse,
       on_ask=self.ask,
-      on_terminate=self.terminate,
+      on_terminate=self._terminate_from_skill,
       on_show=self.show
     )
 
@@ -120,6 +129,7 @@ class Agent:
 
     self._cur_asked_param = None
     self._cur_intent = None
+    self._cur_conversation_id = None
     self._cur_slots = {}
 
     self.client.terminate()
@@ -148,6 +158,7 @@ class Agent:
     """
 
     self._cur_intent = event.transition.dest
+    self._cur_conversation_id = generate_hash()
 
     valid_keys = self.env.keys()
 
@@ -165,6 +176,7 @@ class Agent:
     # Constructs the message payload
     
     data = {
+      CID_KEY: self._cur_conversation_id,
       SID_KEY: self.id,
       UID_KEY: self.uid,
       LANG_KEY: self.interpreter.lang,
@@ -214,8 +226,8 @@ class Agent:
 
     self._log.debug('Parsing "%s"' % msg)
 
-    # TODO if intent is "cancel", returns to asleep
-    # In the future we want every message coming after the cancellation and with a conversation_start_date to be dismissed
+    # TODO if intent is "cancel", go to the cancel state immediately. This will generates a new
+    # conversation id so old request will be dismissed if they tried to do something
 
     # Start by checking if we are in a ask* state
     if self.state.startswith(PREFIX_ASK) and self._cur_asked_param: # pylint: disable=E1101
@@ -243,6 +255,21 @@ class Agent:
       self._cur_slots = intent['slots']
       self.go(intent['intent'])
 
+  def _is_valid_request(self, data):
+    """Checks if a request is valid in the current context.
+
+    :param data: Request data
+    :type data: dict
+
+    """
+
+    conversation_id = data.get(CID_KEY)
+
+    if conversation_id == None:
+      return False
+
+    return conversation_id == self._cur_conversation_id
+
   def ask(self, data, raw_msg):
     """Ask required by the skill intent.
 
@@ -253,7 +280,8 @@ class Agent:
 
     """
 
-    self.go(to_ask_state(data['slot']), payload=raw_msg)
+    if self._is_valid_request(data):
+      self.go(to_ask_state(data['slot']), payload=raw_msg)
 
   def show(self, data, raw_msg):
     """Show simply pass message to the client channel.
@@ -265,7 +293,21 @@ class Agent:
 
     """
 
-    self.client.show(raw_msg)
+    if self._is_valid_request(data):
+      self.client.show(raw_msg)
+
+  def _terminate_from_skill(self, data, raw_msg):
+    """Called by a skill when it has ended its work.
+
+    :param data: Data sent by the intent
+    :type data: dict
+    :param raw_msg: Raw payload received
+    :type raw_msg: str
+
+    """
+
+    if self._is_valid_request(data):
+      self.terminate()
 
   def terminate(self):
     """Terminates a dialog and returns to the asleep state.
