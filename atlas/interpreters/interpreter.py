@@ -4,7 +4,7 @@ class InterpreterConfig():
   """Holds information about the interpreter configuration.
   """
 
-  def __init__(self, type, path, trained_path, **kwargs):
+  def __init__(self, type='atlas.interpreter.Interpreter', **kwargs):
     """Constructs a new interpreter config.
     
     :param type: Type of the interpreter
@@ -21,8 +21,6 @@ class InterpreterConfig():
     mod = __import__('.'.join(interpreter_parts[:-1]), fromlist=[interpreter_klass])
 
     self.interpreter_class = getattr(mod, interpreter_klass)
-    self.path = os.path.abspath(path)
-    self.trained_path = os.path.abspath(trained_path)
     self.kwargs = kwargs
 
   def construct(self):
@@ -64,11 +62,13 @@ class Interpreter():
 
     return {}
 
-  def fit(self, trained_file_path):
+  def fit(self, training_file_path, trained_directory_path):
     """Train this interpreter.
 
-    :param trained_file_path: Path to the training file
-    :type trained_file_path: str
+    :param training_file_path: Path to the training file
+    :type training_file_path: str
+    :param trained_directory_path: Path to the trained folder where stuff should be put
+    :type trained_directory_path: str
     
     """
 

@@ -27,6 +27,8 @@ export default {
 @import "./../_vars.scss";
 
 .message {
+  transition: all 0.2s;
+  
   &__content {
     background-color: color(background, 1);
     box-shadow: 0 0 10px color(shadow);
@@ -35,7 +37,6 @@ export default {
     padding: baseline(0.5);
     position: relative;
     margin-bottom: baseline(0.5);
-    transition: all 0.2s;
   }
 
   &--server &__content {

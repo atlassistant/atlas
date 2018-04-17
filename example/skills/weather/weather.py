@@ -1,23 +1,25 @@
-from atlas_sdk import SkillClient, Intent, Slot, Env, Request, Message
+from atlas_sdk import SkillClient, Intent, Slot, Env, Request
+import time
 
-def get_forecasts(request, message):
+def get_forecasts(request):
   """
   :type request: Request
-  :type message: Message
 
   """
 
-  date = message.slot('date')
+  date = request.slot('date')
 
   if not date:
     return request.ask('date', 'Pour quelle date veux-tu la météo ?')
 
-  location = message.slot('location')
+  location = request.slot('location')
 
   if not location:
     return request.ask('location', 'Pour quel endroit veux-tu la météo ?')
 
-  request.show('Très bien, je recherche la météo pour %s le %s' % (location, date), terminate=True)
+  time.sleep(3)
+
+  request.show('Très bien, je recherche la météo pour %s le %s avec la clé %s' % (location, date, request.env('WEATHER_API_KEY')), terminate=True)
 
 if __name__ == '__main__':
   weather_skill = SkillClient(

@@ -73,7 +73,8 @@ class Server:
     channel = ChannelClient(client_id, 1337, # TODO Replace with a true user id
       on_ask=lambda d, _: socketio.emit('ask', d, room=client_id),
       on_show=lambda d, _: socketio.emit('show', d, room=client_id),
-      on_terminate=lambda: socketio.emit('terminate', room=client_id)
+      on_terminate=lambda: socketio.emit('terminate', room=client_id),
+      on_work=lambda: socketio.emit('work', room=client_id),
     )
     
     self._channels[client_id] = channel
@@ -108,7 +109,7 @@ class Server:
       p = subprocess.Popen('npm run start', cwd=os.path.dirname(__file__), shell=True)
       self._log.info('Started webpack')
 
-    self._log.info('Starting web server on %s:%s' % (self._config.host, self._config.port))
+    self._log.info('🌐 Starting web server on %s:%s' % (self._config.host, self._config.port))
     # app.run(self._config.host, self._config.port)#, debug=self._config.debug)
 
     socketio.run(app, self._config.host, self._config.port)

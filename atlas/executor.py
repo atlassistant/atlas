@@ -55,7 +55,7 @@ class Executor:
 
         process = subprocess.Popen(cmd, cwd=os.path.dirname(p), shell=True)
         self._processes.append(process)
-        self._log.info('Started %s' % cmd)
+        self._log.info('🚀 Started %s' % cmd)
 
   def cleanup(self):
     """Stops spawned processes.

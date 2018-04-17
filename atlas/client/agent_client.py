@@ -1,6 +1,6 @@
 from atlas_sdk.client import Client, \
   DIALOG_PARSE_TOPIC, DIALOG_ASK_TOPIC, DIALOG_SHOW_TOPIC, DIALOG_TERMINATE_TOPIC, \
-  CHANNEL_ASK_TOPIC, CHANNEL_SHOW_TOPIC, INTENT_TOPIC, CHANNEL_TERMINATE_TOPIC
+  CHANNEL_ASK_TOPIC, CHANNEL_SHOW_TOPIC, INTENT_TOPIC, CHANNEL_TERMINATE_TOPIC, CHANNEL_WORK_TOPIC
 import json
 
 class AgentClient(Client):
@@ -35,6 +35,7 @@ class AgentClient(Client):
     self.CHANNEL_ASK_TOPIC = CHANNEL_ASK_TOPIC % client_id
     self.CHANNEL_SHOW_TOPIC = CHANNEL_SHOW_TOPIC % client_id
     self.CHANNEL_TERMINATE_TOPIC = CHANNEL_TERMINATE_TOPIC % client_id
+    self.CHANNEL_WORK_TOPIC = CHANNEL_WORK_TOPIC % client_id
 
     self.on_ask = on_ask or self.handler_not_set
     self.on_parse = on_parse or self.handler_not_set
@@ -76,6 +77,14 @@ class AgentClient(Client):
     """
 
     self.publish(self.CHANNEL_TERMINATE_TOPIC)
+
+  def work(self):
+    """Inform the channel that a skill has been called so the work has started.
+
+    It may be used to show an activity indicator.
+    """
+
+    self.publish(self.CHANNEL_WORK_TOPIC)
 
   def show(self, payload):
     """Show a message to the channel.

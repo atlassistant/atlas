@@ -1,6 +1,7 @@
 import logging
 from .version import __version__
 from .client import AgentClient
+from atlas_sdk.request import SID_KEY, UID_KEY, ENV_KEY, VERSION_KEY, LANG_KEY
 from .interpreters import Interpreter
 from transitions import Machine, EventData, MachineError
 from transitions.extensions.states import add_state_features, Timeout
@@ -34,7 +35,7 @@ class Agent:
 
   """
 
-  def __init__(self, id, uid, interpreter, env, ask_timeout=30):
+  def __init__(self, id, uid, interpreter, env, validate_intent=None, ask_timeout=30):
     """Creates a new agent.
 
     :param id: Channel id
@@ -45,6 +46,11 @@ class Agent:
     :type interpreter: Interpreter
     :param env: Configuration parameters for the user
     :type env: dict
+    :param validate_intent: Handler to validate the user intent by checking if it's available, 
+                            it will take the intent name and should returns a dict containing valid env 
+                            variables if the skill exists or None if no skill could be found matching
+                            that intent
+    :type validate_intent: callable
     :param ask_timeout: Timeout when entering an ask state
     :type ask_timeout: int
 
@@ -53,6 +59,7 @@ class Agent:
     self._log = logging.getLogger('atlas.agent.%s' % id)
     self._intent_queue = []
 
+    self.validate_intent = validate_intent
     self.interpreter = interpreter
     self.env = env
     self.id = id
@@ -140,20 +147,29 @@ class Agent:
 
     """
 
-    # TODO when the discovery will be done, agents should know if an intent
-    # could not be reached because no skill can answered to it so let the user
-    # know!
-
     self._cur_intent = event.transition.dest
+
+    valid_keys = self.env.keys()
+
+    # Try to validate if the intent could be reached
+
+    if self.validate_intent:
+      valid_keys = self.validate_intent(self._cur_intent)
+
+      if valid_keys == None:
+        self._log.warn('Intent %s could not be reached, skipping now' % self._cur_intent)
+        return self.go(STATE_ASLEEP)
+
+    self.client.work()
 
     # Constructs the message payload
     
     data = {
-      '__id': self.id,
-      '__uid': self.uid,
-      '__lang': self.interpreter.lang,
-      '__version': __version__,
-      '__env': self.env, # TODO only send skill needed env configuration
+      SID_KEY: self.id,
+      UID_KEY: self.uid,
+      LANG_KEY: self.interpreter.lang,
+      VERSION_KEY: __version__,
+      ENV_KEY: { k: self.env[k] for k in valid_keys },
     }
     
     data.update(self._cur_slots)
@@ -209,7 +225,7 @@ class Agent:
     else:
       data = self.interpreter.parse(msg)
 
-      # TODO if no intent was found, let it know
+      # TODO if no intent was found, let it know, maybe?
 
       self._intent_queue.extend(data)
 

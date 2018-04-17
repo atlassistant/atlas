@@ -7,8 +7,16 @@ from .web import Server, ServerConfig
 from .interpreters import Interpreter, InterpreterConfig
 from .client import AtlasClient
 from .executor import Executor, ExecutorConfig
-from .env import EnvConfig
+from .loader import Loader, LoaderConfig
 import logging, yaml, os, configparser
+
+BROKER_CONFIG_KEY = 'broker'
+INTERPRETER_CONFIG_KEY = 'interpreter'
+LOADER_CONFIG_KEY = 'loader'
+DISCOVERY_CONFIG_KEY = 'discovery'
+EXECUTOR_CONFIG_KEY = 'executor'
+SERVER_CONFIG_KEY = 'server'
+LOGS_CONFIG_KEY = 'logs'
 
 class AtlasConfig:
   """Represents the global Atlas configuration.
@@ -27,25 +35,23 @@ class AtlasConfig:
 
     # Broker configuration
 
-    self.broker = BrokerConfig(**data.get('broker', {}))
+    self.broker = BrokerConfig(**data.get(BROKER_CONFIG_KEY, {}))
 
     # Interpreter configuration
 
-    self.interpreter =  InterpreterConfig(**data.get('interpreter', {
-      'type': 'atlas.interpreter.Interpreter'
-    }))
+    self.interpreter =  InterpreterConfig(**data.get(INTERPRETER_CONFIG_KEY, {}))
 
-    # Env configuration
+    # Loader configuration
 
-    self.env = EnvConfig(**data.get('env', {}))
+    self.loader = LoaderConfig(interpreter_config=self.interpreter, **data.get(LOADER_CONFIG_KEY, {}))
 
     # Discovery configuration
 
-    self.discovery = DiscoveryConfig(**data.get('discovery', {}))
+    self.discovery = DiscoveryConfig(**data.get(DISCOVERY_CONFIG_KEY, {}))
 
     # Logging level
 
-    logs = data.get('logs', {})
+    logs = data.get(LOGS_CONFIG_KEY, {})
     log_level = logs.get('level', 'INFO')
     logging.basicConfig(level=getattr(logging, log_level))
 
@@ -55,11 +61,11 @@ class AtlasConfig:
 
     # Executor config
 
-    self.executor = ExecutorConfig(broker_config=self.broker, **data.get('executor', {}))
+    self.executor = ExecutorConfig(broker_config=self.broker, **data.get(EXECUTOR_CONFIG_KEY, {}))
 
     # Server config
 
-    self.server = ServerConfig(broker_config=self.broker, **data.get('server', {}))
+    self.server = ServerConfig(broker_config=self.broker, **data.get(SERVER_CONFIG_KEY, {}))
 
 class Atlas:
   """Entry point for this assistant system.
@@ -80,12 +86,7 @@ class Atlas:
     self._config = config
     self._agents = []
     
-    self._envs = {}
-    self._interpreters = {}
-
-    self._load_envs(self._config.env)
-    self._load_interpreters(self._config.interpreter)
-
+    self._loader = Loader(self._config.loader)
     self._executor = Executor(self._config.executor)
     self._discovery = Discovery(self._config.discovery)
     self._server = Server(self._config.server)
@@ -93,45 +94,6 @@ class Atlas:
       on_create=lambda d: self.create_agent(d.get('id'), d.get('uid')),
       on_destroy=self.delete_agent
     )
-
-  def _load_envs(self, config):
-    """Load user environments variables. Filenames should match the user ID.
-    
-    :param config: Configuration to use
-    :type config: EnvConfig
-    
-    """
-
-    self._log.info('Loading user envs from %s' % config.path)
-
-    for env_file_path in os.listdir(config.path):
-      with open(os.path.join(config.path, env_file_path)) as f:
-        config_string = '[DEFAULT]\n' + f.read() # Add a default section since the file is a plain empty one
-        config = configparser.ConfigParser()
-        config.optionxform = str
-        config.read_string(config_string)
-
-        uid, _ = os.path.splitext(env_file_path)
-
-        self._envs[uid] = dict(config['DEFAULT'])
-
-  def _load_interpreters(self, config):
-    """Load user interpreters. Filenames should match the user ID.
-
-    :param config: Configuration to use
-    :type config: InterpreterConfig
-
-    """
-
-    self._log.info('Loading user interpreters from training files %s' % config.path)
-
-    for training_file_path in os.listdir(config.path):
-      uid, _ = os.path.splitext(training_file_path)
-
-      interpreter = config.construct()
-      interpreter.fit(os.path.join(config.path, training_file_path))
-
-      self._interpreters[uid] = interpreter
 
   def find_agent(self, id):
     """Try to find an agent in this engine.
@@ -162,8 +124,9 @@ class Atlas:
         agt = Agent(
           id,
           uid,
-          self._interpreters.get(uid, self._interpreters.get('default')),
-          self._envs.get(uid, self._envs.get('default'))
+          self._loader.interpreter_for(uid),
+          self._loader.env_for(uid),
+          validate_intent=lambda intent_name: self._discovery.skill_env_for_intent(intent_name)
         )
 
         self._agents.append(agt)
@@ -208,6 +171,7 @@ class Atlas:
     """
 
     self._log.info('ATLAS %s is running!' % __version__)
+    self._loader.load()
     self._client.start(self._config.broker)
     self._discovery.start(self._config.broker)
     self._executor.run()

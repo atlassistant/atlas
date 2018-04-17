@@ -35,6 +35,7 @@ export default {
     this.socket.on('ask', (data) => this.processMessage(data, true));
     this.socket.on('show', (data) => this.processMessage(data));
     this.socket.on('terminate', () => this.onTerminate());
+    this.socket.on('work', () => this.onWork());
   },
   methods: {
     onInput(text) {
@@ -43,8 +44,11 @@ export default {
         id: this.messages.length + 1,
         text,
       });
-      this.isThinking = true;
+
       this.socket.emit('parse', text);
+    },
+    onWork() {
+      this.isThinking = true;
     },
     onTerminate() {
       this.$refs.chatInput.stopListening();

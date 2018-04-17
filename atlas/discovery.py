@@ -1,6 +1,8 @@
 from .client import DiscoveryClient
 from atlas_sdk import BrokerConfig
-import logging, threading, datetime
+from .utils import find
+from datetime import datetime, timedelta
+import logging, threading
 
 class Skill():
   """Represents a skill discovered by atlas.
@@ -37,7 +39,10 @@ class Skill():
     """Inform that this skill has just responded to the discovery challenge.
     """
 
-    self.last_heard_of = datetime.datetime.now()
+    self.last_heard_of = datetime.utcnow()
+
+  def has_timedout(self, date, timeout):
+    return self.last_heard_of < date + timedelta(seconds = -timeout)
 
   def __str__(self):
     return 'Skill "%s"' % self.name
@@ -46,15 +51,18 @@ class DiscoveryConfig():
   """Represents the discovery configuration;
   """
 
-  def __init__(self, interval=10):
+  def __init__(self, interval=10, timeout=30):
     """Constructs a new configuration for the discovery service.
 
-    :param interval: Polling interval
+    :param interval: Polling interval in seconds
     :type interval: int
+    :param timeout: Timeout in seconds, when a skill should be removed
+    :type timeout: int
 
     """
 
     self.interval = interval
+    self.timeout = timeout
 
 class Discovery():
   """Represents the discovery service used to keep track of registered skills.
@@ -68,18 +76,33 @@ class Discovery():
     """
 
     self._config = config
-    self.skills = {}
+    self._skills = {}
     self._log = logging.getLogger('atlas.discovery')
     self._client = DiscoveryClient(on_discovery=self.process)
 
   def _ping(self):
     self._log.debug('Sending discovery request!')
 
+    try:
+      self._client.ping()
+    except Exception as e:
+      # May be because the client is not connected yet
+      self._log.warn('Could not send a ping discovery: %s' % e)
+
+    # Check for timeout skills
+
+    now = datetime.utcnow()
+
+    for k in list(self._skills.keys()):
+      v = self._skills.get(k)
+
+      if v.has_timedout(now, self._config.timeout):
+        del self._skills[k]
+        self._log.info('⏳ SKill %s has timed out, removed it' % k)
+
     self._thread = threading.Timer(self._config.interval, self._ping)
     self._thread.daemon = True
     self._thread.start()
-
-    self._client.ping()
 
   def process(self, skill_data, raw=None):
     """Process an incoming ping response for skill data.
@@ -96,16 +119,34 @@ class Discovery():
     name = skill_data.get('name')
 
     if name:
-      skill = self.skills.get(name)
+      skill = self._skills.get(name)
 
       if skill:
         self._log.debug('Skill %s already exists, updating' % name)
         skill.heard_of()
       else:
-        self._log.info('Adding skill %s' % name)
-        self.skills[name] = Skill(**skill_data)
+        self._skills[name] = Skill(**skill_data)
+        self._log.info('🛠️ Added skill %s' % name)
     else:
       self._log.warn('No name defined, skipping the skill')
+
+  def skill_env_for_intent(self, intent):
+    """Try to retrieve a skill env associated with the intent name given.
+
+    :param intent: Name of the intent
+    :type intent: str
+    :rtype: Skill
+
+    """
+
+    # TODO what if multiple skill can respond to the same intent with different env ? :/
+
+    skill = find(self._skills.values(), lambda s: s.intents.get(intent) != None)
+
+    if skill:
+      return skill.env.keys()
+
+    return None
 
   def start(self, broker_config):
     """Starts the discovery service.

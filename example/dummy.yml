@@ -1,17 +1,20 @@
 interpreter: 
   type: 'atlas.interpreters.dummy_interpreter.DummyInterpreter'
-  path: 'example/training'
-  trained_path: 'example/data'
-env:
-  path: 'example/env'
 executor:
   path: 'example/skills'
+discovery:
+  interval: 10
+  timeout: 30
 logs:
   level: 'INFO'
 server:
   host: '0.0.0.0'
   port: 5000
   debug: false
+loader:
+  training_path: 'example/training'
+  trained_path: 'example/data'
+  env_path: 'example/env'
 broker:
   host: 'localhost'
   port: 1883

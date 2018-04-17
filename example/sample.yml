@@ -1,8 +1,8 @@
 interpreter: 
   type: 'atlas.interpreters.snips_interpreter.SnipsInterpreter'
-  path: 'example/training'
-env:
-  path: 'example/env'
+discovery:
+  interval: 10
+  timeout: 30
 executor:
   path: 'example/skills'
 logs:
@@ -11,6 +11,10 @@ server:
   host: '0.0.0.0'
   port: 5000
   debug: false
+loader:
+  training_path: 'example/training'
+  trained_path: 'example/data'
+  env_path: 'example/env'
 broker:
   host: 'localhost'
   port: 1883
