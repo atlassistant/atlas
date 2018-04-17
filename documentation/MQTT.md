@@ -85,11 +85,12 @@ Run skill associated with an intent.
   "__version": "atlas version",
   "__env": {
     "A_PARAMETER": "User configurated value"
-  }
+  },
+  "slot_name": "Slot value"
 }
 ```
 
-# atlas/{sid}/dialog/parse
+## atlas/{sid}/dialog/parse
 
 Parses a message. The message to parse should be included as a raw payload.
 
