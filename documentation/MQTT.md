@@ -3,9 +3,9 @@ MQTT Topics
 
 Here is a list and required body for all MQTT messages. There are some common concepts you need to know:
 
-- cid: represents the conversation id, generated at each intent request
-- sid: represents a channel id (or session id)
-- uid: represents the user id
+- `cid`: represents the conversation id, generated at each intent request
+- `sid`: represents a channel id (or session id)
+- `uid`: represents the user id
 
 ## atlas/discovery/ping
 
