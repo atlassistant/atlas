@@ -158,7 +158,6 @@ class Agent:
     """
 
     self._cur_intent = event.transition.dest
-    self._cur_conversation_id = generate_hash()
 
     valid_keys = self.env.keys()
 
@@ -171,6 +170,8 @@ class Agent:
         self._log.warn('Intent %s could not be reached, skipping now' % self._cur_intent)
         return self.go(STATE_ASLEEP)
 
+    self._cur_conversation_id = generate_hash()
+    
     self.client.work()
 
     # Constructs the message payload
