@@ -7,6 +7,8 @@ Here is a list and required body for all MQTT messages. There are some common co
 - `sid`: represents a channel id (or session id)
 - `uid`: represents the user id
 
+Every json property prefixed by a double underscore are considered as metadata.
+
 ## atlas/discovery/ping
 
 Send a discovery request.
@@ -86,7 +88,8 @@ Run skill associated with an intent.
   "__env": {
     "A_PARAMETER": "User configurated value"
   },
-  "slot_name": "Slot value"
+  "slot_name": "Slot value",
+  "another_slot": "Another value!"
 }
 ```
 
@@ -96,7 +99,7 @@ Parses a message. The message to parse should be included as a raw payload.
 
 ## atlas/{sid}/dialog/ask
 
-Ask for a slot value. In the future more properties will be added to handle more complex UI.
+Ask for a slot value. Additional properties will be transfered directly to the channel.
 
 ```json
 {
@@ -108,7 +111,7 @@ Ask for a slot value. In the future more properties will be added to handle more
 
 ## atlas/{sid}/dialog/show
 
-Show a message to the channel. In the future more properties will be added to handle more complex UI.
+Show a message to the channel by forwarding it.
 
 ```json
 {
