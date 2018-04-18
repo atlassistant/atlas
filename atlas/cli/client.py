@@ -1,14 +1,16 @@
 from cmd import Cmd
 import sys
 from atlas_sdk import ChannelClient, BrokerConfig
+from ..agent import generate_hash
 
 class Prompt(Cmd):
-  def __init__(self, client_id):
+  def __init__(self, user_id):
     super(Prompt, self).__init__()
 
     self.prompt = '> '
-    self.client_id = client_id
-    self.client = ChannelClient(self.client_id, 0, 
+    self.uid = user_id
+    self.client_id = generate_hash()
+    self.client = ChannelClient(self.client_id, self.uid, 
       on_ask=self.show_message, 
       on_show=self.show_message, 
       on_terminate=self.has_terminated,
@@ -35,4 +37,4 @@ class Prompt(Cmd):
 
 if __name__ == '__main__':
   prompt = Prompt(sys.argv[1])
-  prompt.cmdloop('Welcome %s!' % prompt.client_id)
+  prompt.cmdloop('Welcome %s!' % prompt.uid)
