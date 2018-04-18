@@ -76,7 +76,7 @@ Inform the channel that a work has ended.
 
 ## atlas/intents/{intent_name}
 
-Run skill associated with an intent.
+Run a skill associated with an intent.
 
 ```json
 {

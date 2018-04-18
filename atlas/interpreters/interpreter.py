@@ -48,9 +48,17 @@ class Interpreter():
     """
 
     self._log = logging.getLogger(__class__.__name__)
-    self.lang = 'en' # Default to en
 
-  def get_metadata(self):
+  def lang(self):
+    """Returns the interpreter language.
+
+    :rtype: str
+
+    """
+
+    return 'en' # Default to en
+
+  def metadata(self):
     """Gets interpreter metadata as a dict such as
     {
         'intent_name': ['slot_name', 'another_slot']

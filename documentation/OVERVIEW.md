@@ -19,7 +19,7 @@ Read the filesystem to load **environments** and **interpreters** per user. File
 
 ## Executor
 
-It makes running skills a breeze. It will look inside a specific folder to find an `atlas` file which contains the command to run and executes it. By deploying your skills in this folder, they will be run at **atlas** startup. You are free to launch them by yourself if you prefer.
+It makes running skills a breeze. It will look inside a specific folder to find an `atlas` file which contains the command to run and executes it. By deploying your skills in this folder, they will be run at **atlas** startup. You are free to launch them by yourself if you prefer. Skills in this folder will receive the broker configuration from **atlas** by args parameters.
 
 ## Discovery
 

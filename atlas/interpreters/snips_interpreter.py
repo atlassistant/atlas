@@ -21,11 +21,15 @@ class SnipsInterpreter(Interpreter):
     super(SnipsInterpreter, self).__init__()
 
     self._meta = None
+    self._lang = None
     self._engine = None
     self._entity_parser = None
 
-  def get_metadata(self):
+  def metadata(self):
     return self._meta
+
+  def lang(self):
+    return self._lang
 
   def fit(self, training_file_path, trained_directory_path):
     filename, _ = os.path.splitext(os.path.basename(training_file_path))
@@ -36,8 +40,8 @@ class SnipsInterpreter(Interpreter):
 
     with open(training_file_path) as f:
       training_data = json.load(f)
-      self.lang = training_data['language']
-      load_resources(self.lang)
+      self._lang = training_data['language']
+      load_resources(self._lang)
     
     try:
       with open(trained_path) as f:
@@ -49,7 +53,7 @@ class SnipsInterpreter(Interpreter):
       with open(trained_path, mode='w') as f:
         json.dump(self._engine.to_dict(), f)
 
-    self._entity_parser = BuiltinEntityParser(self.lang)
+    self._entity_parser = BuiltinEntityParser(self._lang)
     self._meta = { k: list(v.keys()) for k, v in self._engine._dataset_metadata['slot_name_mappings'].items() }
 
   def parse_entity(self, msg, intent, slot):

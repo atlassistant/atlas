@@ -87,7 +87,7 @@ class Agent:
 
     # Constructs every possible transitions from interpreter metadata
 
-    metadata = self.interpreter.get_metadata()
+    metadata = self.interpreter.metadata()
 
     ask_states = list(set([to_ask_state(slot) for meta in metadata.values() for slot in meta]))
     states = [STATE_ASLEEP] + list(metadata.keys()) + [{ 
@@ -180,7 +180,7 @@ class Agent:
       CID_KEY: self._cur_conversation_id,
       SID_KEY: self.id,
       UID_KEY: self.uid,
-      LANG_KEY: self.interpreter.lang,
+      LANG_KEY: self.interpreter.lang(),
       VERSION_KEY: __version__,
       ENV_KEY: { k: self.env[k] for k in valid_keys },
     }
