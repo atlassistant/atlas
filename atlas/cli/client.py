@@ -1,7 +1,7 @@
 from cmd import Cmd
 import sys
 from atlas_sdk import ChannelClient, BrokerConfig
-from ..agent import generate_hash
+from ..utils import generate_hash
 
 class Prompt(Cmd):
   def __init__(self, user_id):

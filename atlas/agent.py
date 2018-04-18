@@ -1,12 +1,12 @@
 import logging
 from .version import __version__
 from .client import AgentClient
+from .utils import generate_hash
 from atlas_sdk import BrokerConfig
 from atlas_sdk.request import SID_KEY, UID_KEY, ENV_KEY, VERSION_KEY, LANG_KEY, CID_KEY
 from .interpreters import Interpreter
 from transitions import Machine, EventData, MachineError
 from transitions.extensions.states import add_state_features, Timeout
-import uuid
 
 STATE_ASLEEP = 'asleep'
 INTENT_CANCEL = 'cancel' # TODO handle it :)
@@ -21,14 +21,6 @@ def to_ask_state(slot):
   """
 
   return PREFIX_ASK + slot
-
-def generate_hash():
-  """Generates a random hash.
-
-  :rtype: str
-  """
-
-  return uuid.uuid4().hex
 
 @add_state_features(Timeout)
 class AgentMachine(Machine):
