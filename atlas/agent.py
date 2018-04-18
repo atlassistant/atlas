@@ -1,6 +1,7 @@
 import logging
 from .version import __version__
 from .client import AgentClient
+from atlas_sdk import BrokerConfig
 from atlas_sdk.request import SID_KEY, UID_KEY, ENV_KEY, VERSION_KEY, LANG_KEY, CID_KEY
 from .interpreters import Interpreter
 from transitions import Machine, EventData, MachineError
@@ -76,7 +77,7 @@ class Agent:
 
     # Configure the client facade
 
-    self.client = AgentClient(id,
+    self._client = AgentClient(id,
       on_parse=self.parse,
       on_ask=self.ask,
       on_terminate=self._terminate_from_skill,
@@ -132,7 +133,7 @@ class Agent:
     self._cur_conversation_id = None
     self._cur_slots = {}
 
-    self.client.terminate()
+    self._client.terminate()
 
     self._process_next_intent()
 
@@ -172,7 +173,7 @@ class Agent:
 
     self._cur_conversation_id = generate_hash()
     
-    self.client.work()
+    self._client.work()
 
     # Constructs the message payload
     
@@ -189,7 +190,7 @@ class Agent:
 
     self._log.debug('Calling intent "%s" with params %s' % (self._cur_intent, data))
 
-    self.client.intent(self._cur_intent, data)
+    self._client.intent(self._cur_intent, data)
 
   def _on_asked(self, event):
     """Entered in ask state, save current asked param.
@@ -205,7 +206,7 @@ class Agent:
 
     self._log.debug('Asking request with payload %s' % payload)
 
-    self.client.ask(payload)
+    self._client.ask(payload)
 
   def _on_timeout(self, event):
     """Called when a state timeout has been reached.
@@ -295,7 +296,7 @@ class Agent:
     """
 
     if self._is_valid_request(data):
-      self.client.show(raw_msg)
+      self._client.show(raw_msg)
 
   def _terminate_from_skill(self, data, raw_msg):
     """Called by a skill when it has ended its work.
@@ -316,6 +317,16 @@ class Agent:
 
     self.go(STATE_ASLEEP)
 
+  def start(self, config):
+    """Starts this agent.
+
+    :param config: Broker configuration
+    :type config: BrokerConfig
+
+    """
+
+    self._client.start(config)
+
   def cleanup(self):
     """Cleanup the agent.
     """
@@ -323,7 +334,7 @@ class Agent:
     # TODO Find a way to remove it cleanly
     # self._machine.remove_model(self)
     
-    self.client.stop()
+    self._client.stop()
 
   def __str__(self):
     return 'Agent %s - %s' % (self.id, self.interpreter.lang)

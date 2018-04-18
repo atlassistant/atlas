@@ -131,7 +131,7 @@ class Atlas:
 
         self._agents.append(agt)
 
-        agt.client.start(self._config.broker)
+        agt.start(self._config.broker)
     else:
       self._log.error('No id defined, could not create the agent')
 
