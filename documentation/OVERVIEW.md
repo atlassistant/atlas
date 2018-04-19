@@ -35,6 +35,8 @@ It represents the dialog engine. Implemented with a finite state machine, it han
 
 It manages multi-turn dialogs by forwarding input request made by a `SKill` to the `Channel` and transitioning to a particular *ask* state as needed.
 
+Agents are totally language agnostics. The internationalization support is done in skills.
+
 ## Channel
 
 Consider it as a client for the **atlas** core system. It can be anything you want. A CLI and a PWA has been already implemented to provide a quickstart and test experience.
@@ -42,3 +44,7 @@ Consider it as a client for the **atlas** core system. It can be anything you wa
 ## Skill
 
 Skill developers, this is where you will spend most of your time. Use the SDK in your favorite language ([Python](https://github.com/atlassistant/atlas-sdk) only for now) to make the development experience a breeze or subscribe and publish to the raw MQTT topics in your favorite language.
+
+SKill are also responsible of internationalizing data. They received the user language when they are called.
+
+Skill communicates directly with agents to ask for particular slots. Why? Imagine a weather skill which needs a location. The user has entered an ambiguous city as seen by the skill itself when retrieving weather data (by fetching an external API) so it can ask the user to give a more precise location and finally gives the weather forecast for the correct one.
