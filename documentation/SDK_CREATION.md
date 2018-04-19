@@ -8,3 +8,9 @@ You must at least expose:
 - a `SkillClient`: Exposes stuff to create skills with auto discovery response. It should give an easy way for new developers to add their own skill to **atlas**
 
 You must also check, in the `atlas/discovery/ping` handler if the atlas version is supported by your SDK. If not, you must inform the SDK developer!
+
+One last thing, your SDK should be run as a CLI which takes those arguments to be able to be run by the **atlas** executor:
+
+- `-H`: Broker host
+- `-p`: Broker port
+- `-u`: Username and password separated by ':' such as `username:password`
