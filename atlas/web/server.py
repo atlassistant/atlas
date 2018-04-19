@@ -19,7 +19,7 @@ class ServerConfig:
   """Holds settings related to the web server.
   """
 
-  def __init__(self, broker_config, host='localhost', port=5000, debug=True):
+  def __init__(self, broker_config, url=None, host='localhost', port=5000, debug=True):
     """Constructs a new ServerConfig.
 
     :param broker_config: Broker config used by the web server for websocket channels
@@ -33,6 +33,7 @@ class ServerConfig:
 
     """
 
+    self.url = url or 'http://%s:%d' % (host, port)
     self.host = host
     self.port = port
     self.debug = debug
@@ -109,7 +110,7 @@ class Server:
       p = subprocess.Popen('npm run start', cwd=os.path.dirname(__file__), shell=True)
       self._log.info('Started webpack')
 
-    self._log.info('🌐 Starting web server on %s:%s' % (self._config.host, self._config.port))
+    self._log.info('🌐 Starting web server on %s:%s, public url is %s' % (self._config.host, self._config.port, self._config.url))
     # app.run(self._config.host, self._config.port)#, debug=self._config.debug)
 
     socketio.run(app, self._config.host, self._config.port)

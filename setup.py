@@ -12,4 +12,9 @@ setup(
     'Flask-SocketIO==2.9.6',
     'PyYAML==3.12',
   ],
+  entry_points={
+    'console_scripts': [
+      'atlas = atlas.cli.main:main'
+    ]
+  },
 )

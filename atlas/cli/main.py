@@ -8,8 +8,8 @@ try:
 except:
   pass
 
-if __name__ == '__main__':
-  parser = argparse.ArgumentParser(description='Atlas CLI %s' % __version__)
+def main():
+  parser = argparse.ArgumentParser(description='Atlas CLI %s - An open-source assistant built for people' % __version__)
 
   parser.add_argument('-c', '--config', help='Path to the configuration yaml file')
 
@@ -24,3 +24,6 @@ if __name__ == '__main__':
   except Exception as e:
     print (e)
     atlas.cleanup()
+
+if __name__ == '__main__':
+  main()

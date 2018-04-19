@@ -8,6 +8,7 @@ This file should help newcomers and contributors to know what are the next big *
 - Unit testing!
 - Provides a CLI to expose a tiny web interface which takes training data and interpreter class as an input and outputs trained data with associated checksum. With this interface, it would be fairly easy to expose hosted trainer and use their power to train the model and only use the trained model on lightweight system such as a Rasp ;)
 - Handle multiple choices. Skill should be able to ask for limited choices via `atlas/<sid>/dialog/ask { "slot": "slot_name", "text": "Select a choice", "choices": ["one", "two", "three"] }` and the Agent should be able to use fuzzy matching to make user inputs maps on one of them.
+- Add support for complex UI, such as cards in the Progressive Web App.
 
 ## Mid term
 

@@ -31,6 +31,8 @@ logs:
 
 # Web server related settings
 server:
+  # Public URL of your server
+  url: 'http://localhost:5000'
   # Host to bind to
   host: '0.0.0.0'
   # Port to bind to

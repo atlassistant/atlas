@@ -55,10 +55,6 @@ class AtlasConfig:
     log_level = logs.get('level', 'INFO')
     logging.basicConfig(level=getattr(logging, log_level))
 
-    # Disable transitions logging
-    transitions_logger = logging.getLogger('transitions')
-    transitions_logger.setLevel(logging.WARNING)
-
     # Executor config
 
     self.executor = ExecutorConfig(broker_config=self.broker, **data.get(EXECUTOR_CONFIG_KEY, {}))
@@ -66,6 +62,12 @@ class AtlasConfig:
     # Server config
 
     self.server = ServerConfig(broker_config=self.broker, **data.get(SERVER_CONFIG_KEY, {}))
+
+    # Disable transitions and werkzeug logging
+    logging.getLogger('transitions').setLevel(logging.WARNING)
+
+    if not self.server.debug:
+      logging.getLogger('werkzeug').setLevel(logging.WARNING)
 
 class Atlas:
   """Entry point for this assistant system.
