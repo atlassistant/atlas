@@ -3,4 +3,5 @@
 __pycache__
 node_modules
 *.trained.json
+*.checksum
 atlas.egg-info

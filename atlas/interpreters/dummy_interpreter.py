@@ -3,6 +3,9 @@ from . import Interpreter
 class DummyInterpreter(Interpreter):
   """This is a tiny dummy interpreter used for testing.
   """
+
+  def __init__(self):
+    super(DummyInterpreter, self).__init__('dummy')
     
   def metadata(self):
     return {

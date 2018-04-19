@@ -17,11 +17,6 @@ This file should help newcomers and contributors to know what are the next big *
 
 - Package and repository management to ease the process of discovering and adding comprehensive and execution skills to our assistant.
 
-## For me
+## Before the first release
 
-- [ ] Documentation architecture
-- [x] Fin UI
-- [ ] Checksum interpréteur
-- [x] Configuration des skills
-- [x] Gestion multi users, passer un ui à l'Agent + la config de l'env pour cet utilisateur
-- [-] SDK python (localization support)
+- [ ] SDK python, localisation

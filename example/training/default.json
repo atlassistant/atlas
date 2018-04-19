@@ -148,6 +148,10 @@
         {
           "value": "Mont-Saint-Aignan",
           "synonyms": []
+        },
+        {
+          "value": "Gaillon",
+          "synonyms": []
         }
       ],
       "automatically_extensible": true,

@@ -18,7 +18,7 @@ def get_entity_value(entity, default_value=None):
 class SnipsInterpreter(Interpreter):
 
   def __init__(self):
-    super(SnipsInterpreter, self).__init__()
+    super(SnipsInterpreter, self).__init__('snips')
 
     self._meta = None
     self._lang = None
@@ -34,24 +34,35 @@ class SnipsInterpreter(Interpreter):
   def fit(self, training_file_path, trained_directory_path):
     filename, _ = os.path.splitext(os.path.basename(training_file_path))
 
-    trained_path = os.path.join(trained_directory_path, '%s.trained.json' % filename)
+    # TODO check what should be in the base Interpreter class
 
-    # TODO use checksums to decide if a training is needed
+    trained_path = os.path.join(trained_directory_path, '%s.trained.json' % filename)
+    checksum_path = os.path.join(trained_directory_path, '%s.checksum' % filename)
 
     with open(training_file_path) as f:
-      training_data = json.load(f)
+      training_str = f.read()
+      training_data = json.loads(training_str)
       self._lang = training_data['language']
+      self._log.info('Loading resource for language %s' % self._lang)
       load_resources(self._lang)
-    
-    try:
+
+    same, computed_checksum = self.checksum_match(training_str, checksum_path)
+
+    # Checksums match, load the engine from trained file
+    if same and os.path.isfile(trained_path):
+      self._log.info('Checksum matched, loading trained engine')
       with open(trained_path) as f:
-        self._engine = SnipsNLUEngine.from_dict(json.load(f))
-    except FileNotFoundError:
+        self._engine = SnipsNLUEngine.from_dict(json.load(f))  
+    else:
+      self._log.info('Checksum has changed, retraining the engine')
       self._engine = SnipsNLUEngine()
       self._engine.fit(training_data)
 
       with open(trained_path, mode='w') as f:
         json.dump(self._engine.to_dict(), f)
+
+      with open(checksum_path, mode='w') as f:
+        f.write(computed_checksum)
 
     self._entity_parser = BuiltinEntityParser(self._lang)
     self._meta = { k: list(v.keys()) for k, v in self._engine._dataset_metadata['slot_name_mappings'].items() }

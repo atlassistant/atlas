@@ -1,3 +1,4 @@
+from ..utils import generate_checksum
 import os, logging
 
 class InterpreterConfig():
@@ -39,15 +40,41 @@ class Interpreter():
 
   """
 
-  def __init__(self):
+  def __init__(self, name):
     """Constructs a new interpreter.
 
-    :param lang: Language of the interpreter
-    :type lang: str
+    :param name: Name of the interpreter
+    :type name: str
 
     """
 
-    self._log = logging.getLogger(__class__.__name__)
+    self._log = logging.getLogger('atlas.interpreter.%s' % name)
+
+  def checksum_match(self, data, checksum_file_path):
+    """Checks if the checksum is the same between raw data and a checksum file.
+
+    :param data: Raw data for which we want to compute the checksum
+    :type data: str
+    :param checksum_file_path: Path of the checksum file
+    :type checksum_file_path: str
+    :rtype: tuple
+
+    """
+
+    data_checksum = generate_checksum(data)
+
+    self._log.debug('Checksum of raw data is %s' % data_checksum)
+
+    try:
+      with open(checksum_file_path) as f:
+        file_checksum = f.read()
+
+      self._log.debug('File checksum is %s' % file_checksum)
+
+      return (data_checksum == file_checksum, data_checksum)
+    except FileNotFoundError:
+      self._log.debug('Checksum file not found at %s' % checksum_file_path)
+      return (False, data_checksum)
 
   def lang(self):
     """Returns the interpreter language.
