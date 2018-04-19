@@ -13,6 +13,13 @@ Every json property prefixed by a double underscore are considered as metadata.
 
 Send a discovery request.
 
+```json
+{
+  "version": "Version of the atlas server which sent this ping",
+  "started_at": "datetime.utcnow().isoformat() at which it was started"
+}
+```
+
 ## atlas/discovery/pong
 
 Send a discovery response.
