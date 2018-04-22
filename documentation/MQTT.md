@@ -96,7 +96,7 @@ Run a skill associated with an intent.
     "A_PARAMETER": "User configurated value"
   },
   "slot_name": "Slot value",
-  "another_slot": "Another value!"
+  "another_slot": ["If multiple values for the same slot are found", "They will be passed as an array"]
 }
 ```
 

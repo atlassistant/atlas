@@ -10,16 +10,18 @@ def get_forecasts(request):
   date = request.slot('date')
 
   if not date:
-    return request.ask('date', 'Pour quelle date veux-tu la météo ?')
+    return request.ask('date', _('For when do you want the forecast?')) # pylint: disable=E0602
 
   location = request.slot('location')
 
   if not location:
-    return request.ask('location', 'Pour quel endroit veux-tu la météo ?')
+    return request.ask('location', _('For where do you want the forecast?')) # pylint: disable=E0602
 
   time.sleep(3)
 
-  request.show('Très bien, je recherche la météo pour %s le %s avec la clé %s' % (location, date, request.env('WEATHER_API_KEY')), terminate=True)
+  api_key = request.env('WEATHER_API_KEY') # pylint: disable=W0612
+
+  request.show(_("Well, I'll try to find the forecasts for %s on %s") % (location, date), terminate=True)  # pylint: disable=E0602
 
 if __name__ == '__main__':
   weather_skill = SkillClient(

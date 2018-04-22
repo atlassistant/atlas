@@ -112,6 +112,9 @@ class Interpreter():
   def parse(self, msg):
     """Parses an incoming message and converts it to a list of dict that represents intents and slots.
 
+    If multiple values are found for the same slot, the interpreter should returns an array of values
+    instead of a single one.
+
     :param msg: Message to parse
     :type msg: str
 

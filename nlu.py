@@ -3,15 +3,15 @@ from snips_nlu.builtin_entities import BuiltinEntityParser
 from snips_nlu.nlu_engine.utils import resolve_slots
 import io, json
 
-with open('./example/sample_dataset.json') as f:
+with open('./example/training/default.json') as f:
   data = json.load(f)
 
-load_resources('en')
+load_resources('fr')
 engine = SnipsNLUEngine()
 
 engine.fit(data)
 
-parsed = engine.parse("tomorrow", "sampleGetWeather")
+parsed = engine.parse("Quel temps va t-il faire demain et mardi")
 
 # meta = engine._dataset_metadata['slot_name_mappings']
 
@@ -20,7 +20,22 @@ parsed = engine.parse("tomorrow", "sampleGetWeather")
                 
 #print (engine.intent_parsers[1].slot_fillers['sampleGetWeather'].get_slots('today'))
 
-print (engine.parse('ceci est un test'))
+r = dict()
+
+for slot in parsed['slots']:
+  name = slot['slotName']
+  value = slot['value']['value']
+
+  if name in r:
+    if r[name] is not list:
+      r[name] = [r[name]]
+
+    r[name].append(value)
+  else:
+    r[name] = value
+
+print (r)
+
 
 # p = BuiltinEntityParser('en')
 # print(p.parse('5 degree'))

@@ -15,9 +15,9 @@ Have a look at the [📚 documentation folder](documentation).
 
 *Docker too...*
 
-`git clone` this repository and run `python setup.py install`.
+Since no pip packages are available for now, starts by installing the **atlas-sdk** using [its own instructions](https://github.com/atlassistant/atlas-sdk).
 
-If you want an optimal development workflow, you will also need to `git clone https://github.com/atlassistant/atlas-sdk atlas_sdk` and install it using [its own instructions](https://github.com/atlassistant/atlas-sdk).
+Then, `git clone` this repository and run `python setup.py install`.
 
 ### NLU backends
 

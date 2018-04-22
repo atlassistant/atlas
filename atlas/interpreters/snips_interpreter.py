@@ -82,8 +82,23 @@ class SnipsInterpreter(Interpreter):
     if parsed['intent'] == None:
       return []
 
+    slots = {}
+
+    # Constructs a slot dictionary with slot value as a list if multiples matched
+    for slot in parsed['slots']:
+      name = slot['slotName']
+      value = get_entity_value(slot['value'])
+
+      if name in slots:
+        if slots[name] is not list:
+          slots[name] = [slots[name]]
+
+        slots[name].append(value)
+      else:
+        slots[name] = value
+
     return [{
       'text': msg,
       'intent': parsed['intent']['intentName'],
-      'slots': { s['slotName']: get_entity_value(s['value']) for s in parsed['slots'] }
+      'slots': slots,
     }]
