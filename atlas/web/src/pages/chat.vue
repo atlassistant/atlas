@@ -1,6 +1,9 @@
 <template>
   <div class="chat">
-    <messages-list :show-thinking="isThinking" class="chat__list" :messages="messages" />
+    <messages-list v-if="messages.length" :show-thinking="isThinking" class="chat__list" :messages="messages" />
+    <blankslate v-else icon="explore">
+      Looks like you do not have an history yet!<br />Start chatting with your assistant!
+    </blankslate>
     <chat-input :lang="lang" ref="chatInput" class="chat__input" @input="onInput" />
   </div>
 </template>
@@ -8,6 +11,7 @@
 <script>
 import {
   MessagesList,
+  Blankslate,
 } from './../molecules';
 import {
   ChatInput,
@@ -17,6 +21,7 @@ import io from 'socket.io-client';
 export default {
   name: 'Chat',
   components: {
+    Blankslate,
     ChatInput,
     MessagesList,
   },

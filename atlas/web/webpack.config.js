@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const DIST_FOLDER = 'public';
 
@@ -34,6 +35,9 @@ module.exports = {
     },
     plugins: [
         new CleanWebpackPlugin([DIST_FOLDER]),
+        new CopyWebpackPlugin([{
+            from: './src/static',
+        }]),
         new HtmlWebpackPlugin({
             title: 'Atlas',
             template: './src/index.html'

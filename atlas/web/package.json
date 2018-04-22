@@ -11,6 +11,7 @@
     },
     "devDependencies": {
         "clean-webpack-plugin": "^0.1.19",
+        "copy-webpack-plugin": "^4.5.1",
         "css-loader": "^0.28.11",
         "dropee": "^1.0.2",
         "html-webpack-plugin": "^3.1.0",
