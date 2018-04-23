@@ -34,6 +34,8 @@ in the atlas configuration file.
 
 ## Quickstart
 
+⚠️ As of now, the application accessed from your `<server.url>` is not a valid PWA but it will be in a near future to be able to install it on your phone homescreen.
+
 Those quick steps use Snips as the NLU backend.
 
 - Once installed, you must configure it using a [configuration file](documentation/CONFIGURATION.md).
@@ -46,6 +48,12 @@ Those quick steps use Snips as the NLU backend.
 - That's it!
 
 I encourage you to read the [architecture overview](documentation/OVERVIEW.md) if you want to know how it works alltogether.
+
+## Deploying
+
+If you want the exposed PWA to work on your mobile device, you will have to use a valid certificate since this is required by web browsers.
+
+Please note that the Web Speech API used by the PWA only works in Chrome as far as I know.
 
 ## Contributing
 

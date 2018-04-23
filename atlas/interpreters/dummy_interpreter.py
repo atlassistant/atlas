@@ -18,7 +18,8 @@ class DummyInterpreter(Interpreter):
       'text': msg,
       'intent': 'weather_forecast',
       'slots': {
-        'date': 'tomorrow'
+        'date': 'tomorrow',
+        'location': ['one', 'two', 'three']
       }
     }, {
       'text': msg,

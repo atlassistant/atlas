@@ -90,7 +90,7 @@ class SnipsInterpreter(Interpreter):
       value = get_entity_value(slot['value'])
 
       if name in slots:
-        if slots[name] is not list:
+        if type(slots[name]) is not list:
           slots[name] = [slots[name]]
 
         slots[name].append(value)

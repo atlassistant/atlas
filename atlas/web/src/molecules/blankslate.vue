@@ -1,6 +1,7 @@
 <template>
   <div class="blankslate">
     <div class="blankslate__content">
+      <!-- <loader /> -->
       <icon class="blankslate__icon" :name="icon" />
       <div class="blankslate__message">
         <slot />
@@ -12,6 +13,7 @@
 <script>
 import {
   Icon,
+  Loader,
 } from './../atoms';
 
 export default {
@@ -24,6 +26,7 @@ export default {
   },
   components: {
     Icon,
+    Loader,
   },
 }
 </script>

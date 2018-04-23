@@ -5,8 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <title><%= htmlWebpackPlugin.options.title %></title>
+    <link rel="manifest" href="/public/manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="atlas">
+    <meta name="apple-mobile-web-app-title" content="atlas">
+    <meta name="theme-color" content="#8E24AA">
+    <meta name="msapplication-navbutton-color" content="#8E24AA">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="msapplication-starturl" content="/">
+
     <script type="text/javascript">
       window.LANG = '{{lang}}';
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker
+          .register('/public/sw.js')
+          .then(function () {
+            console.log('Registered!');
+          });
+      }
     </script>
   </head>
   <body>

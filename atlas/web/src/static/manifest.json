@@ -1,3 +1,8 @@
 {
-  
+  "name": "atlas",
+  "short_name": "atlas",
+  "lang": "en-US",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#8E24AA"
 }
