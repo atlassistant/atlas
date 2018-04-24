@@ -2,7 +2,7 @@ atlas
 ===
 
 <p align="center">
-  <img alt="Photo Sphere by Denis Klyuchnikov from the Noun Project" src="documentation/logo.png" />
+  <img alt="Photo Sphere by Denis Klyuchnikov from the Noun Project" src="logo.png" />
 </p>
 
 ⚠️ This is an early version, so API may change in the future if this is needed! I'll try not to do so unless if there's no other possibilities.
