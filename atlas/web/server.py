@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, send_file
 from flask_restful import Api, Resource
 from flask_socketio import SocketIO, Namespace, emit
 import logging, subprocess, os
@@ -15,6 +15,10 @@ socketio = SocketIO(app)
 def index():
   # TODO language from user settings
   return render_template('index.html', lang='fr-FR', version=__version__)
+
+@app.route('/sw.js')
+def serve_service_worker():
+  return send_file('public/sw.js')
 
 class ServerConfig:
   """Holds settings related to the web server.

@@ -6,7 +6,6 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <title>atlas v{{version}}</title>
     <link rel="manifest" href="/public/manifest.json">
-    <link rel="icon" type="image/png" href="/public/favicon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="atlas">
@@ -15,6 +14,21 @@
     <meta name="msapplication-navbutton-color" content="#8E24AA">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="msapplication-starturl" content="/">
+    <link rel="apple-touch-icon" sizes="57x57" href="/public/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/public/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/public/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/public/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/public/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/public/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/public/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/public/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/public/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/public/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/public/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/public/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/public/favicon-16x16.png">
+    <meta name="msapplication-TileColor" content="#8E24AA">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
 
     <script type="text/javascript">
       window.LANG = '{{lang}}';
@@ -22,7 +36,7 @@
 
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker
-          .register('/public/sw.js')
+          .register('/sw.js')
           .then(function () {
             console.log('Registered!');
           });
@@ -31,5 +45,5 @@
   </head>
   <body>
     <div id="root">Loading...</div>
-  <script type="text/javascript" src="/public/main.63e86af78d8bb6d644d7.bundle.js"></script></body>
+  <script type="text/javascript" src="/public/main.58e1a0664390ec68855c.bundle.js"></script></body>
 </html>
