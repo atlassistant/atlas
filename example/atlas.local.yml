@@ -17,7 +17,7 @@ loader:
   trained_path: './data'
   env_path: './env'
 broker:
-  host: 'broker'
+  host: 'localhost'
   port: 1883
   username:
   password:

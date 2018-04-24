@@ -2,8 +2,11 @@ FROM python:3.6-slim
 
 RUN apt-get update && apt-get install -y git
 
-VOLUME [ "/training", "/trained", "/conf", "/skills" ]
+RUN pip install snips-nlu
+RUN pip install git+https://github.com/atlassistant/atlas-sdk.git
+RUN pip install git+https://github.com/atlassistant/atlas.git
 
-# TODO once published to Github!
+VOLUME [ "/atlas" ]
+WORKDIR /atlas
 
-ENTRYPOINT [ "git", "--version" ]
+ENTRYPOINT [ "atlas" ]
