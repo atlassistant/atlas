@@ -63,7 +63,7 @@ Please note that the Web Speech API used by the PWA only works in Chrome as far 
 
 ## Contributing
 
-Contribution are welcome! 
+Contributions are welcome! 
 
 You're a developer or just want to know where this project is heading to? Have a look at the [extended TODO](TODO.md) file.
 
