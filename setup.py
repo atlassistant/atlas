@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
   name='atlas',
   version='1.0.0',
-  packages=['atlas', 'atlas.cli', 'atlas.client', 'atlas.interpreters', 'atlas.web'],
+  packages=['atlas', 'atlas.cli', 'atlas.client', 'atlas.interpreters', 'atlas.web', 'atlas.web.public'],
   install_requires=[
     'atlas_sdk==1.0.0',
     'transitions==0.6.4',
