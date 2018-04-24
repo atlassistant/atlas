@@ -135,11 +135,11 @@ class Discovery():
 
     :param intent: Name of the intent
     :type intent: str
-    :rtype: Skill
+    :rtype: list
 
     """
 
-    # TODO what if multiple skill can respond to the same intent with different env ? :/
+    # TODO what if multiple skill can respond to the same intent with different env? :/
 
     skill = find(self._skills.values(), lambda s: s.intents.get(intent) != None)
 

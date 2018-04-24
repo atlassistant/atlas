@@ -2,6 +2,7 @@ from flask import Flask, request, render_template
 from flask_restful import Api, Resource
 from flask_socketio import SocketIO, Namespace, emit
 import logging, subprocess, os
+from ..version import __version__
 from atlas_sdk import BrokerConfig, ChannelClient
 
 app = Flask('atlas.web', static_folder='./public', template_folder='./public')
@@ -13,7 +14,7 @@ socketio = SocketIO(app)
 @app.route('/')
 def index():
   # TODO language from user settings
-  return render_template('index.html', lang='fr-FR')
+  return render_template('index.html', lang='fr-FR', version=__version__)
 
 class ServerConfig:
   """Holds settings related to the web server.

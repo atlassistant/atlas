@@ -9,7 +9,8 @@ from transitions import Machine, EventData, MachineError
 from transitions.extensions.states import add_state_features, Timeout
 
 STATE_ASLEEP = 'asleep'
-INTENT_CANCEL = 'cancel' # TODO handle it :)
+INTENT_CANCEL = 'cancel' # TODO handle the cancel event, see comments in the Agent.parse method
+INTENT_NOTFOUND = 'notfound' # TODO handle the case when no intent has been found in the user request
 PREFIX_ASK = 'ask__'
 
 def to_ask_state(slot):
@@ -231,7 +232,7 @@ class Agent:
     else:
       data = self.interpreter.parse(msg)
 
-      # TODO if no intent was found, let it know, maybe?
+      # TODO if no intent was found, let it know with the INTENT_NOTFOUND
 
       self._intent_queue.extend(data)
 

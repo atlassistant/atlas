@@ -1,5 +1,6 @@
 <template>
   <div class="chat">
+    <p class="chat__notice">You're using <strong>atlas v{{version}} PWA</strong>, it's an early preview that only works on Chrome for now!</p>
     <messages-list v-if="messages.length" :show-thinking="isThinking" class="chat__list" :messages="messages" />
     <blankslate v-else icon="explore">
       Looks like you do not have an history yet!<br />Start chatting with your assistant!
@@ -29,6 +30,7 @@ export default {
     return {
       isThinking: false,
       lang: window.LANG,
+      version: window.VERSION,
       messages: [],
     };
   },
@@ -95,6 +97,14 @@ export default {
 
   &__list {
     flex: 1;
+  }
+
+  &__notice {
+    @include type(tiny);
+    background-color: color(info);
+    color: color(text-inverse);
+    padding: baseline(0.5);
+    text-align: center;
   }
 }
 </style>

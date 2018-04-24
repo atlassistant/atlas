@@ -39,7 +39,7 @@ module.exports = {
             from: './src/static',
         }]),
         new HtmlWebpackPlugin({
-            title: 'Atlas',
+            title: 'atlas',
             template: './src/index.html'
         })
     ],

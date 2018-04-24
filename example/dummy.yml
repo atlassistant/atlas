@@ -1,7 +1,7 @@
 interpreter: 
   type: 'atlas.interpreters.dummy_interpreter.DummyInterpreter'
 executor:
-  path: 'example/skills'
+  path: './skills'
 discovery:
   interval: 10
   timeout: 30
@@ -11,7 +11,7 @@ server:
   url: 'http://localhost:5000'
   host: '0.0.0.0'
   port: 5000
-  debug: false
+  debug: true
 loader:
   training_path: './training'
   trained_path: './data'

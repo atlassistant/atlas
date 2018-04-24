@@ -1,6 +1,10 @@
 atlas
 ===
 
+<p align="center">
+  <img alt="Photo Sphere by Denis Klyuchnikov from the Noun Project" src="documentation/logo.png" />
+</p>
+
 ⚠️ This is an early version, so API may change in the future if this is needed! I'll try not to do so unless if there's no other possibilities.
 
 **atlas** is a totally open-source assistant written in Python. It is totally interopable since it uses the MQTT protocol to communicate with third party skills.
@@ -62,3 +66,7 @@ Contribution are welcome!
 You're a developer or just want to know where this project is heading to? Have a look at the [extended TODO](TODO.md) file.
 
 You want to support **atlas** by giving some money? Head over to Liberapay with this tiny button [![Donate using Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/YuukanOO/donate), thanks ❤️!
+
+## Credits
+
+- Photo Sphere by Denis Klyuchnikov from the Noun Project (Logo)
