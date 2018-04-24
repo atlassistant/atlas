@@ -1,6 +1,6 @@
 from . import Interpreter
 from snips_nlu import load_resources, SnipsNLUEngine
-from snips_nlu.builtin_entities import BuiltinEntityParser
+from snips_nlu.builtin_entities import BuiltinEntityParser, is_builtin_entity
 import io, json, os
 
 def get_entity_value(entity, default_value=None):
@@ -68,13 +68,16 @@ class SnipsInterpreter(Interpreter):
     self._meta = { k: list(v.keys()) for k, v in self._engine._dataset_metadata['slot_name_mappings'].items() }
 
   def parse_entity(self, msg, intent, slot):
-    # TODO check if builtin entity type for performance
-    # TODO try to find a way to retrieve multiple slot values
-    
-    parsed = self._entity_parser.parse(msg)
+    entity_label = self._engine._dataset_metadata['slot_name_mappings'].get(intent, {}).get(slot)
 
-    if parsed:
-      return get_entity_value(parsed[0]['entity'], msg)
+    # TODO try to find a way to retrieve multiple slot values, that's a hard one
+    # May be we can try matching on _dataset_metadata['entities']
+
+    if is_builtin_entity(entity_label):
+      parsed = self._entity_parser.parse(msg)
+
+      if parsed:
+        return get_entity_value(parsed[0]['entity'], msg)
 
     return msg
 
