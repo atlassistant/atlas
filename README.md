@@ -5,7 +5,7 @@ atlas
 
 ⚠️ This is an early version, so API may change in the future if this is needed! I'll try not to do so unless if there's no other possibilities.
 
-**atlas** is a totally open-source assistant written in Python. It is totally interopable since it uses the MQTT protocol to communicate with third party skills.
+**atlas** is a totally open-source assistant written in Python 3 (not tested with Python 2). It is totally interopable since it uses the MQTT protocol to communicate with third party skills.
 
 It manages dialog states with the help of the [transitions](https://github.com/pytransitions) library and parses natural language with [snips](https://github.com/snipsco/snips-nlu). If snips doesn't fit your needs, you can subclass the `Interpreter` class and make your own 😉
 
