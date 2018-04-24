@@ -115,6 +115,9 @@ class Interpreter():
     If multiple values are found for the same slot, the interpreter should returns an array of values
     instead of a single one.
 
+    Why a list of dict? Because you can return multiple intents for the same sentence if this is what
+    the user asked for.
+
     :param msg: Message to parse
     :type msg: str
 

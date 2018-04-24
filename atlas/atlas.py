@@ -33,6 +33,8 @@ class AtlasConfig:
     with open(path) as f:
       data = yaml.safe_load(f)
 
+    os.chdir(os.path.dirname(path))
+
     # Broker configuration
 
     self.broker = BrokerConfig(**data.get(BROKER_CONFIG_KEY, {}))

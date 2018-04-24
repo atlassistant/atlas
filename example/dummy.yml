@@ -11,11 +11,11 @@ server:
   url: 'http://localhost:5000'
   host: '0.0.0.0'
   port: 5000
-  debug: true
+  debug: false
 loader:
-  training_path: 'example/training'
-  trained_path: 'example/data'
-  env_path: 'example/env'
+  training_path: './training'
+  trained_path: './data'
+  env_path: './env'
 broker:
   host: 'localhost'
   port: 1883

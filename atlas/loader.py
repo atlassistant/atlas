@@ -1,5 +1,5 @@
 from .interpreters import InterpreterConfig
-import logging, os, configparser
+import logging, os, configparser, sys
 
 DEFAULT_SECTION = 'DEFAULT'
 DEFAULT_KEY = 'default'
@@ -10,12 +10,22 @@ class LoaderConfig():
 
   def __init__(self, interpreter_config, training_path, trained_path, env_path):
     """Constructs a new LoaderConfig object.
+
+    :param interpreter_config: Configuration of the interpreter
+    :type interpreter_config: InterpreterConfig
+    :param training_path: Where are stored the training samples
+    :type training_path: str
+    :param trained_path: Where are stored the trained data (checksum + backend specific files to speed up the loading time)
+    :type trained_path: str
+    :param env_path: Where are stored the configuration parameters
+    :type env_path: str
+
     """
 
     self.interpreter_config = interpreter_config
-    self.trained_path = trained_path
-    self.training_path = training_path
-    self.env_path = env_path
+    self.trained_path = os.path.abspath(trained_path)
+    self.training_path = os.path.abspath(training_path)
+    self.env_path = os.path.abspath(env_path)
 
 class Loader():
   """Loads interpreters and env configurations from the file system.
@@ -84,6 +94,10 @@ class Loader():
 
         self._envs[uid] = dict(config[DEFAULT_SECTION])
 
+    if DEFAULT_KEY not in self._envs:
+      self._log.critical('No %s env file found, exiting' % DEFAULT_KEY)
+      sys.exit(1)
+
     self._log.debug('Loaded %d env(s) files' % len(self._envs))
 
   def _load_interpreters(self,):
@@ -99,5 +113,9 @@ class Loader():
       interpreter.fit(os.path.join(self._config.training_path, training_file_path), self._config.trained_path)
 
       self._interpreters[uid] = interpreter
+
+    if DEFAULT_KEY not in self._interpreters:
+      self._log.critical('No %s interpreter file found, exiting' % DEFAULT_KEY)
+      sys.exit(1)
 
     self._log.debug('Loaded %d interpreter(s)' % len(self._interpreters))

@@ -77,6 +77,9 @@ class SnipsInterpreter(Interpreter):
     return msg
 
   def parse(self, msg):
+
+    # TODO manage multiple intents in the same sentence
+
     parsed = self._engine.parse(msg)
 
     if parsed['intent'] == None:
