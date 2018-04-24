@@ -11,6 +11,8 @@ It manages dialog states with the help of the [transitions](https://github.com/p
 
 Have a look at the [📚 documentation folder](documentation).
 
+![PWA Screenshot](pwa_screenshot.png)
+
 ## Installation
 
 *pip maybe...*
@@ -37,6 +39,8 @@ in the atlas configuration file.
 ## Quickstart
 
 ⚠️ As of now, the application accessed from your `<server.url>` is not a valid PWA but it will be in a near future to be able to install it on your phone homescreen.
+
+Starts with the prebuilt [sample](example) or make your own by reading below.
 
 Those quick steps use Snips as the NLU backend.
 
