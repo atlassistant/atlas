@@ -1,5 +1,6 @@
 from atlas_sdk import SkillClient, Intent, Slot, Env, Request
 import time
+from dateutil.parser import parse as dateParse
 
 def get_forecasts(request):
   """
@@ -7,15 +8,15 @@ def get_forecasts(request):
 
   """
 
-  date = request.slot('date')
+  date = request.slot('weatherDate', converter=dateParse)
 
   if not date:
-    return request.ask('date', _('For when do you want the forecast?')) # pylint: disable=E0602
+    return request.ask('weatherDate', _('For when do you want the forecast?')) # pylint: disable=E0602
 
-  location = request.slot('location')
+  location = request.slot('weatherLocation')
 
   if not location:
-    return request.ask('location', _('For where do you want the forecast?')) # pylint: disable=E0602
+    return request.ask('weatherLocation', _('For where do you want the forecast?')) # pylint: disable=E0602
 
   time.sleep(3)
 
@@ -30,7 +31,7 @@ if __name__ == '__main__':
     author='Julien LEICHER',
     description='Gives some weather forecasts',
     intents=[
-      Intent('weather_forecast', get_forecasts, [Slot('date'), Slot('location')])
+      Intent('sampleGetWeather', get_forecasts, [Slot('weatherDate'), Slot('weatherLocation')])
     ],
     env=[Env('WEATHER_API_KEY')]
   )

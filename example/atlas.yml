@@ -4,7 +4,7 @@ discovery:
   interval: 10
   timeout: 30
 executor:
-  path: 'example/skills'
+  path: './skills'
 logs:
   level: 'INFO'
 server:
@@ -13,9 +13,9 @@ server:
   port: 5000
   debug: false
 loader:
-  training_path: 'example/training'
-  trained_path: 'example/data'
-  env_path: 'example/env'
+  training_path: './training'
+  trained_path: './data'
+  env_path: './env'
 broker:
   host: 'localhost'
   port: 1883

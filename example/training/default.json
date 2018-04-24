@@ -1,116 +1,204 @@
 {
   "intents": {
-    "weather_forecast": {
+    "sampleGetWeather": {
       "utterances": [
         {
           "data": [
             {
-              "text": "peux-tu me donner la météo de "
+              "text": "give me the weather forecast for "
             },
             {
-              "text": "bourg-achard",
+              "text": "los angeles",
               "entity": "location",
-              "slot_name": "location"
-            },
-            {
-              "text": " pour "
-            },
-            {
-              "text": "demain",
-              "entity": "snips/datetime",
-              "slot_name": "date"
-            }
-          ]
-        },
-        {
-          "data": [
-            {
-              "text": "va t-il faire beau "
-            },
-            {
-              "text": "demain",
-              "entity": "snips/datetime",
-              "slot_name": "date"
-            }
-          ]
-        },
-        {
-          "data": [
-            {
-              "text": "va t-il pleuvoir à "
-            },
-            {
-              "text": "Rouen",
-              "entity": "location",
-              "slot_name": "location"
+              "slot_name": "weatherLocation"
             },
             {
               "text": " "
             },
             {
-              "text": "samedi",
+              "text": "this weekend",
               "entity": "snips/datetime",
-              "slot_name": "date"
+              "slot_name": "weatherDate"
             }
           ]
         },
         {
           "data": [
             {
-              "text": "dois-je prévoir un parapluie à "
+              "text": "What kind of weather should I expect "
             },
             {
-              "text": "Saint-Ouen",
+              "text": "today",
+              "entity": "snips/datetime",
+              "slot_name": "weatherDate"
+            },
+            {
+              "text": " in "
+            },
+            {
+              "text": "rio de janeiro",
               "entity": "location",
-              "slot_name": "location"
+              "slot_name": "weatherLocation"
+            },
+            {
+              "text": " ? "
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "Will it be sunny in "
+            },
+            {
+              "text": "Tokyo",
+              "entity": "location",
+              "slot_name": "weatherLocation"
             },
             {
               "text": " "
             },
             {
-              "text": "mardi",
+              "text": "at the end of the day",
               "entity": "snips/datetime",
-              "slot_name": "date"
+              "slot_name": "weatherDate"
+            },
+            {
+              "text": " ?"
             }
           ]
         },
         {
           "data": [
             {
-              "text": "quel temps va t-il faire "
+              "text": "What will be the weather in "
             },
             {
-              "text": "demain",
-              "entity": "snips/datetime",
-              "slot_name": "date"
-            },
-            {
-              "text": " à "
-            },
-            {
-              "text": "Rouen",
+              "text": "London",
               "entity": "location",
-              "slot_name": "location"
+              "slot_name": "weatherLocation"
+            },
+            {
+              "text": ", "
+            },
+            {
+              "text": "tomorrow morning",
+              "entity": "snips/datetime",
+              "slot_name": "weatherDate"
+            },
+            {
+              "text": "?"
             }
           ]
         },
         {
           "data": [
             {
-              "text": "donne moi la météo de "
+              "text": "Tell me if it is going to rain "
             },
             {
-              "text": "demain",
+              "text": "this afternoon",
               "entity": "snips/datetime",
-              "slot_name": "date"
+              "slot_name": "weatherDate"
             },
             {
-              "text": " sur "
+              "text": " in "
             },
             {
-              "text": "le Touquet",
+              "text": "tel aviv",
               "entity": "location",
-              "slot_name": "location"
+              "slot_name": "weatherLocation"
+            },
+            {
+              "text": ", please"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "What is the weather in "
+            },
+            {
+              "text": "Paris",
+              "entity": "location",
+              "slot_name": "weatherLocation"
+            },
+            {
+              "text": "?"
+            }
+          ]
+        }
+      ]
+    },
+    "sampleTurnOnLight": {
+      "utterances": [
+        {
+          "data": [
+            {
+              "text": "The "
+            },
+            {
+              "text": "bedroom",
+              "entity": "room",
+              "slot_name": "room"
+            },
+            {
+              "text": " is dark, please turn on the light !"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "Can you enlight the "
+            },
+            {
+              "text": "living room",
+              "entity": "room",
+              "slot_name": "room"
+            },
+            {
+              "text": " ?"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "I need some light in the "
+            },
+            {
+              "text": "basement",
+              "entity": "room",
+              "slot_name": "room"
+            },
+            {
+              "text": " please"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "Please put some lights in the "
+            },
+            {
+              "text": "bathroom",
+              "entity": "room",
+              "slot_name": "room"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "Turn on the lights in the "
+            },
+            {
+              "text": "kitchen",
+              "entity": "room",
+              "slot_name": "room"
             }
           ]
         }
@@ -118,45 +206,31 @@
     }
   },
   "entities": {
-    "snips/datetime": {},
     "location": {
+      "data": [],
+      "use_synonyms": true,
+      "automatically_extensible": true
+    },
+    "snips/datetime": {},
+    "room": {
       "data": [
         {
-          "value": "Rouen",
-          "synonyms": []
+          "value": "basement",
+          "synonyms": [
+            "cellar"
+          ]
         },
         {
-          "value": "Bourg-Achard",
-          "synonyms": []
-        },
-        {
-          "value": "Londres",
-          "synonyms": []
-        },
-        {
-          "value": "Paris",
-          "synonyms": []
-        },
-        {
-          "value": "Saint-Etienne du Rouvray",
-          "synonyms": []
-        },
-        {
-          "value": "Petit-Quevilly",
-          "synonyms": []
-        },
-        {
-          "value": "Mont-Saint-Aignan",
-          "synonyms": []
-        },
-        {
-          "value": "Gaillon",
-          "synonyms": []
+          "value": "living room",
+          "synonyms": [
+            "lounge",
+            "family room"
+          ]
         }
       ],
-      "automatically_extensible": true,
-      "use_synonyms": false
+      "use_synonyms": true,
+      "automatically_extensible": false
     }
   },
-  "language": "fr"
+  "language": "en"
 }

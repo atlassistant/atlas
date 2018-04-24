@@ -69,6 +69,8 @@ class SnipsInterpreter(Interpreter):
 
   def parse_entity(self, msg, intent, slot):
     # TODO check if builtin entity type for performance
+    # TODO try to find a way to retrieve multiple slot values
+    
     parsed = self._entity_parser.parse(msg)
 
     if parsed:
