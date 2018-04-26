@@ -174,7 +174,27 @@ class Atlas:
     """Runs this instance!
     """
 
-    self._log.info('ATLAS %s is running!' % __version__)
+    self._log.info("""
+
+      `.-:::::::-.`      
+   `-::-..`````..-::-`   
+  -::.```         `.::-  
+ ::- `::-`           -:: 
+-::   .`              ::-
+::.           -:`     .::
+::.    ``   `-:::.    .::
+-::   .::-`.:::::::.`.::-
+ :::-:::::::::::::--:::: 
+  -:::::::::::::-:.-::-  
+   `-:::::::::::::::-`   
+      `.-:::::::-.`      
+
+atlas v%s  Copyright (C) 2018  Julien LEICHER
+This program comes with ABSOLUTELY NO WARRANTY.
+This is free software, and you are welcome to redistribute it
+under certain conditions.
+""" % __version__)
+
     self._loader.load()
     self._client.start(self._config.broker)
     self._discovery.start(self._config.broker)
