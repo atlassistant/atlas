@@ -107,6 +107,6 @@ class SnipsInterpreter(Interpreter):
 
     return [{
       'text': msg,
-      'intent': self.resolve_parametric_intent_name(parsed['intent']['intentName'], slots),
+      'intent': parsed['intent']['intentName'],
       'slots': slots,
     }]

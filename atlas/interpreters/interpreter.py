@@ -76,26 +76,6 @@ class Interpreter():
       self._log.debug('Checksum file not found at %s' % checksum_file_path)
       return (False, data_checksum)
 
-  def resolve_parametric_intent_name(self, name, slots):
-    """Format the intent name with slots dict to handle parametric intent name.
-
-    With this feature, you can create generic intent and output a single intent name
-    based on slots values.
-
-    :param name: Name of the intent, may contain placeholders such as {slotName}
-    :type name: str
-    :param slots: Dictionary of slots values
-    :type slots: dict
-
-    """
-
-    # TODO what to do if a slot value is an array?
-
-    try:
-      return name.format(**slots)
-    except KeyError:
-      return name
-
   def lang(self):
     """Returns the interpreter language.
 

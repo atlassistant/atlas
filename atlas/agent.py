@@ -1,7 +1,7 @@
 import logging
 from .version import __version__
 from .client import AgentClient
-from .utils import generate_hash
+from .utils import generate_hash, resolve_parametric_intent_name
 from atlas_sdk import BrokerConfig
 from atlas_sdk.request import SID_KEY, UID_KEY, ENV_KEY, VERSION_KEY, LANG_KEY, CID_KEY
 from .interpreters import Interpreter
@@ -151,17 +151,22 @@ class Agent:
 
     """
 
+    # Here we need to keep track of the original intent name otherwise transitions
+    # will be broke
     self._cur_intent = event.transition.dest
 
+    # But we use the resolved name for the intent validation to check if a skill can
+    # take care of it
+    resolved_intent_name = resolve_parametric_intent_name(self._cur_intent, self._cur_slots)
     valid_keys = self.env.keys()
 
     # Try to validate if the intent could be reached
 
     if self.validate_intent:
-      valid_keys = self.validate_intent(self._cur_intent)
+      valid_keys = self.validate_intent(resolved_intent_name)
 
       if valid_keys == None:
-        self._log.warn('Intent %s could not be reached, skipping now' % self._cur_intent)
+        self._log.warn('Intent %s could not be reached, skipping now' % resolved_intent_name)
         return self.go(STATE_ASLEEP)
 
     self._cur_conversation_id = generate_hash()
@@ -181,9 +186,9 @@ class Agent:
     
     data.update(self._cur_slots)
 
-    self._log.debug('Calling intent "%s" with params %s' % (self._cur_intent, data))
+    self._log.debug('Calling resolved intent "%s (%s)" with params %s' % (resolved_intent_name, self._cur_intent, data))
 
-    self._client.intent(self._cur_intent, data)
+    self._client.intent(resolved_intent_name, data)
 
   def _on_asked(self, event):
     """Entered in ask state, save current asked param.
