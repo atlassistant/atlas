@@ -15,9 +15,15 @@ Have a look at the [📚 documentation folder](documentation).
 
 ## Installation
 
-*pip maybe...*
+### PIP
 
-*Docker too...*
+Run `RUN pip install git+https://github.com/atlassistant/atlas-sdk.git && pip install git+https://github.com/atlassistant/atlas.git`
+
+### Docker
+
+*TODO*
+
+### Manual
 
 Since no pip packages are available for now, starts by installing the **atlas-sdk** using [its own instructions](https://github.com/atlassistant/atlas-sdk).
 
