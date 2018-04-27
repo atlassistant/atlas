@@ -90,14 +90,14 @@ class Agent:
       'on_timeout': self._on_timeout 
     } for o in ask_states]
 
-    self._log.info('Registering with states %s' % states)
-
     self._machine = AgentMachine(self, 
       states=states, 
       initial=STATE_ASLEEP, 
       send_event=True, 
       before_state_change=lambda e: self._log.info('⚡ %s: %s -> %s' % (e.event.name, e.transition.source, e.transition.dest) )
     )
+
+    self._log.info('Registering with states %s' % list(self._machine.states.keys()))
 
     self._machine.add_transition(STATE_ASLEEP, '*', STATE_ASLEEP, after=self.reset)
 
