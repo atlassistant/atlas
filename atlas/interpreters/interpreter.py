@@ -49,6 +49,7 @@ class Interpreter():
     """
 
     self._log = logging.getLogger('atlas.interpreter.%s' % name)
+    self.name = name
 
   def checksum_match(self, data, checksum_file_path):
     """Checks if the checksum is the same between raw data and a checksum file.

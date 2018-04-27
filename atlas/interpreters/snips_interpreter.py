@@ -1,5 +1,5 @@
 from . import Interpreter
-from snips_nlu import load_resources, SnipsNLUEngine
+from snips_nlu import load_resources, SnipsNLUEngine, __version__
 from snips_nlu.builtin_entities import BuiltinEntityParser, is_builtin_entity
 import io, json, os
 
@@ -24,6 +24,8 @@ class SnipsInterpreter(Interpreter):
     self._lang = None
     self._engine = None
     self._entity_parser = None
+
+    self._log.info('Using snips-nlu version %s' % __version__)
 
   def metadata(self):
     return self._meta

@@ -5,7 +5,9 @@ atlas
 
 ⚠️ This is an early version, so API may change in the future if this is needed! I'll try not to do so unless if there's no other possibilities.
 
-**atlas** is a totally open-source assistant written in Python 3 (not tested with Python 2). It is totally interopable since it uses the MQTT protocol to communicate with third party skills.
+**atlas** is a totally **open-source**, **self-hosted**, **interoperable** assistant written in Python 3 *(not tested with Python 2)*. It uses the MQTT protocol to communicate with third party skills.
+
+Ever wanted to build your own Alexa, Siri or Google Assistant and host it yourself? That's why **atlas** has been created!
 
 It manages dialog states with the help of the [transitions](https://github.com/pytransitions) library and parses natural language with [snips](https://github.com/snipsco/snips-nlu). If snips doesn't fit your needs, you can subclass the `Interpreter` class and make your own 😉
 
@@ -63,7 +65,7 @@ I encourage you to read the [architecture overview](documentation/OVERVIEW.md) i
 
 ## Deploying
 
-If you want the exposed PWA to work on your mobile device, you will have to use a valid certificate since this is required by web browsers.
+If you want the exposed PWA to work on your mobile device, you will have to use a valid certificate since this is required by web browsers for the Web Speech API to use your mic.
 
 Please note that the Web Speech API used by the PWA only works in Chrome as far as I know.
 
@@ -77,4 +79,6 @@ You want to support **atlas** by giving some money? Head over to Liberapay with 
 
 ## Credits
 
-- Photo Sphere by Denis Klyuchnikov from the Noun Project (Logo)
+- [Photo Sphere by Denis Klyuchnikov from the Noun Project](https://thenounproject.com/denis.klyuchnikov.1/uploads/?i=569622) (Logo)
+- [snips-nlu](https://github.com/snipsco/snips-nlu) (base interpreter)
+- [transitions](https://github.com/pytransitions/transitions) (dialog management)
