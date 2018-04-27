@@ -45,7 +45,7 @@ class SnipsInterpreter(Interpreter):
       training_str = f.read()
       training_data = json.loads(training_str)
       self._lang = training_data['language']
-      self._log.info('Loading resource for language %s' % self._lang)
+      self._log.info('Loading resources for language %s' % self._lang)
       load_resources(self._lang)
 
     same, computed_checksum = self.checksum_match(training_str, checksum_path)

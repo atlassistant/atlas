@@ -179,20 +179,15 @@ class Atlas:
       `.-:::::::-.`      
    `-::-..`````..-::-`   
   -::.```         `.::-  
- ::- `::-`           -:: 
--::   .`              ::-
-::.           -:`     .::
-::.    ``   `-:::.    .::
--::   .::-`.:::::::.`.::-
+ ::- `::-`           -::    
+-::   .`              ::-   atlas v%s  Copyright (C) 2018  Julien LEICHER
+::.           -:`     .::   This program comes with ABSOLUTELY NO WARRANTY.
+::.    ``   `-:::.    .::   This is free software, and you are welcome to redistribute it
+-::   .::-`.:::::::.`.::-   under certain conditions.
  :::-:::::::::::::--:::: 
   -:::::::::::::-:.-::-  
    `-:::::::::::::::-`   
       `.-:::::::-.`      
-
-atlas v%s  Copyright (C) 2018  Julien LEICHER
-This program comes with ABSOLUTELY NO WARRANTY.
-This is free software, and you are welcome to redistribute it
-under certain conditions.
 """ % __version__)
 
     self._loader.load()

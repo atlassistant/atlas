@@ -23,7 +23,8 @@ Run `RUN pip install git+https://github.com/atlassistant/atlas-sdk.git && pip in
 
 ### Docker
 
-*TODO*
+- Build the image with `docker build . -t atlas`
+- Run `docker run --rm -it -v <a folder containing an atlas.yml file>:/atlas -p 5000:5000 atlas`
 
 ### Manual
 

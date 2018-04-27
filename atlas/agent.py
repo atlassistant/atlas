@@ -97,7 +97,7 @@ class Agent:
       before_state_change=lambda e: self._log.info('⚡ %s: %s -> %s' % (e.event.name, e.transition.source, e.transition.dest) )
     )
 
-    self._log.info('Registering with states %s' % list(self._machine.states.keys()))
+    self._log.info('Created with states %s' % list(self._machine.states.keys()))
 
     self._machine.add_transition(STATE_ASLEEP, '*', STATE_ASLEEP, after=self.reset)
 
