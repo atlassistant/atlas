@@ -1,4 +1,5 @@
 from .. import Atlas, AtlasConfig, __version__
+from ..checker import Checker
 import os, sys, argparse
 
 # Monkey patch with eventlet
@@ -8,7 +9,7 @@ try:
 except:
   pass
 
-def main():
+def get_config():
   parser = argparse.ArgumentParser(description='Atlas CLI %s - An open-source assistant built for people' % __version__)
 
   parser.add_argument('-c', '--config', help='Path to the configuration yaml file')
@@ -17,7 +18,14 @@ def main():
 
   config_path = os.path.abspath(args.config or 'atlas.yml')
 
-  atlas = Atlas(AtlasConfig(config_path))
+  return AtlasConfig(config_path)
+
+def check():
+  check = Checker(get_config())
+  check.run()
+
+def main():
+  atlas = Atlas(get_config())
 
   try:
     atlas.run()

@@ -77,6 +77,23 @@ class Interpreter():
       self._log.debug('Checksum file not found at %s' % checksum_file_path)
       return (False, data_checksum)
 
+  def training(self):
+    """Returns annotated training data used to compute accuracy. This is needed
+    only if you plan to use atlas-check with this interpreter.
+
+    You must returns an array in the following form:
+
+    [{
+      'text': 'will it rain today',
+      'intent': 'weatherForecast',
+    }]
+
+    :rtype: list
+
+    """
+    
+    return []
+
   def lang(self):
     """Returns the interpreter language.
 

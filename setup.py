@@ -15,7 +15,8 @@ setup(
   ],
   entry_points={
     'console_scripts': [
-      'atlas = atlas.cli.main:main'
+      'atlas = atlas.cli.main:main',
+      'atlas-check = atlas.cli.main:check'
     ]
   },
 )

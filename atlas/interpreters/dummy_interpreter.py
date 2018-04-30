@@ -13,6 +13,15 @@ class DummyInterpreter(Interpreter):
         'reminder': ['date', 'subject', 'message']
     }
 
+  def training(self):
+    return [{
+      'text': 'will it rain today',
+      'intent': 'weather_forecast'
+    }, {
+      'text': "what's the weather like today",
+      'intent': 'weather_forecast'
+    }]
+
   def parse(self, msg):
     return [{
       'text': msg,
