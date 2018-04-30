@@ -77,6 +77,7 @@ export default {
             this.speaker.onend = null;
           };
         }
+        
         speechSynthesis.speak(this.speaker);
       }
     },

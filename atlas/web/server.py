@@ -14,7 +14,8 @@ socketio = SocketIO(app)
 @app.route('/')
 def index():
   # TODO language from user settings
-  return render_template('index.html', lang='fr-FR', version=__version__)
+
+  return render_template('index.html', lang=request.args.get('lang', 'en-US'), version=__version__)
 
 @app.route('/sw.js')
 def serve_service_worker():

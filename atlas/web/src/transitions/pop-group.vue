@@ -21,5 +21,6 @@ export default {
 .pop-enter, 
 .pop-leave-to {
   transform: scale(0) !important;
+  opacity: 0 !important;
 }
 </style>

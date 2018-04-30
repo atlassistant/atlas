@@ -76,12 +76,13 @@ export default {
       this.isTextInput = true;
     },
     startListening() {
+      if (!this.recognition) {
+        return;
+      }
+
       this.isTextInput = false;
       this.isListening = true;
-
-      if (this.recognition) {
-        this.recognition.start();
-      }
+      this.recognition.start();
     },
     stopListening() {
       this.isListening = false;

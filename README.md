@@ -59,7 +59,7 @@ Those quick steps use Snips as the NLU backend.
 - Drop some skills scripts inside `<executor.path>`, each one should be in its own subfolder with an `atlas` file containing the command to run to executes your skill
 - Start a MQTT broker, such as [mosquitto](https://mosquitto.org/)
 - Start atlas with `atlas -c <your_configuration_file_path>.yml`
-- Go to the `<server.url>` in your favorite browser to access the exposed PWA! (you may use another channel if you prefer)
+- Go to the `<server.url>` in your favorite browser to access the exposed PWA! (you may use another channel if you prefer). By default it uses the `en-US` language, if you want to change it, just add a query parameters such as `http://localhost:5000?lang=fr-FR`
 - That's it!
 
 I encourage you to read the [architecture overview](documentation/OVERVIEW.md) if you want to know how it works alltogether.

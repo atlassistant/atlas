@@ -19,14 +19,13 @@ export default {
     Message,
     PopGroup,
   },
+  mounted() {
+    this.$el.addEventListener('DOMNodeInserted', 
+      () => this.$el.scrollTo(0, this.$el.scrollHeight));
+  },
   props: {
     messages: Array,
     showThinking: Boolean,
-  },
-  watch: {
-    messages() {
-      setTimeout(() => this.$el.scrollTo(0, this.$el.scrollHeight), 50);
-    },
   },
 }
 </script>
