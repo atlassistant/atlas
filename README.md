@@ -54,7 +54,7 @@ Starts with the prebuilt [sample](example) or make your own by reading below.
 Those quick steps use Snips as the NLU backend.
 
 - Once installed, you must configure it using a [configuration file](documentation/CONFIGURATION.md).
-- Drop your training files (appropriate for your backend) into the `<loader.training_path>`, you may use a tool such as [tracy](https://github.com/YuukanOO/tracy) to generates it.
+- Drop your training files (appropriate for your backend) into the `<loader.training_path>`, you may use a tool such as [tracy](https://github.com/YuukanOO/tracy) or [chatito](https://github.com/rodrigopivi/Chatito) to generates it.
 - Drop your configuration files into the `<loader.env_path>`.
 - Drop some skills scripts inside `<executor.path>`, each one should be in its own subfolder with an `atlas` file containing the command to run to executes your skill
 - Start a MQTT broker, such as [mosquitto](https://mosquitto.org/)
