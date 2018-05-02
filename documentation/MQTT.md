@@ -49,9 +49,23 @@ Creates an agent for this channel.
 }
 ```
 
+## atlas/{sid}/channel/created
+
+Inform the channel that an agent has been succesfuly created.
+
+```json
+{
+  "lang": "Language of the interpreter for this channel"
+}
+```   
+
 ## atlas/{sid}/channel/destroy
 
 Destroy a channel.
+
+## atlas/{sid}/channel/destroyed
+
+Inform the channel that it has been destroyed by atlas.
 
 ## atlas/{sid}/channel/show
 

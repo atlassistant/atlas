@@ -1,6 +1,7 @@
 from atlas_sdk.client import Client, \
   DIALOG_PARSE_TOPIC, DIALOG_ASK_TOPIC, DIALOG_SHOW_TOPIC, DIALOG_TERMINATE_TOPIC, \
-  CHANNEL_ASK_TOPIC, CHANNEL_SHOW_TOPIC, INTENT_TOPIC, CHANNEL_TERMINATE_TOPIC, CHANNEL_WORK_TOPIC
+  CHANNEL_ASK_TOPIC, CHANNEL_SHOW_TOPIC, INTENT_TOPIC, CHANNEL_TERMINATE_TOPIC, CHANNEL_WORK_TOPIC, \
+  CHANNEL_CREATED_TOPIC, CHANNEL_DESTROYED_TOPIC
 import json
 
 class AgentClient(Client):
@@ -10,11 +11,13 @@ class AgentClient(Client):
 
   """
 
-  def __init__(self, client_id, on_ask=None, on_parse=None, on_terminate=None, on_show=None):
+  def __init__(self, client_id, lang, on_ask=None, on_parse=None, on_terminate=None, on_show=None):
     """Constructs a new AgentClient.
 
     :param client_id: ID of the client manages by this agent
     :type client_id: str
+    :param lang: Lang of the agent
+    :type lang: str
     :param on_ask: Handler when a skill wants to ask something
     :type on_ask: callable
     :param on_parse: Handler when a channel wants to parse a message
@@ -28,6 +31,8 @@ class AgentClient(Client):
 
     super(AgentClient, self).__init__(name='agent.' + client_id) # Do not pass the client_id here!
 
+    self._lang = lang
+
     self.DIALOG_PARSE_TOPIC = DIALOG_PARSE_TOPIC % client_id
     self.DIALOG_ASK_TOPIC = DIALOG_ASK_TOPIC % client_id
     self.DIALOG_SHOW_TOPIC = DIALOG_SHOW_TOPIC % client_id
@@ -36,6 +41,8 @@ class AgentClient(Client):
     self.CHANNEL_SHOW_TOPIC = CHANNEL_SHOW_TOPIC % client_id
     self.CHANNEL_TERMINATE_TOPIC = CHANNEL_TERMINATE_TOPIC % client_id
     self.CHANNEL_WORK_TOPIC = CHANNEL_WORK_TOPIC % client_id
+    self.CHANNEL_CREATED_TOPIC = CHANNEL_CREATED_TOPIC % client_id
+    self.CHANNEL_DESTROYED_TOPIC = CHANNEL_DESTROYED_TOPIC % client_id
 
     self.on_ask = on_ask or self.handler_not_set
     self.on_parse = on_parse or self.handler_not_set
@@ -50,6 +57,8 @@ class AgentClient(Client):
     self.subscribe_json(self.DIALOG_SHOW_TOPIC, self.on_show)
     self.subscribe_raw(self.DIALOG_PARSE_TOPIC, self.on_parse)
 
+    self.created()
+
   def intent(self, intent, data):
     """Publish a message to call the intent handler.
 
@@ -61,6 +70,20 @@ class AgentClient(Client):
     """
 
     self.publish(INTENT_TOPIC % intent, json.dumps(data))
+
+  def created(self):
+    """Inform the channel that an agent has been created for it.
+    """
+
+    self.publish(self.CHANNEL_CREATED_TOPIC, json.dumps({
+      'lang': self._lang,
+    }))
+
+  def destroyed(self):
+    """Inform the channel that the agent has been destroyed.
+    """
+
+    self.publish(self.CHANNEL_DESTROYED_TOPIC)
 
   def ask(self, payload):
     """Ask a question to the channel.

@@ -82,6 +82,8 @@ class Server:
       on_show=lambda d, _: socketio.emit('show', d, room=client_id),
       on_terminate=lambda: socketio.emit('terminate', room=client_id),
       on_work=lambda: socketio.emit('work', room=client_id),
+      on_created=lambda d, _: socketio.emit('created', d, room=client_id),
+      on_destroyed=lambda: socketio.emit('destroyed', room=client_id),
     )
     
     self._channels[client_id] = channel

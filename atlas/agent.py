@@ -70,7 +70,7 @@ class Agent:
 
     # Configure the client facade
 
-    self._client = AgentClient(id,
+    self._client = AgentClient(id, self.interpreter.lang(),
       on_parse=self.parse,
       on_ask=self.ask,
       on_terminate=self._terminate_from_skill,
@@ -331,7 +331,8 @@ class Agent:
 
     # TODO Find a way to remove it cleanly
     # self._machine.remove_model(self)
-    
+
+    self._client.destroyed()
     self._client.stop()
 
   def __str__(self):
