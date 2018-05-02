@@ -21,7 +21,10 @@ export default {
   },
   mounted() {
     this.$el.addEventListener('DOMNodeInserted', 
-      () => this.$el.scrollTo(0, this.$el.scrollHeight));
+      () => this.$el.scroll({ 
+        top: this.$el.scrollHeight,
+        behavior: 'smooth',
+      }));
   },
   props: {
     messages: Array,

@@ -9,24 +9,24 @@ class DummyInterpreter(Interpreter):
     
   def metadata(self):
     return {
-        'sampleGetWeather': ['weatherLocation', 'weatherDate'],
+        'weatherForecast': ['city', 'date'],
         'reminder': ['date', 'subject', 'message']
     }
 
   def training(self):
     return [{
       'text': 'will it rain today',
-      'intent': 'sampleGetWeather'
+      'intent': 'weatherForecast'
     }, {
       'text': "what's the weather like today",
-      'intent': 'sampleGetWeather'
+      'intent': 'weatherForecast'
     }]
 
   def parse(self, msg):
     return [{
       'text': msg,
-      'intent': 'sampleGetWeather',
+      'intent': 'weatherForecast',
       'slots': {
-        'weatherDate': '2018-05-20',
+        'date': '2018-05-20',
       }
     }]
