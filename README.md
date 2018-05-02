@@ -47,7 +47,7 @@ in the atlas configuration file.
 
 ## Quickstart
 
-⚠️ As of now, the application accessed from your `<server.url>` is not a valid PWA but it will be in a near future to be able to install it on your phone homescreen.
+⚠️ As of now, the PWA exposed at `<server.url>` lacks offline support.
 
 Starts with the prebuilt [sample](example) or make your own by reading below.
 
