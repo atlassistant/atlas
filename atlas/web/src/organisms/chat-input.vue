@@ -42,16 +42,16 @@ export default {
     };
   },
   mounted() {
-    // this.speaker = new SpeechSynthesisUtterance();
-    // this.speaker.lang = 'fr-FR';
-    // this.speaker.text = 'Pour quelle ville voulez-vous la météo ?'
-    
-    // speechSynthesis.speak(this.speaker);
-
     if ('webkitSpeechRecognition' in window) {
+      this.start_sound = new Audio('/public/start_of_input.wav');
+      this.end_sound = new Audio('/public/end_of_input.wav');
+
       this.recognition = new webkitSpeechRecognition();
       this.recognition.lang = this.lang;
-      this.recognition.onend = this.recognition.onerror = () => this.isListening = false;
+      this.recognition.onend = this.recognition.onerror = () => {
+        this.isListening = false;
+        this.end_sound.play();
+      };
       this.recognition.onresult = (evt) => {
         // this.isListening = false;
 
@@ -82,6 +82,8 @@ export default {
 
       this.isTextInput = false;
       this.isListening = true;
+
+      this.start_sound.play();
       this.recognition.start();
     },
     stopListening() {

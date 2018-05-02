@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{lang[:2]}}">
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -31,7 +31,12 @@
     <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
 
     <script type="text/javascript">
-      window.LANG = '{{lang}}';
+      var qd = {};
+      if (location.search) location.search.substr(1).split("&").forEach(function(item) {var s = item.split("="), k = s[0], v = s[1] && decodeURIComponent(s[1]); (qd[k] = qd[k] || []).push(v)})
+
+      // Try to retrieve the lang from the query string or the navigator
+
+      window.LANG = qd['lang'] ? qd['lang'][0] : (navigator.language || navigator.userLanguage);
       window.VERSION = '{{version}}';
 
       if ('serviceWorker' in navigator) {
