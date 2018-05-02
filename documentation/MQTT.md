@@ -32,7 +32,7 @@ Send a discovery response.
   "version": "Version of the skill",
   "intents": {
     "intent_name": ["slot_name"]
-  }
+  },
   "env": {
     "A_PARAMETER": "type"
   }
