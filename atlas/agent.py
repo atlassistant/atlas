@@ -336,4 +336,4 @@ class Agent:
     self._client.stop()
 
   def __str__(self):
-    return 'Agent %s - %s' % (self.id, self.interpreter.lang)
+    return 'Agent %s - %s' % (self.id, self.interpreter.lang())
