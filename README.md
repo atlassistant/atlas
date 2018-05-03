@@ -19,18 +19,16 @@ Have a look at the [📚 documentation folder](documentation).
 
 ### PIP
 
-Run `RUN pip install git+https://github.com/atlassistant/atlas-sdk.git && pip install git+https://github.com/atlassistant/atlas.git`
+`pip install atlas-core`
 
 ### Docker
 
 - Build the image with `docker build . -t atlas`
 - Run `docker run --rm -it -v <a folder containing an atlas.yml file>:/atlas -p 5000:5000 atlas`
 
-### Manual
+### Source
 
-Install the **atlas-sdk** using [its own instructions](https://github.com/atlassistant/atlas-sdk).
-
-Then, `git clone` this repository and run `python setup.py install`.
+`git clone` this repository and run `python setup.py install`.
 
 ### NLU backends
 
