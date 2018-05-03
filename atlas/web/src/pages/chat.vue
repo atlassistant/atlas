@@ -1,5 +1,5 @@
 <template>
-  <div class="chat">
+  <div v-if="lang" class="chat">
     <p class="chat__notice">You're using <strong>atlas v{{version}} PWA</strong>, it's an early preview that only works on Chrome for now!</p>
     <messages-list v-if="messages.length" :show-thinking="isThinking" class="chat__list" :messages="messages" />
     <blankslate v-else icon="explore">
@@ -7,6 +7,9 @@
     </blankslate>
     <chat-input :lang="lang" ref="chatInput" class="chat__input" @input="onInput" />
   </div>
+  <blankslate v-else icon="network_check">
+    Connecting to your assistant
+  </blankslate>
 </template>
 
 <script>
@@ -29,20 +32,24 @@ export default {
   data() {
     return {
       isThinking: false,
-      lang: window.LANG,
+      lang: null,
       version: window.VERSION,
       messages: [],
     };
   },
   mounted() {
-    this.speaker = new SpeechSynthesisUtterance();
-    this.speaker.lang = this.lang;
-
     this.socket = io();
     this.socket.on('ask', (data) => this.processMessage(data, true));
     this.socket.on('show', (data) => this.processMessage(data));
     this.socket.on('terminate', () => this.onTerminate());
     this.socket.on('work', () => this.onWork());
+    this.socket.on('destroyed', () => this.lang = null);
+    this.socket.on('created', (data) => {
+      this.lang = data.lang;
+
+      this.speaker = new SpeechSynthesisUtterance();
+      this.speaker.lang = this.lang;
+    });
   },
   methods: {
     onInput(text) {

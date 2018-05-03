@@ -76,6 +76,7 @@ class Discovery():
     """
 
     self._config = config
+    self._thread = None
     self._skills = {}
     self._log = logging.getLogger('atlas.discovery')
     self._client = DiscoveryClient(on_discovery=self.process)
@@ -163,5 +164,7 @@ class Discovery():
     """Cleanup discovery service stuff.
     """
     
-    self._thread.cancel()
+    if self._thread:
+      self._thread.cancel()
+
     self._client.stop()

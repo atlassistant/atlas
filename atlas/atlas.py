@@ -160,7 +160,7 @@ class Atlas:
     """Cleanups this engine instance.
     """
 
-    self._log.info('Exiting ATLAS %s gracefuly' % __version__)
+    self._log.info('Exiting atlas %s gracefuly' % __version__)
 
     self._discovery.cleanup()
 

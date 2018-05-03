@@ -25,9 +25,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.8"
-     inkscape:cx="127.21379"
-     inkscape:cy="-80.190376"
+     inkscape:zoom="11.2"
+     inkscape:cx="-10.063993"
+     inkscape:cy="5.2158083"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -44,7 +44,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -63,7 +63,7 @@
        inkscape:export-xdpi="1484.275"
        inkscape:export-ydpi="1484.275" />
     <g
-       transform="matrix(0.26458333,0,0,0.26458333,11.201348,80.645839)"
+       transform="matrix(0.25243472,0,0,0.25243472,11.333904,80.792235)"
        id="g4497"
        style="fill:#403cb3;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1"
        inkscape:export-filename="C:\Users\j.leicher\Documents\Sources\python\atlas\documentation\logo_app.png"
