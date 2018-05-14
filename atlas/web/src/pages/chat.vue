@@ -44,6 +44,7 @@ export default {
     this.socket.on('terminate', () => this.onTerminate());
     this.socket.on('work', () => this.onWork());
     this.socket.on('destroyed', () => this.lang = null);
+    this.socket.on('disconnect', () => this.lang = null); // TODO proper disconnect indicator
     this.socket.on('created', (data) => {
       this.lang = data.lang;
 

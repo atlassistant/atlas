@@ -5,6 +5,14 @@ Natural Language Understanding
 
 Whatever backend you are using, there some built-in features in **atlas** that extend NLU possibilities.
 
+## Reserved intent names
+
+They are some specific intent names that you should not take for your custom actions but should train to handle some specific case in the **atlas** core.
+
+These are:
+
+- `cancel`: Used to cancel an ongoing command
+
 ## Parametric intent name
 
 When you're using the same pattern in your training examples for different intents, you may have some issue retrieving the correct one when inferring.

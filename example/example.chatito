@@ -22,6 +22,17 @@
     cancel the command
     abandon
 
+%[yes]
+    yes
+    ok
+    sure
+
+%[no]
+    no
+    nope
+    ko
+    not at all
+
 @[room]
     living room
     kitchen

@@ -9,7 +9,7 @@ from transitions import Machine, EventData, MachineError
 from transitions.extensions.states import add_state_features, Timeout
 
 STATE_ASLEEP = 'asleep'
-INTENT_CANCEL = 'cancel' # TODO handle the cancel event, see comments in the Agent.parse method
+STATE_CANCEL = 'cancel'
 INTENT_NOTFOUND = 'notfound' # TODO handle the case when no intent has been found in the user request
 PREFIX_ASK = 'ask__'
 
@@ -100,6 +100,7 @@ class Agent:
     self._log.info('Created with states %s' % list(self._machine.states.keys()))
 
     self._machine.add_transition(STATE_ASLEEP, '*', STATE_ASLEEP, after=self.reset)
+    self._machine.add_transition(STATE_CANCEL, '*', STATE_CANCEL, after=self._call_intent)
 
     ask_transitions_source = { k: [] for k in ask_states }
 
@@ -226,25 +227,28 @@ class Agent:
 
     self._log.debug('Parsing "%s"' % msg)
 
-    # TODO if intent is "cancel", go to the cancel state immediately. This will generates a new
+    data = self.interpreter.parse(msg)
+    data_without_cancel = [d for d in data if d['intent'] != STATE_CANCEL]
+
+    # If intent is "cancel", go to the cancel state immediately. This will generates a new
     # conversation id so old request will be dismissed if they tried to do something
-
-    # Start by checking if we are in a ask* state
-    if self.state.startswith(PREFIX_ASK) and self._cur_asked_param: # pylint: disable=E1101
-      self._cur_slots[self._cur_asked_param] = self.interpreter.parse_entity(msg, self._cur_intent, self._cur_asked_param)
-
-      self.go(self._cur_intent)
+    if len(data_without_cancel) != len(data) and self.state != STATE_ASLEEP: # pylint: disable=E1101
+      self.go(STATE_CANCEL)
     else:
-      data = self.interpreter.parse(msg)
+      # Start by checking if we are in a ask* state
+      if self.state.startswith(PREFIX_ASK) and self._cur_asked_param: # pylint: disable=E1101
+        self._cur_slots[self._cur_asked_param] = self.interpreter.parse_entity(msg, self._cur_intent, self._cur_asked_param)
 
-      # TODO if no intent was found, let it know with the INTENT_NOTFOUND
+        self.go(self._cur_intent)
+      else:
+        # TODO if no intent was found, let it know with the INTENT_NOTFOUND
 
-      self._intent_queue.extend(data)
+        self._intent_queue.extend(data_without_cancel)
 
-      if self.state == STATE_ASLEEP: # pylint: disable=E1101
-        self._process_next_intent()
+        if self.state == STATE_ASLEEP: # pylint: disable=E1101
+          self._process_next_intent()
 
-      # TODO another intent is running, ask for confirmation? maybe?
+        # TODO another intent is running, ask for confirmation? maybe?
 
   def _process_next_intent(self):
     """Process the intent queue if any left.
