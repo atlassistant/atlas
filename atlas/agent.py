@@ -102,7 +102,10 @@ class Agent:
     metadata = { k: v for k, v in self.interpreter.metadata().items() if not is_builtin(k) }
 
     ask_states = list(set([to_ask_state(slot) for meta in metadata.values() for slot in meta]))
-    states = [STATE_ASLEEP, STATE_CANCEL] + list(metadata.keys()) + [{ 
+    metadata_states = list(metadata.keys())
+    builtin_states = [STATE_CANCEL]
+    
+    states = [STATE_ASLEEP] + builtin_states + metadata_states + [{ 
       'name': o, 
       'timeout': ask_timeout, 
       'on_timeout': self._on_timeout 
@@ -117,8 +120,8 @@ class Agent:
 
     self._log.info('Created with states %s' % list(self._machine.states.keys()))
 
-    self._machine.add_transition(STATE_ASLEEP, '*', STATE_ASLEEP, after=self.reset)
-    self._machine.add_transition(STATE_CANCEL, '*', STATE_CANCEL, after=self._call_intent)
+    self._machine.add_transition(STATE_ASLEEP, builtin_states + metadata_states + ask_states, STATE_ASLEEP, after=self.reset)
+    self._machine.add_transition(STATE_CANCEL, metadata_states + ask_states, STATE_CANCEL, after=self._call_intent)
     
     ask_transitions_source = { k: [] for k in ask_states }
 
