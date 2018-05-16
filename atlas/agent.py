@@ -34,6 +34,13 @@ def to_ask_state(slot):
 
   return PREFIX_ASK + slot
 
+try:
+  # Try to load the GraphMachine
+  import pygraphviz
+  from transitions.extensions import GraphMachine as Machine
+except:
+  pass
+
 @add_state_features(Timeout)
 class AgentMachine(Machine):
   """Custom transitions Machine to add state features.
@@ -124,6 +131,11 @@ class Agent:
 
     for k, v in ask_transitions_source.items():
       self._machine.add_transition(k, v, k, after=self._on_asked)
+
+    try:
+      self.get_graph().draw('%s.png' % self.uid, prog='dot') # pylint: disable=E1101
+    except:
+      self._log.info('Could not draw the transitions graph')
 
   def reset(self, event=None):
     """Resets the current agent states.
