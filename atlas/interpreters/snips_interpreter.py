@@ -21,6 +21,7 @@ class SnipsInterpreter(Interpreter):
     super(SnipsInterpreter, self).__init__('snips')
 
     self._meta = None
+    self._training_data = None
     self._lang = None
     self._engine = None
     self._entity_parser = None
@@ -33,6 +34,18 @@ class SnipsInterpreter(Interpreter):
   def lang(self):
     return self._lang
 
+  def training(self):
+    result = []
+
+    for intent, data in self._training_data['intents'].items():
+      for utterance in data['utterances']:
+        result.append({
+          'text': ''.join([u['text'] for u in utterance['data']]),
+          'intent': intent,
+        })
+
+    return result
+
   def fit(self, training_file_path, trained_directory_path):
     filename, _ = os.path.splitext(os.path.basename(training_file_path))
 
@@ -43,8 +56,8 @@ class SnipsInterpreter(Interpreter):
 
     with open(training_file_path) as f:
       training_str = f.read()
-      training_data = json.loads(training_str)
-      self._lang = training_data['language']
+      self._training_data = json.loads(training_str)
+      self._lang = self._training_data['language']
       self._log.info('Loading resources for language %s' % self._lang)
       load_resources(self._lang)
 
@@ -58,7 +71,7 @@ class SnipsInterpreter(Interpreter):
     else:
       self._log.info('Checksum has changed, retraining the engine')
       self._engine = SnipsNLUEngine()
-      self._engine.fit(training_data)
+      self._engine.fit(self._training_data)
 
       with open(trained_path, mode='w') as f:
         json.dump(self._engine.to_dict(), f)

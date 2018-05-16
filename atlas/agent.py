@@ -104,7 +104,7 @@ class Agent:
     ask_states = list(set([to_ask_state(slot) for meta in metadata.values() for slot in meta]))
     metadata_states = list(metadata.keys())
     builtin_states = [STATE_CANCEL]
-    
+
     states = [STATE_ASLEEP] + builtin_states + metadata_states + [{ 
       'name': o, 
       'timeout': ask_timeout, 
@@ -138,7 +138,7 @@ class Agent:
     try:
       self.get_graph().draw('%s.png' % self.uid, prog='dot') # pylint: disable=E1101
     except:
-      self._log.info('Could not draw the transitions graph')
+      self._log.info("Could not draw the transitions graph, maybe you'll need pygraphviz installed!")
 
   def reset(self, event=None):
     """Resets the current agent states.

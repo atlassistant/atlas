@@ -14,14 +14,19 @@ class CheckerTest(unittest.TestCase):
 
     super(CheckerTest, self).__init__()
     
+    self._log = logging.getLogger('atlas.checker.test')
     self._interpreter = interpreter
 
   def runTest(self):
     for data in self._interpreter.training():
       text = data['text']
       
+      
       with self.subTest(text=text):
         expectedIntent = data['intent']
+        
+        self._log.debug('Testing sentence "%s" with expected intent "%s"' % (text, expectedIntent))
+        
         r = self._interpreter.parse(text)
 
         self.assertEqual(1, len(r))
