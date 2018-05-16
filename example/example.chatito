@@ -17,17 +17,17 @@
     close the @[room] lights
     turn @[room] lights off please
 
-%[cancel]
+%[atlas/cancel]
     cancel
     cancel the command
     abandon
 
-%[yes]
+%[atlas/yes]
     yes
     ok
     sure
 
-%[no]
+%[atlas/no]
     no
     nope
     ko

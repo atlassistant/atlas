@@ -1309,21 +1309,21 @@
         }
       ]
     },
-    "cancel": {
+    "atlas/cancel": {
       "utterances": [
         {"data": [{"text": "cancel"}]},
         {"data": [{"text": "cancel the command"}]},
         {"data": [{"text": "abandon"}]}
       ]
     },
-    "yes": {
+    "atlas/yes": {
       "utterances": [
         {"data": [{"text": "yes"}]},
         {"data": [{"text": "ok"}]},
         {"data": [{"text": "sure"}]}
       ]
     },
-    "no": {
+    "atlas/no": {
       "utterances": [
         {"data": [{"text": "no"}]},
         {"data": [{"text": "nope"}]},

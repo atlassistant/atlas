@@ -8,10 +8,21 @@ from .interpreters import Interpreter
 from transitions import Machine, EventData, MachineError
 from transitions.extensions.states import add_state_features, Timeout
 
-STATE_ASLEEP = 'asleep'
-STATE_CANCEL = 'cancel'
-INTENT_NOTFOUND = 'notfound' # TODO handle the case when no intent has been found in the user request
-PREFIX_ASK = 'ask__'
+PREFIX_ATLAS = 'atlas/'
+PREFIX_ASK = '%sask__' % PREFIX_ATLAS
+STATE_ASLEEP = '%sasleep' % PREFIX_ATLAS
+STATE_CANCEL = '%scancel' % PREFIX_ATLAS
+
+def is_builtin(state):
+  """Checks if the given state is a builtin one.
+
+  :param state: State to check
+  :type state: str
+  :rtype: bool
+
+  """
+
+  return state.startswith(PREFIX_ATLAS)
 
 def to_ask_state(slot):
   """Converts to an ask state.
@@ -81,10 +92,10 @@ class Agent:
 
     # Constructs every possible transitions from interpreter metadata
 
-    metadata = self.interpreter.metadata()
+    metadata = { k: v for k, v in self.interpreter.metadata().items() if not is_builtin(k) }
 
     ask_states = list(set([to_ask_state(slot) for meta in metadata.values() for slot in meta]))
-    states = [STATE_ASLEEP] + list(metadata.keys()) + [{ 
+    states = [STATE_ASLEEP, STATE_CANCEL] + list(metadata.keys()) + [{ 
       'name': o, 
       'timeout': ask_timeout, 
       'on_timeout': self._on_timeout 
@@ -101,7 +112,7 @@ class Agent:
 
     self._machine.add_transition(STATE_ASLEEP, '*', STATE_ASLEEP, after=self.reset)
     self._machine.add_transition(STATE_CANCEL, '*', STATE_CANCEL, after=self._call_intent)
-
+    
     ask_transitions_source = { k: [] for k in ask_states }
 
     for intent, slots in metadata.items():

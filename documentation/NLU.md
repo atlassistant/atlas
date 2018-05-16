@@ -7,11 +7,11 @@ Whatever backend you are using, there some built-in features in **atlas** that e
 
 ## Reserved intent names
 
-They are some specific intent names that you should not take for your custom actions but should train to handle some specific case in the **atlas** core.
+There are some specific intent names that you should not take for your custom actions but should train to handle some specific case in the **atlas** core, they all starts with the prefix `atlas/`.
 
-These are:
+Some of them should be trained, these are:
 
-- `cancel`: Used to cancel an ongoing command
+- `atlas/cancel`: Used to cancel an ongoing command
 
 ## Parametric intent name
 

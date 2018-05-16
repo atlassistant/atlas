@@ -14,7 +14,7 @@ if __name__ == '__main__':
     author='Julien LEICHER',
     description='Handle built-ins operations',
     intents=[
-      Intent('cancel', cancel),
+      Intent('atlas/cancel', cancel),
     ],
   )
 
