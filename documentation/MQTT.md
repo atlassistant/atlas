@@ -101,9 +101,9 @@ Run a skill associated with an intent.
 
 ```json
 {
-  "__cid": "conversation_id",
-  "__sid": "session_id",
-  "__uid": "user_id",
+  "__cid": "A unique conversation id representing a conversation lifetime",
+  "__sid": "A unique session id representing the channel",
+  "__uid": "The user id",
   "__lang": "user language code",
   "__version": "atlas version",
   "__env": {
@@ -113,6 +113,8 @@ Run a skill associated with an intent.
   "another_slot": ["If multiple values for the same slot are found", "They will be passed as an array"]
 }
 ```
+
+When a skill needs more inputs, it should always include the `__cid` value otherwise it will be dismissed to prevent unwanted behaviors.
 
 ## atlas/{sid}/dialog/parse
 
@@ -124,7 +126,7 @@ Ask for a slot value. Additional properties will be transfered directly to the c
 
 ```json
 {
-  "__cid": "conversation_id",
+  "__cid": "A unique conversation id representing a conversation lifetime",
   "slot": "slot_name",
   "text": "Question to ask"
 }
@@ -136,7 +138,7 @@ Show a message to the channel by forwarding it.
 
 ```json
 {
-  "__cid": "conversation_id",
+  "__cid": "A unique conversation id representing a conversation lifetime",
   "text": "Message to show"
 }
 ```
@@ -147,6 +149,6 @@ Terminates a dialog.
 
 ```json
 {
-  "__cid": "conversation_id",
+  "__cid": "A unique conversation id representing a conversation lifetime",
 }
 ```

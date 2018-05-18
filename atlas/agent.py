@@ -1,7 +1,7 @@
 import logging
 from .version import __version__
 from .client import AgentClient
-from .utils import generate_hash, resolve_parametric_intent_name
+from .utils import generate_hash
 from atlas_sdk import BrokerConfig
 from atlas_sdk.request import SID_KEY, UID_KEY, ENV_KEY, VERSION_KEY, LANG_KEY, CID_KEY
 from .interpreters import Interpreter
@@ -33,6 +33,26 @@ def to_ask_state(slot):
   """
 
   return PREFIX_ASK + slot
+
+def resolve_parametric_intent_name(name, slots):
+  """Format the intent name with slots dict to handle parametric intent name.
+
+  With this feature, you can create generic intent and output a single intent name
+  based on slots values.
+
+  :param name: Name of the intent, may contain placeholders such as {slotName}
+  :type name: str
+  :param slots: Dictionary of slots values
+  :type slots: dict
+
+  """
+
+  # TODO what to do if a slot value is an array?
+
+  try:
+    return name.format(**slots)
+  except KeyError:
+    return name
 
 try:
   # Try to load the GraphMachine
@@ -167,7 +187,7 @@ class Agent:
 
     try:
       self.trigger(trigger_name, **kwargs) # pylint: disable=E1101
-    except MachineError as err:
+    except Exception as err:
       self._log.error('Could not trigger "%s": %s' % (trigger_name, err))
 
   def _call_intent(self, event):
@@ -177,6 +197,11 @@ class Agent:
     :type event: EventData
 
     """
+
+    # Generates a new conversation id if needed
+    if event.transition.dest != self._cur_intent:
+      self._cur_conversation_id = generate_hash()
+      self._log.info('💬 New conversation started with id %s' % self._cur_conversation_id)
 
     # Here we need to keep track of the original intent name otherwise transitions
     # will be broke
@@ -195,8 +220,6 @@ class Agent:
       if valid_keys == None:
         self._log.warn('Intent %s could not be reached, skipping now' % resolved_intent_name)
         return self.go(STATE_ASLEEP)
-
-    self._cur_conversation_id = generate_hash()
     
     self._client.work()
 
