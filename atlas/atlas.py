@@ -130,7 +130,8 @@ class Atlas:
           uid,
           self._loader.interpreter_for(uid),
           self._loader.env_for(uid),
-          validate_intent=lambda intent_name: self._discovery.skill_env_for_intent(intent_name)
+          validate_intent=lambda intent_name: self._discovery.skill_env_for_intent(intent_name),
+          data_path=self._config.loader.trained_path
         )
 
         self._agents.append(agt)

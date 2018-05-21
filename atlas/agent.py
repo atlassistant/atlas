@@ -1,17 +1,20 @@
-import logging
+import os, logging
 from .version import __version__
 from .client import AgentClient
 from .utils import generate_hash
 from atlas_sdk import BrokerConfig
-from atlas_sdk.request import SID_KEY, UID_KEY, ENV_KEY, VERSION_KEY, LANG_KEY, CID_KEY
+from atlas_sdk.request import SID_KEY, UID_KEY, ENV_KEY, VERSION_KEY, LANG_KEY, \
+  CID_KEY, CONFIRMED_KEY
 from .interpreters import Interpreter
 from transitions import Machine, EventData, MachineError
-from transitions.extensions.states import add_state_features, Timeout
 
 PREFIX_ATLAS = 'atlas/'
 PREFIX_ASK = '%sask__' % PREFIX_ATLAS
 STATE_ASLEEP = '%sasleep' % PREFIX_ATLAS
+STATE_CONFIRM = '%sconfirm' % PREFIX_ATLAS
 STATE_CANCEL = '%scancel' % PREFIX_ATLAS
+INTENT_YES = '%syes' % PREFIX_ATLAS
+INTENT_NO = '%sno' % PREFIX_ATLAS
 
 def is_builtin(state):
   """Checks if the given state is a builtin one.
@@ -61,13 +64,6 @@ try:
 except:
   pass
 
-@add_state_features(Timeout)
-class AgentMachine(Machine):
-  """Custom transitions Machine to add state features.
-  """
-  
-  pass
-
 class Agent:
   """Agents are the core of the dialog engine of atlas.
 
@@ -76,7 +72,7 @@ class Agent:
 
   """
 
-  def __init__(self, id, uid, interpreter, env, validate_intent=None, ask_timeout=30):
+  def __init__(self, id, uid, interpreter, env, validate_intent=None, data_path=None):
     """Creates a new agent.
 
     :param id: Channel id
@@ -92,8 +88,8 @@ class Agent:
                             variables if the skill exists or None if no skill could be found matching
                             that intent
     :type validate_intent: callable
-    :param ask_timeout: Timeout when entering an ask state
-    :type ask_timeout: int
+    :param data_path: Where to store generated data such as the graph
+    :type data_path: str
 
     """
 
@@ -123,15 +119,10 @@ class Agent:
 
     ask_states = list(set([to_ask_state(slot) for meta in metadata.values() for slot in meta]))
     metadata_states = list(metadata.keys())
-    builtin_states = [STATE_CANCEL]
 
-    states = [STATE_ASLEEP] + builtin_states + metadata_states + [{ 
-      'name': o, 
-      'timeout': ask_timeout, 
-      'on_timeout': self._on_timeout 
-    } for o in ask_states]
+    states = [STATE_ASLEEP, STATE_CANCEL, STATE_CONFIRM] + metadata_states + ask_states
 
-    self._machine = AgentMachine(self, 
+    self._machine = Machine(self, 
       states=states, 
       initial=STATE_ASLEEP, 
       send_event=True, 
@@ -140,14 +131,15 @@ class Agent:
 
     self._log.info('Created with states %s' % list(self._machine.states.keys()))
 
-    self._machine.add_transition(STATE_ASLEEP, builtin_states + metadata_states + ask_states, STATE_ASLEEP, after=self.reset)
-    self._machine.add_transition(STATE_CANCEL, metadata_states + ask_states, STATE_CANCEL, after=self._call_intent)
+    self._machine.add_transition(STATE_ASLEEP, [STATE_CANCEL] + metadata_states + ask_states, STATE_ASLEEP, after=self.reset)
+    self._machine.add_transition(STATE_CANCEL, [STATE_CONFIRM] + metadata_states + ask_states, STATE_CANCEL, after=self._call_intent)
+    self._machine.add_transition(STATE_CONFIRM, metadata_states, STATE_CONFIRM, after=self._on_confirm)
     
     ask_transitions_source = { k: [] for k in ask_states }
 
     for intent, slots in metadata.items():
       converted_slots = [to_ask_state(s) for s in slots]
-      self._machine.add_transition(intent, [STATE_ASLEEP] + converted_slots, intent, after=self._call_intent)
+      self._machine.add_transition(intent, [STATE_ASLEEP, STATE_CONFIRM] + converted_slots, intent, after=self._call_intent)
 
       for slot in converted_slots:
         ask_transitions_source[slot].append(intent)
@@ -155,10 +147,11 @@ class Agent:
     for k, v in ask_transitions_source.items():
       self._machine.add_transition(k, v, k, after=self._on_asked)
 
-    try:
-      self.get_graph().draw('%s.png' % self.uid, prog='dot') # pylint: disable=E1101
-    except:
-      self._log.info("Could not draw the transitions graph, maybe you'll need pygraphviz installed!")
+    if data_path:
+      try:
+        self.get_graph().draw(os.path.join(data_path, '%s.png' % self.uid), prog='dot') # pylint: disable=E1101
+      except:
+        self._log.info("Could not draw the transitions graph, maybe you'll need pygraphviz installed!")
 
   def reset(self, event=None):
     """Resets the current agent states.
@@ -172,6 +165,8 @@ class Agent:
     self._cur_intent = None
     self._cur_conversation_id = None
     self._cur_slots = {}
+    self._cur_confirmed_steps = []
+    self._cur_confirm_step = None
 
     self._client.terminate()
 
@@ -190,6 +185,9 @@ class Agent:
     except Exception as err:
       self._log.error('Could not trigger "%s": %s' % (trigger_name, err))
 
+  def _on_confirm(self, event):
+    pass # TODO
+
   def _call_intent(self, event):
     """Call the intent with current slot values.
 
@@ -198,14 +196,16 @@ class Agent:
 
     """
 
+    dest = event.transition.dest
+
     # Generates a new conversation id if needed
-    if event.transition.dest != self._cur_intent:
+    if dest != self._cur_intent:
       self._cur_conversation_id = generate_hash()
       self._log.info('💬 New conversation started with id %s' % self._cur_conversation_id)
 
     # Here we need to keep track of the original intent name otherwise transitions
     # will be broke
-    self._cur_intent = event.transition.dest
+    self._cur_intent = dest
 
     # But we use the resolved name for the intent validation to check if a skill can
     # take care of it
@@ -224,7 +224,6 @@ class Agent:
     self._client.work()
 
     # Constructs the message payload
-    
     data = {
       CID_KEY: self._cur_conversation_id,
       SID_KEY: self.id,
@@ -232,8 +231,9 @@ class Agent:
       LANG_KEY: self.interpreter.lang(),
       VERSION_KEY: __version__,
       ENV_KEY: { k: self.env[k] for k in valid_keys },
+      CONFIRMED_KEY: self._cur_confirmed_steps
     }
-    
+
     data.update(self._cur_slots)
 
     self._log.debug('Calling resolved intent "%s (%s)" with params %s' % (resolved_intent_name, self._cur_intent, data))
@@ -255,16 +255,6 @@ class Agent:
     self._log.debug('Asking request with payload %s' % payload)
 
     self._client.ask(payload)
-
-  def _on_timeout(self, event):
-    """Called when a state timeout has been reached.
-
-    :param event: Machine event
-    :type event: EventData
-
-    """
-
-    self.go(STATE_ASLEEP)
 
   def parse(self, msg):
     """Parse a raw message.
@@ -326,7 +316,7 @@ class Agent:
   def ask(self, data, raw_msg):
     """Ask required by the skill intent.
 
-    :param data: Data sent by the intent, it should at least contains the key "slot"
+    :param data: Data sent by the intent, some keys such as "slot" or "confirm" represents specific cases
     :type data: dict
     :param raw_msg: Raw payload received
     :type raw_msg: str
@@ -334,7 +324,13 @@ class Agent:
     """
 
     if self._is_valid_request(data):
-      self.go(to_ask_state(data['slot']), payload=raw_msg)
+      self._cur_confirm_step = data.get('confirm')
+
+      # If the skill has required user confirmation, go to the confirm state
+      if self._cur_confirm_step:
+        self.go(STATE_CONFIRM)
+      else:
+        self.go(to_ask_state(data['slot']), payload=raw_msg)
 
   def show(self, data, raw_msg):
     """Show simply pass message to the client channel.
