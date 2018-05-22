@@ -308,15 +308,18 @@ class Agent:
         # If found, recal the intent, otherwise do nothing
         if self._cur_choice:
           self.go(self._cur_intent)
+        else:
+          self._log.warning('Not a valid input "%s", choices are %s' % (msg, self._cur_choices))
 
       elif self.state.startswith(PREFIX_ASK) and self._cur_asked_param: # pylint: disable=E1101
         value = self._extract_choice(msg)
         
-        # If a value was extracted, convert it to the appropriate slot type, otherwise recall the intent without modifying the slot
+        # If a value was extracted, convert it to the appropriate slot type, otherwise dismiss user input
         if value:
           self._cur_slots[self._cur_asked_param] = self.interpreter.parse_entity(value, self._cur_intent, self._cur_asked_param)
-
-        self.go(self._cur_intent) # TODO recall or just dismissed till it choose something available?
+          self.go(self._cur_intent)
+        else:
+          self._log.warning('Not a valid input "%s", choices are %s' % (msg, self._cur_choices))
       else:
         # TODO if no intent was found, let it know with the INTENT_NOTFOUND
 
