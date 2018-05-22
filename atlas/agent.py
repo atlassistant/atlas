@@ -236,6 +236,10 @@ class Agent:
 
     self._client.intent(resolved_intent_name, data)
 
+    # Resets choices related properties just after the skill has been called
+    self._cur_choice = None
+    self._cur_choices = None
+
   def _on_slot_asked(self, event):
     """Entered in ask state, save current asked param.
 

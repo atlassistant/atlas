@@ -100,6 +100,13 @@ Inform the channel that a work has ended.
 
 Run a skill associated with an intent.
 
+Concerning the key `__choice`, if the skill asked for choices without a slot value (by using the `atlas/<sid>/dialog/ask` topic, the user choice will be filled here and resetted as soon as the skill has been called. The flow is:
+
+- User intent trigger the skill
+- The skill ask for a user choice between `yes` or `no`
+- User respond with `yes`
+- The skill is called again with the `__choice` key filled with `yes` and **atlas** does not keep this value, so if your skill ask for another **slot** value, the `__choice` key will be empty next time
+
 ```json
 {
   "__cid": "A unique conversation id representing a conversation lifetime",
@@ -110,6 +117,7 @@ Run a skill associated with an intent.
   "__env": {
     "A_PARAMETER": "User configurated value"
   },
+  "__choice": "Contains the last user entered choice",
   "slot_name": "Slot value",
   "another_slot": ["If multiple values for the same slot are found", "They will be passed as an array"]
 }
@@ -125,16 +133,18 @@ Parses a message. The message to parse should be included as a raw payload.
 
 Ask for a user input value. Additional properties will be transfered directly to the channel.
 
+if `slot` is given, **atlas** will parse the user input and convert it to the slot NLU value.
+
 The `choices` key permits to restrict valid inputs to those defined if you need to.
 
-If `slot` is omitted, `choices` is mandatory and represents a user choice such as a confirmation (yes/no).
+If `slot` is omitted, `choices` is mandatory and represents a user choice such as a confirmation (yes/no). The user choice will be sent back to the skill and resetted automatically.
 
 ```json
 {
   "__cid": "A unique conversation id representing a conversation lifetime",
   "text": "Question to ask",
-  "slot": "slot_name", // If set, the slot will be filled with user input and converted as needed by the NLU
-  "choices": ["Choice 1", "Choice 2"] // Optional valid choices, if set, the user should choose one of those
+  "slot": "slot_name",
+  "choices": ["Choice 1", "Choice 2"]
 }
 ```
 
