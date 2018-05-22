@@ -94,6 +94,8 @@ class SnipsInterpreter(Interpreter):
       if parsed:
         return get_entity_value(parsed[0]['entity'], msg)
 
+    # TODO if slot is not an auto-extensible, use fuzzy matching to match with restricted values
+
     return msg
 
   def parse(self, msg):

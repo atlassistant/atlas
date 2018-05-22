@@ -15,6 +15,7 @@ setup(
     'Flask-RESTful==0.3.6',
     'Flask-SocketIO==2.9.6',
     'PyYAML==3.12',
+    'fuzzywuzzy==0.16.0',
   ],
   entry_points={
     'console_scripts': [

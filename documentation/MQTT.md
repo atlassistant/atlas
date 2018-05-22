@@ -79,11 +79,12 @@ Show a message to the channel. In the future more properties will be added to ha
 
 ## atlas/{sid}/channel/ask
 
-Ask for a slot value. In the future more properties will be added to handle more complex UI.
+Ask for a user input. In the future more properties will be added to handle more complex UI.
 
 ```json
 {
-  "text": "Question to ask"
+  "text": "Question to ask",
+  "choices": ["Choice 1", "Choice 2"] // Optional valid choices, if set, the user should choose one of those
 }
 ```
 
@@ -122,13 +123,18 @@ Parses a message. The message to parse should be included as a raw payload.
 
 ## atlas/{sid}/dialog/ask
 
-Ask for a slot value. Additional properties will be transfered directly to the channel.
+Ask for a user input value. Additional properties will be transfered directly to the channel.
+
+The `choices` key permits to restrict valid inputs to those defined if you need to.
+
+If `slot` is omitted, `choices` is mandatory and represents a user choice such as a confirmation (yes/no).
 
 ```json
 {
   "__cid": "A unique conversation id representing a conversation lifetime",
-  "slot": "slot_name",
-  "text": "Question to ask"
+  "text": "Question to ask",
+  "slot": "slot_name", // If set, the slot will be filled with user input and converted as needed by the NLU
+  "choices": ["Choice 1", "Choice 2"] // Optional valid choices, if set, the user should choose one of those
 }
 ```
 

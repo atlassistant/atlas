@@ -4,17 +4,16 @@ from .client import AgentClient
 from .utils import generate_hash
 from atlas_sdk import BrokerConfig
 from atlas_sdk.request import SID_KEY, UID_KEY, ENV_KEY, VERSION_KEY, LANG_KEY, \
-  CID_KEY, CONFIRMED_KEY
+  CID_KEY, CHOICE_KEY
 from .interpreters import Interpreter
 from transitions import Machine, EventData, MachineError
+from fuzzywuzzy import process
 
 PREFIX_ATLAS = 'atlas/'
 PREFIX_ASK = '%sask__' % PREFIX_ATLAS
 STATE_ASLEEP = '%sasleep' % PREFIX_ATLAS
-STATE_CONFIRM = '%sconfirm' % PREFIX_ATLAS
+STATE_ASK = '%sask' % PREFIX_ATLAS # Generic ask state for choices without slots
 STATE_CANCEL = '%scancel' % PREFIX_ATLAS
-INTENT_YES = '%syes' % PREFIX_ATLAS
-INTENT_NO = '%sno' % PREFIX_ATLAS
 
 def is_builtin(state):
   """Checks if the given state is a builtin one.
@@ -120,7 +119,7 @@ class Agent:
     ask_states = list(set([to_ask_state(slot) for meta in metadata.values() for slot in meta]))
     metadata_states = list(metadata.keys())
 
-    states = [STATE_ASLEEP, STATE_CANCEL, STATE_CONFIRM] + metadata_states + ask_states
+    states = [STATE_ASLEEP, STATE_CANCEL, STATE_ASK] + metadata_states + ask_states
 
     self._machine = Machine(self, 
       states=states, 
@@ -132,26 +131,26 @@ class Agent:
     self._log.info('Created with states %s' % list(self._machine.states.keys()))
 
     self._machine.add_transition(STATE_ASLEEP, [STATE_CANCEL] + metadata_states + ask_states, STATE_ASLEEP, after=self.reset)
-    self._machine.add_transition(STATE_CANCEL, [STATE_CONFIRM] + metadata_states + ask_states, STATE_CANCEL, after=self._call_intent)
-    self._machine.add_transition(STATE_CONFIRM, metadata_states, STATE_CONFIRM, after=self._on_confirm)
+    self._machine.add_transition(STATE_CANCEL, [STATE_ASK] + metadata_states + ask_states, STATE_CANCEL, after=self._call_intent)
+    self._machine.add_transition(STATE_ASK, metadata_states, STATE_ASK, after=self._on_generic_ask)
     
     ask_transitions_source = { k: [] for k in ask_states }
 
     for intent, slots in metadata.items():
       converted_slots = [to_ask_state(s) for s in slots]
-      self._machine.add_transition(intent, [STATE_ASLEEP, STATE_CONFIRM] + converted_slots, intent, after=self._call_intent)
+      self._machine.add_transition(intent, [STATE_ASLEEP, STATE_ASK] + converted_slots, intent, after=self._call_intent)
 
       for slot in converted_slots:
         ask_transitions_source[slot].append(intent)
 
     for k, v in ask_transitions_source.items():
-      self._machine.add_transition(k, v, k, after=self._on_asked)
+      self._machine.add_transition(k, v, k, after=self._on_slot_asked)
 
     if data_path:
       try:
         self.get_graph().draw(os.path.join(data_path, '%s.png' % self.uid), prog='dot') # pylint: disable=E1101
       except:
-        self._log.info("Could not draw the transitions graph, maybe you'll need pygraphviz installed!")
+        self._log.warning("Could not draw the transitions graph, maybe you'll need pygraphviz installed!")
 
   def reset(self, event=None):
     """Resets the current agent states.
@@ -165,8 +164,8 @@ class Agent:
     self._cur_intent = None
     self._cur_conversation_id = None
     self._cur_slots = {}
-    self._cur_confirmed_steps = []
-    self._cur_confirm_step = None
+    self._cur_choices = None
+    self._cur_choice = None
 
     self._client.terminate()
 
@@ -184,9 +183,6 @@ class Agent:
       self.trigger(trigger_name, **kwargs) # pylint: disable=E1101
     except Exception as err:
       self._log.error('Could not trigger "%s": %s' % (trigger_name, err))
-
-  def _on_confirm(self, event):
-    pass # TODO
 
   def _call_intent(self, event):
     """Call the intent with current slot values.
@@ -231,7 +227,7 @@ class Agent:
       LANG_KEY: self.interpreter.lang(),
       VERSION_KEY: __version__,
       ENV_KEY: { k: self.env[k] for k in valid_keys },
-      CONFIRMED_KEY: self._cur_confirmed_steps
+      CHOICE_KEY: self._cur_choice
     }
 
     data.update(self._cur_slots)
@@ -240,7 +236,7 @@ class Agent:
 
     self._client.intent(resolved_intent_name, data)
 
-  def _on_asked(self, event):
+  def _on_slot_asked(self, event):
     """Entered in ask state, save current asked param.
 
     :param event: Machine event
@@ -255,6 +251,38 @@ class Agent:
     self._log.debug('Asking request with payload %s' % payload)
 
     self._client.ask(payload)
+
+  def _on_generic_ask(self, event):
+    """Entered in generic atlas/ask state, forward the raw payload to the channel.
+
+    :param event: Machine event
+    :type event: EventData
+
+    """
+
+    payload = event.kwargs.get('payload')
+
+    self._log.debug('Asking generic choice with payload %s' % payload)
+
+    self._client.ask(payload)
+
+  def _extract_choice(self, value):
+    """Extract choice with given message. It will use fuzzy match to determine
+    the valid one.
+
+    :param value: Value to use when searching
+    :type value: str
+    :rtype: str
+
+    """
+
+    # No choices available, just return the value
+    if not self._cur_choices:
+      return value
+
+    match = process.extractOne(value, self._cur_choices, score_cutoff=60)
+
+    return match[0] if match else None
 
   def parse(self, msg):
     """Parse a raw message.
@@ -274,11 +302,21 @@ class Agent:
     if len(data_without_cancel) != len(data) and self.state != STATE_ASLEEP: # pylint: disable=E1101
       self.go(STATE_CANCEL)
     else:
-      # Start by checking if we are in a ask* state
-      if self.state.startswith(PREFIX_ASK) and self._cur_asked_param: # pylint: disable=E1101
-        self._cur_slots[self._cur_asked_param] = self.interpreter.parse_entity(msg, self._cur_intent, self._cur_asked_param)
+      if self.state == STATE_ASK:
+        self._cur_choice = self._extract_choice(msg)
 
-        self.go(self._cur_intent)
+        # If found, recal the intent, otherwise do nothing
+        if self._cur_choice:
+          self.go(self._cur_intent)
+
+      elif self.state.startswith(PREFIX_ASK) and self._cur_asked_param: # pylint: disable=E1101
+        value = self._extract_choice(msg)
+        
+        # If a value was extracted, convert it to the appropriate slot type, otherwise recall the intent without modifying the slot
+        if value:
+          self._cur_slots[self._cur_asked_param] = self.interpreter.parse_entity(value, self._cur_intent, self._cur_asked_param)
+
+        self.go(self._cur_intent) # TODO recall or just dismissed till it choose something available?
       else:
         # TODO if no intent was found, let it know with the INTENT_NOTFOUND
 
@@ -286,8 +324,6 @@ class Agent:
 
         if self.state == STATE_ASLEEP: # pylint: disable=E1101
           self._process_next_intent()
-
-        # TODO another intent is running, ask for confirmation? maybe?
 
   def _process_next_intent(self):
     """Process the intent queue if any left.
@@ -324,13 +360,13 @@ class Agent:
     """
 
     if self._is_valid_request(data):
-      self._cur_confirm_step = data.get('confirm')
+      self._cur_choices = data.get('choices')
+      
+      slot_name = data.get('slot')
+      
+      # TODO if no slot and no choices, there was a mistake! We should raise exception when needed
 
-      # If the skill has required user confirmation, go to the confirm state
-      if self._cur_confirm_step:
-        self.go(STATE_CONFIRM)
-      else:
-        self.go(to_ask_state(data['slot']), payload=raw_msg)
+      self.go(STATE_ASK if not slot_name else to_ask_state(slot_name), payload=raw_msg)
 
   def show(self, data, raw_msg):
     """Show simply pass message to the client channel.
