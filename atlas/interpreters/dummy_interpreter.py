@@ -23,6 +23,7 @@ class DummyInterpreter(Interpreter):
     }]
 
   def parse(self, msg):
+    # return []
     return [{
       'text': msg,
       'intent': 'weatherForecast',

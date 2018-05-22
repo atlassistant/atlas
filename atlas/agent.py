@@ -12,8 +12,9 @@ from fuzzywuzzy import process
 PREFIX_ATLAS = 'atlas/'
 PREFIX_ASK = '%sask__' % PREFIX_ATLAS
 STATE_ASLEEP = '%sasleep' % PREFIX_ATLAS
-STATE_ASK = '%sask' % PREFIX_ATLAS # Generic ask state for choices without slots
+STATE_CHOICE = '%schoice' % PREFIX_ATLAS
 STATE_CANCEL = '%scancel' % PREFIX_ATLAS
+STATE_FALLBACK = '%sfallback' % PREFIX_ATLAS
 
 def is_builtin(state):
   """Checks if the given state is a builtin one.
@@ -119,7 +120,7 @@ class Agent:
     ask_states = list(set([to_ask_state(slot) for meta in metadata.values() for slot in meta]))
     metadata_states = list(metadata.keys())
 
-    states = [STATE_ASLEEP, STATE_CANCEL, STATE_ASK] + metadata_states + ask_states
+    states = [STATE_ASLEEP, STATE_FALLBACK, STATE_CANCEL, STATE_CHOICE] + metadata_states + ask_states
 
     self._machine = Machine(self, 
       states=states, 
@@ -130,15 +131,16 @@ class Agent:
 
     self._log.info('Created with states %s' % list(self._machine.states.keys()))
 
-    self._machine.add_transition(STATE_ASLEEP, [STATE_CANCEL] + metadata_states + ask_states, STATE_ASLEEP, after=self.reset)
-    self._machine.add_transition(STATE_CANCEL, [STATE_ASK] + metadata_states + ask_states, STATE_CANCEL, after=self._call_intent)
-    self._machine.add_transition(STATE_ASK, metadata_states, STATE_ASK, after=self._on_generic_ask)
+    self._machine.add_transition(STATE_ASLEEP, [STATE_CANCEL, STATE_FALLBACK] + metadata_states + ask_states, STATE_ASLEEP, after=self.reset)
+    self._machine.add_transition(STATE_CANCEL, [STATE_CHOICE, STATE_FALLBACK] + metadata_states + ask_states, STATE_CANCEL, after=self._call_intent)
+    self._machine.add_transition(STATE_FALLBACK, [STATE_ASLEEP, STATE_CHOICE], STATE_FALLBACK, after=self._call_intent)
+    self._machine.add_transition(STATE_CHOICE, [STATE_FALLBACK] + metadata_states, STATE_CHOICE, after=self._on_generic_ask)
     
     ask_transitions_source = { k: [] for k in ask_states }
 
     for intent, slots in metadata.items():
       converted_slots = [to_ask_state(s) for s in slots]
-      self._machine.add_transition(intent, [STATE_ASLEEP, STATE_ASK] + converted_slots, intent, after=self._call_intent)
+      self._machine.add_transition(intent, [STATE_ASLEEP, STATE_CHOICE] + converted_slots, intent, after=self._call_intent)
 
       for slot in converted_slots:
         ask_transitions_source[slot].append(intent)
@@ -306,7 +308,7 @@ class Agent:
     if len(data_without_cancel) != len(data) and self.state != STATE_ASLEEP: # pylint: disable=E1101
       self.go(STATE_CANCEL)
     else:
-      if self.state == STATE_ASK:
+      if self.state == STATE_CHOICE:
         self._cur_choice = self._extract_choice(msg)
 
         # If found, recal the intent, otherwise do nothing
@@ -325,12 +327,16 @@ class Agent:
         else:
           self._log.warning('Not a valid input "%s", choices are %s' % (msg, self._cur_choices))
       else:
-        # TODO if no intent was found, let it know with the INTENT_NOTFOUND
-
         self._intent_queue.extend(data_without_cancel)
 
         if self.state == STATE_ASLEEP: # pylint: disable=E1101
-          self._process_next_intent()
+          if len(data_without_cancel) == 0:
+            self._cur_slots = {
+              "text": msg,
+            }
+            self.go(STATE_FALLBACK)
+          else:
+            self._process_next_intent()
 
   def _process_next_intent(self):
     """Process the intent queue if any left.
@@ -373,7 +379,7 @@ class Agent:
       
       # TODO if no slot and no choices, there was a mistake! We should raise exception when needed
 
-      self.go(STATE_ASK if not slot_name else to_ask_state(slot_name), payload=raw_msg)
+      self.go(STATE_CHOICE if not slot_name else to_ask_state(slot_name), payload=raw_msg)
 
   def show(self, data, raw_msg):
     """Show simply pass message to the client channel.

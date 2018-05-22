@@ -137,7 +137,9 @@ if `slot` is given, **atlas** will parse the user input and convert it to the sl
 
 The `choices` key permits to restrict valid inputs to those defined if you need to.
 
-If `slot` is omitted, `choices` is mandatory and represents a user choice such as a confirmation (yes/no). The user choice will be sent back to the skill and resetted automatically.
+If `slot` is omitted, `choices` is mandatory and represents a user choice such as a confirmation (yes/no). The user choice will be sent back to the skill in the `__choice` key and resetted automatically.
+
+As of now, there is no way to ask for a value not tied to a slot or choice, I really think it's not a good idea to permit skills to ask for everything they want.
 
 ```json
 {
