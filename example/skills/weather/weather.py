@@ -8,31 +8,24 @@ def get_forecasts(request):
 
   """
 
-  yes = _('Yes') # pylint: disable=E0602
-  no = _('No') # pylint: disable=E0602
-
   date = request.slot('date', converter=dateParse)
-  location = request.slot('city')
-
-  if request.choice == yes:
-    request.show(_("Well, I'll try to find the forecasts for %s on %s") % (location, date)) # pylint: disable=E0602
-
-    time.sleep(3)
-
-    # Do something with the key
-    api_key = request.env('WEATHER_API_KEY') # pylint: disable=W0612
-
-    request.show(_("Some real code should go here"), terminate=True)  # pylint: disable=E0602
-  elif request.choice == no:
-    return request.show(_('You have dismissed the command'), terminate=True) # pylint: disable=E0602
 
   if not date:
-    return request.ask(_('For when do you want the forecast?'), slot='date') # pylint: disable=E0602
+    return request.ask('date', _('For when do you want the forecast?')) # pylint: disable=E0602
+  
+  location = request.slot('city')
 
   if not location:
-    return request.ask(_('For where do you want the forecast?'), slot='city') # pylint: disable=E0602
+    return request.ask('city', _('For where do you want the forecast?')) # pylint: disable=E0602
 
-  return request.ask(_('Do you confirm the command?'), choices=[yes, no]) # pylint: disable=E0602
+  request.show(_("Well, I'll try to find the forecasts for %s on %s") % (location, date)) # pylint: disable=E0602
+
+  time.sleep(3)
+
+  # Do something with the key
+  api_key = request.env('WEATHER_API_KEY') # pylint: disable=W0612
+
+  request.show(_("Some real code should go here"), terminate=True)  # pylint: disable=E0602
 
 if __name__ == '__main__':
   weather_skill = SkillClient(

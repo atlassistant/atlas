@@ -22,17 +22,6 @@
     cancel the command
     abandon
 
-%[atlas/yes]
-    yes
-    ok
-    sure
-
-%[atlas/no]
-    no
-    nope
-    ko
-    not at all
-
 @[room]
     living room
     kitchen

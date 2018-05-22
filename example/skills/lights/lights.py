@@ -10,7 +10,7 @@ def turn_lights(request, switch):
   rooms = request.slot('room')
 
   if not rooms:
-    return request.ask(_('For which room?'), slot='room') # pylint: disable=E0602
+    return request.ask('room', _('For which room?')) # pylint: disable=E0602
 
   if type(rooms) is not list:
     rooms = [rooms]

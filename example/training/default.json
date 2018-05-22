@@ -1315,21 +1315,6 @@
         {"data": [{"text": "cancel the command"}]},
         {"data": [{"text": "abandon"}]}
       ]
-    },
-    "atlas/yes": {
-      "utterances": [
-        {"data": [{"text": "yes"}]},
-        {"data": [{"text": "ok"}]},
-        {"data": [{"text": "sure"}]}
-      ]
-    },
-    "atlas/no": {
-      "utterances": [
-        {"data": [{"text": "no"}]},
-        {"data": [{"text": "nope"}]},
-        {"data": [{"text": "ko"}]},
-        {"data": [{"text": "not at all"}]}
-      ]
     }
   }
 }

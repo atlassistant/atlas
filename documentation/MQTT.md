@@ -100,13 +100,6 @@ Inform the channel that a work has ended.
 
 Run a skill associated with an intent.
 
-Concerning the key `__choice`, if the skill asked for choices without a slot value (by using the `atlas/<sid>/dialog/ask` topic, the user choice will be filled here and resetted as soon as the skill has been called. The flow is:
-
-- User intent trigger the skill
-- The skill ask for a user choice between `yes` or `no`
-- User respond with `yes`
-- The skill is called again with the `__choice` key filled with `yes` and **atlas** does not keep this value, so if your skill ask for another **slot** value, the `__choice` key will be empty next time
-
 ```json
 {
   "__cid": "A unique conversation id representing a conversation lifetime",
@@ -117,7 +110,6 @@ Concerning the key `__choice`, if the skill asked for choices without a slot val
   "__env": {
     "A_PARAMETER": "User configurated value"
   },
-  "__choice": "Contains the last user entered choice",
   "slot_name": "Slot value",
   "another_slot": ["If multiple values for the same slot are found", "They will be passed as an array"]
 }
@@ -133,13 +125,7 @@ Parses a message. The message to parse should be included as a raw payload.
 
 Ask for a user input value. Additional properties will be transfered directly to the channel.
 
-if `slot` is given, **atlas** will parse the user input and convert it to the slot NLU value.
-
-The `choices` key permits to restrict valid inputs to those defined if you need to.
-
-If `slot` is omitted, `choices` is mandatory and represents a user choice such as a confirmation (yes/no). The user choice will be sent back to the skill in the `__choice` key and resetted automatically.
-
-As of now, there is no way to ask for a value not tied to a slot or choice, I really think it's not a good idea to permit skills to ask for everything they want.
+The optional `choices` key permits to restrict valid inputs so user inputs should match one of the provided values.
 
 ```json
 {

@@ -15,12 +15,19 @@ def fallback(request):
   yes = _('Yes') # pylint: disable=E0602
   no = _('No') # pylint: disable=E0602
 
-  if request.choice == yes:
+  confirmation = request.slot('confirmation')
+
+  if confirmation == yes:
     return request.show(_("Ok! I'll search the web for %s") % request.slot('text'), terminate=True) # pylint: disable=E0602
-  elif request.choice == no:
+  elif confirmation == no:
     return request.terminate()
 
-  return request.ask(_('Do you want me to search for %s?') % request.slot('text'), choices=[yes, no]) # pylint: disable=E0602
+  text = request.slot('text')
+
+  return request.ask('confirmation', [
+    _('Do you want me to search for "%s"?') % text, # pylint: disable=E0602
+    _('Should I search the web for "%s" ?') % text, # pylint: disable=E0602
+  ], choices=[yes, no])
 
 if __name__ == '__main__':
   skill = SkillClient(

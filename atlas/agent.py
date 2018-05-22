@@ -4,15 +4,14 @@ from .client import AgentClient
 from .utils import generate_hash
 from atlas_sdk import BrokerConfig
 from atlas_sdk.request import SID_KEY, UID_KEY, ENV_KEY, VERSION_KEY, LANG_KEY, \
-  CID_KEY, CHOICE_KEY
+  CID_KEY
 from .interpreters import Interpreter
 from transitions import Machine, EventData, MachineError
 from fuzzywuzzy import process
 
 PREFIX_ATLAS = 'atlas/'
-PREFIX_ASK = '%sask__' % PREFIX_ATLAS
 STATE_ASLEEP = '%sasleep' % PREFIX_ATLAS
-STATE_CHOICE = '%schoice' % PREFIX_ATLAS
+STATE_ASK = '%sask' % PREFIX_ATLAS
 STATE_CANCEL = '%scancel' % PREFIX_ATLAS
 STATE_FALLBACK = '%sfallback' % PREFIX_ATLAS
 
@@ -26,16 +25,6 @@ def is_builtin(state):
   """
 
   return state.startswith(PREFIX_ATLAS)
-
-def to_ask_state(slot):
-  """Converts to an ask state.
-
-  :param slot: Slot to convert
-  :type slot: str
-
-  """
-
-  return PREFIX_ASK + slot
 
 def resolve_parametric_intent_name(name, slots):
   """Format the intent name with slots dict to handle parametric intent name.
@@ -116,43 +105,43 @@ class Agent:
     # Constructs every possible transitions from interpreter metadata
 
     metadata = { k: v for k, v in self.interpreter.metadata().items() if not is_builtin(k) }
-
-    ask_states = list(set([to_ask_state(slot) for meta in metadata.values() for slot in meta]))
     metadata_states = list(metadata.keys())
 
-    states = [STATE_ASLEEP, STATE_FALLBACK, STATE_CANCEL, STATE_CHOICE] + metadata_states + ask_states
+    states = [STATE_ASLEEP, STATE_FALLBACK, STATE_CANCEL, STATE_ASK] + metadata_states
 
     self._machine = Machine(self, 
       states=states, 
       initial=STATE_ASLEEP, 
       send_event=True, 
-      before_state_change=lambda e: self._log.info('⚡ %s: %s -> %s' % (e.event.name, e.transition.source, e.transition.dest) )
-    )
+      after_state_change=self._format_transition)
 
     self._log.info('Created with states %s' % list(self._machine.states.keys()))
 
-    self._machine.add_transition(STATE_ASLEEP, [STATE_CANCEL, STATE_FALLBACK] + metadata_states + ask_states, STATE_ASLEEP, after=self.reset)
-    self._machine.add_transition(STATE_CANCEL, [STATE_CHOICE, STATE_FALLBACK] + metadata_states + ask_states, STATE_CANCEL, after=self._call_intent)
-    self._machine.add_transition(STATE_FALLBACK, [STATE_ASLEEP, STATE_CHOICE], STATE_FALLBACK, after=self._call_intent)
-    self._machine.add_transition(STATE_CHOICE, [STATE_FALLBACK] + metadata_states, STATE_CHOICE, after=self._on_generic_ask)
-    
-    ask_transitions_source = { k: [] for k in ask_states }
+    self._machine.add_transition(STATE_ASLEEP, 
+      [STATE_CANCEL, STATE_FALLBACK, STATE_ASK] + metadata_states, STATE_ASLEEP, after=self.reset)
+    self._machine.add_transition(STATE_CANCEL, 
+      [STATE_ASK, STATE_FALLBACK] + metadata_states, STATE_CANCEL, after=self._call_intent)
+    self._machine.add_transition(STATE_FALLBACK, 
+      [STATE_ASLEEP, STATE_ASK], STATE_FALLBACK, after=self._call_intent)
+    self._machine.add_transition(STATE_ASK, [STATE_FALLBACK] + metadata_states, STATE_ASK, after=self._on_ask)
 
-    for intent, slots in metadata.items():
-      converted_slots = [to_ask_state(s) for s in slots]
-      self._machine.add_transition(intent, [STATE_ASLEEP, STATE_CHOICE] + converted_slots, intent, after=self._call_intent)
-
-      for slot in converted_slots:
-        ask_transitions_source[slot].append(intent)
-
-    for k, v in ask_transitions_source.items():
-      self._machine.add_transition(k, v, k, after=self._on_slot_asked)
+    for intent in metadata_states:
+      self._machine.add_transition(intent, [STATE_ASLEEP, STATE_ASK], intent, after=self._call_intent)
 
     if data_path:
       try:
         self.get_graph().draw(os.path.join(data_path, '%s.png' % self.uid), prog='dot') # pylint: disable=E1101
       except:
         self._log.warning("Could not draw the transitions graph, maybe you'll need pygraphviz installed!")
+
+  def _format_transition(self, e):
+    dest = e.transition.dest
+    msg = '⚡ %s: %s -> %s' % (e.event.name, e.transition.source, dest)
+
+    if dest == STATE_ASK:
+      msg += ' (slot: %s, choices: %s)' % (self._cur_asked_slot, self._cur_choices)
+
+    self._log.info(msg)
 
   def reset(self, event=None):
     """Resets the current agent states.
@@ -162,12 +151,11 @@ class Agent:
 
     """
 
-    self._cur_asked_param = None
+    self._cur_asked_slot = None
     self._cur_intent = None
     self._cur_conversation_id = None
     self._cur_slots = {}
     self._cur_choices = None
-    self._cur_choice = None
 
     self._client.terminate()
 
@@ -199,7 +187,7 @@ class Agent:
     # Generates a new conversation id if needed
     if dest != self._cur_intent:
       self._cur_conversation_id = generate_hash()
-      self._log.info('💬 New conversation started with id %s' % self._cur_conversation_id)
+      self._log.info('💬 New "%s" conversation started with id %s' % (dest, self._cur_conversation_id))
 
     # Here we need to keep track of the original intent name otherwise transitions
     # will be broke
@@ -229,7 +217,6 @@ class Agent:
       LANG_KEY: self.interpreter.lang(),
       VERSION_KEY: __version__,
       ENV_KEY: { k: self.env[k] for k in valid_keys },
-      CHOICE_KEY: self._cur_choice
     }
 
     data.update(self._cur_slots)
@@ -238,11 +225,7 @@ class Agent:
 
     self._client.intent(resolved_intent_name, data)
 
-    # Resets choices related properties just after the skill has been called
-    self._cur_choice = None
-    self._cur_choices = None
-
-  def _on_slot_asked(self, event):
+  def _on_ask(self, event):
     """Entered in ask state, save current asked param.
 
     :param event: Machine event
@@ -250,25 +233,12 @@ class Agent:
 
     """
 
-    self._cur_asked_param = event.transition.dest[len(PREFIX_ASK):]
+    self._cur_asked_slot = event.kwargs.get('slot')
+    self._cur_choices = event.kwargs.get('choices')
 
     payload = event.kwargs.get('payload')
 
     self._log.debug('Asking request with payload %s' % payload)
-
-    self._client.ask(payload)
-
-  def _on_generic_ask(self, event):
-    """Entered in generic atlas/ask state, forward the raw payload to the channel.
-
-    :param event: Machine event
-    :type event: EventData
-
-    """
-
-    payload = event.kwargs.get('payload')
-
-    self._log.debug('Asking generic choice with payload %s' % payload)
 
     self._client.ask(payload)
 
@@ -308,21 +278,13 @@ class Agent:
     if len(data_without_cancel) != len(data) and self.state != STATE_ASLEEP: # pylint: disable=E1101
       self.go(STATE_CANCEL)
     else:
-      if self.state == STATE_CHOICE:
-        self._cur_choice = self._extract_choice(msg)
+      if self.state == STATE_ASK and self._cur_asked_slot: # pylint: disable=E1101
+        value = self.interpreter.parse_entity(msg, self._cur_intent, self._cur_asked_slot)
 
-        # If found, recal the intent, otherwise do nothing
-        if self._cur_choice:
-          self.go(self._cur_intent)
-        else:
-          self._log.warning('Not a valid input "%s", choices are %s' % (msg, self._cur_choices))
+        matched_value = self._extract_choice(value)
 
-      elif self.state.startswith(PREFIX_ASK) and self._cur_asked_param: # pylint: disable=E1101
-        value = self._extract_choice(msg)
-        
-        # If a value was extracted, convert it to the appropriate slot type, otherwise dismiss user input
-        if value:
-          self._cur_slots[self._cur_asked_param] = self.interpreter.parse_entity(value, self._cur_intent, self._cur_asked_param)
+        if matched_value:
+          self._cur_slots[self._cur_asked_slot] = matched_value
           self.go(self._cur_intent)
         else:
           self._log.warning('Not a valid input "%s", choices are %s' % (msg, self._cur_choices))
@@ -347,20 +309,29 @@ class Agent:
       self._cur_slots = intent['slots']
       self.go(intent['intent'])
 
-  def _is_valid_request(self, data):
+  def _is_valid_request(self, data, required_keys=[]):
     """Checks if a request is valid in the current context.
 
     :param data: Request data
     :type data: dict
+    :param required_keys: Keys required in the data to validate the request
+    :type required_keys: list
 
     """
 
     conversation_id = data.get(CID_KEY)
 
-    if conversation_id == None:
+    if conversation_id == None or conversation_id != self._cur_conversation_id:
+      self._log.warning('Wrong conversation id, dismissing')
+      
       return False
 
-    return conversation_id == self._cur_conversation_id
+    if not all(elem in data and data[elem] != None for elem in required_keys):
+      self._log.warning('One of required keys are not present or its value is equal to None in the data, required keys were %s' % required_keys)
+
+      return False
+
+    return True
 
   def ask(self, data, raw_msg):
     """Ask required by the skill intent.
@@ -372,14 +343,8 @@ class Agent:
 
     """
 
-    if self._is_valid_request(data):
-      self._cur_choices = data.get('choices')
-      
-      slot_name = data.get('slot')
-      
-      # TODO if no slot and no choices, there was a mistake! We should raise exception when needed
-
-      self.go(STATE_CHOICE if not slot_name else to_ask_state(slot_name), payload=raw_msg)
+    if self._is_valid_request(data, ['text', 'slot']):
+      self.go(STATE_ASK, slot=data.get('slot'), choices=data.get('choices'), payload=raw_msg)
 
   def show(self, data, raw_msg):
     """Show simply pass message to the client channel.
@@ -391,7 +356,7 @@ class Agent:
 
     """
 
-    if self._is_valid_request(data):
+    if self._is_valid_request(data, ['text']):
       self._client.show(raw_msg)
 
   def _terminate_from_skill(self, data, raw_msg):

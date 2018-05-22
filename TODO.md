@@ -8,8 +8,6 @@ This file should help newcomers and contributors to know what are the next big *
 - Unit testing!
 - Make `parse_entity` retrieve a list of slots if needed in the snips interpreter
 - Provides a CLI to expose a tiny web interface which takes training data and interpreter configuration as an input and outputs trained data with associated checksum. With this interface, it would be fairly easy to expose hosted trainer and use their power to train the model and only use the trained model on lightweight system such as a Rasp ;)
-- Handle confirm state. Skills should be able to ask for user confirmation
-- Handle multiple choices. Skill should be able to ask for limited choices via `atlas/<sid>/dialog/ask { "slot": "slot_name", "text": "Select a choice", "choices": ["one", "two", "three"] }` and the Agent should be able to use fuzzy matching to make user inputs maps on one of them.
 - Add support for complex UI, such as cards in the Progressive Web App.
 
 ## Mid term

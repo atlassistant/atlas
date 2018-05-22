@@ -88,11 +88,12 @@ class SnipsInterpreter(Interpreter):
     # TODO try to find a way to retrieve multiple slot values, that's a hard one
     # May be we can try matching on _dataset_metadata['entities']
 
-    if is_builtin_entity(entity_label):
-      parsed = self._entity_parser.parse(msg)
+    if entity_label:
+      if is_builtin_entity(entity_label):
+        parsed = self._entity_parser.parse(msg)
 
-      if parsed:
-        return get_entity_value(parsed[0]['entity'], msg)
+        if parsed:
+          return get_entity_value(parsed[0]['entity'], msg)
 
     # TODO if slot is not an auto-extensible, use fuzzy matching to match with restricted values
 
