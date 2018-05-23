@@ -1,17 +1,9 @@
 from setuptools import setup
-import os
-
-ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
-README = os.path.join(ROOT_PATH, 'README.md')
-
-with open(README, encoding='utf8') as f:
-  readme = f.read()
 
 setup(
   name='atlas-core',
   version='1.0.0',
   description='An open-source assistant built for people',
-  long_description=readme,
   author='Julien LEICHER',
   license='GPL-3.0',
   packages=['atlas', 'atlas.client', 'atlas.interpreters', 'atlas.web'],
@@ -25,11 +17,6 @@ setup(
     'PyYAML==3.12',
     'fuzzywuzzy==0.16.0',
   ],
-  extras_require={
-    'snips': [
-      'snips-nlu==0.13.4',
-    ],
-  },
   entry_points={
     'console_scripts': [
       'atlas = atlas.cli:main',

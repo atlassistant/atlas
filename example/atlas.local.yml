@@ -1,5 +1,5 @@
 interpreter: 
-  type: 'atlas.interpreters.dummy_interpreter.DummyInterpreter'
+  type: 'atlas.interpreters.snips_interpreter.SnipsInterpreter'
 discovery:
   interval: 10
   timeout: 30
