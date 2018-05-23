@@ -19,7 +19,7 @@ Have a look at the [📚 documentation folder](documentation).
 
 ### PIP
 
-`pip install atlas-core`
+`pip install atlas-core` or `pip install atlas-core[snips]` to already include the snips backend.
 
 ### Docker
 
@@ -32,7 +32,7 @@ Have a look at the [📚 documentation folder](documentation).
 
 ### NLU backends
 
-Once installed, **atlas** will not have any dependency with a NLU backend. So you may want to install it yourself. Once done, don't forget to use the appropriated interpreter in the `atlas.yml` configuration file.
+Once installed, **atlas** will not have any dependency with a NLU backend (unless you use `pip install atlas-core[snips]`) . So you may want to install it yourself. Once done, don't forget to use the appropriated interpreter in the `atlas.yml` configuration file.
 
 For example, if you use [snips-nlu](https://github.com/snipsco/snips-nlu), you must install it with `pip install snips-nlu` and use
 
