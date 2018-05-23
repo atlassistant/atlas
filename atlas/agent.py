@@ -105,9 +105,9 @@ class Agent:
     # Constructs every possible transitions from interpreter metadata
 
     metadata = { k: v for k, v in self.interpreter.metadata().items() if not is_builtin(k) }
-    metadata_states = list(metadata.keys())
+    metadata_states = list(metadata.keys()) + [STATE_FALLBACK]
 
-    states = [STATE_ASLEEP, STATE_FALLBACK, STATE_CANCEL, STATE_ASK] + metadata_states
+    states = [STATE_ASLEEP, STATE_CANCEL, STATE_ASK] + metadata_states
 
     self._machine = Machine(self, 
       states=states, 
@@ -118,12 +118,10 @@ class Agent:
     self._log.info('Created with states %s' % list(self._machine.states.keys()))
 
     self._machine.add_transition(STATE_ASLEEP, 
-      [STATE_CANCEL, STATE_FALLBACK, STATE_ASK] + metadata_states, STATE_ASLEEP, after=self.reset)
+      [STATE_CANCEL] + metadata_states, STATE_ASLEEP, after=self.reset)
     self._machine.add_transition(STATE_CANCEL, 
-      [STATE_ASK, STATE_FALLBACK] + metadata_states, STATE_CANCEL, after=self._call_intent)
-    self._machine.add_transition(STATE_FALLBACK, 
-      [STATE_ASLEEP, STATE_ASK], STATE_FALLBACK, after=self._call_intent)
-    self._machine.add_transition(STATE_ASK, [STATE_FALLBACK] + metadata_states, STATE_ASK, after=self._on_ask)
+      [STATE_ASK] + metadata_states, STATE_CANCEL, after=self._call_intent)
+    self._machine.add_transition(STATE_ASK, metadata_states, STATE_ASK, after=self._on_ask)
 
     for intent in metadata_states:
       self._machine.add_transition(intent, [STATE_ASLEEP, STATE_ASK], intent, after=self._call_intent)
