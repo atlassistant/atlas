@@ -1,6 +1,13 @@
 <template>
   <pop-group class="messages-list">
-    <message v-for="item in messages" :key="item.id" :text="item.text" :client="item.client" />
+    <message 
+      @choose="$emit('choose', $event)"
+      v-for="item in messages" 
+      :key="item.id" 
+      :text="item.text" 
+      :choices="item.choices"
+      :current="item.id === messages[messages.length -1].id" 
+      :client="item.client" />
     <message v-if="showThinking" text="..." :key="0" />
   </pop-group>
 </template>
@@ -37,7 +44,7 @@ export default {
 @import "./../_vars.scss";
 
 .messages-list {
-  @include col($x: flex-start);
+  @include col($x: stretch);
   overflow: auto;
   padding: baseline(1);
   padding-bottom: 0;

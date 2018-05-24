@@ -94,9 +94,15 @@ class Loader():
 
         self._envs[uid] = dict(config[DEFAULT_SECTION])
 
-    if DEFAULT_KEY not in self._envs:
+    default_env = self._envs.get(DEFAULT_KEY)
+
+    if not default_env:
       self._log.critical('No %s env file found, exiting' % DEFAULT_KEY)
       sys.exit(1)
+
+    # Update user env to take the default value if not overrided
+    for uid in self._envs.keys():
+      self._envs[uid] = { **default_env, **self._envs[uid] }
 
     self._log.debug('Loaded %d env(s) files' % len(self._envs))
 

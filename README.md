@@ -3,7 +3,7 @@ atlas
 
 ![banner](documentation/banner.png)
 
-**atlas** is a totally **open-source**, **self-hosted**, **interoperable** assistant written in Python 3 *(not tested with Python 2)*. It uses the MQTT protocol to communicate with third party skills.
+**atlas** is a totally **open-source**, **self-hosted**, **interoperable** assistant written in Python 3. It uses the MQTT protocol to communicate with third party skills.
 
 Ever wanted to build your own Alexa, Siri or Google Assistant and host it yourself? That's why **atlas** has been created!
 

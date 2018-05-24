@@ -1,7 +1,12 @@
 <template>
   <div v-if="lang" class="chat">
     <p class="chat__notice">You're using <strong>atlas v{{version}} PWA</strong>, it's an early preview that only works on Chrome for now!</p>
-    <messages-list v-if="messages.length" :show-thinking="isThinking" class="chat__list" :messages="messages" />
+    <messages-list 
+      @choose="onInput" 
+      v-if="messages.length" 
+      :show-thinking="isThinking" 
+      class="chat__list" 
+      :messages="messages" />
     <blankslate v-else icon="explore">
       Looks like you do not have an history yet!<br />Start chatting with your assistant!
     </blankslate>

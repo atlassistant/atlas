@@ -7,6 +7,15 @@
     <div class="message__content">
       {{text}}
     </div>
+    <div class="message__choices" v-if="choices && current">
+      <button 
+        class="message__choice"
+        v-for="choice in choices"
+        :key="choice"
+        @click.prevent="$emit('choose', choice)">
+        {{choice}}
+      </button>
+    </div>
   </div>
 </template>
 
@@ -18,6 +27,11 @@ export default {
       type: String,
       required: true,
     },
+    choices: {
+      type: Array,
+      default: null,
+    },
+    current: Boolean,
     client: Boolean,
   },
 }
@@ -27,6 +41,8 @@ export default {
 @import "./../_vars.scss";
 
 .message {
+  @include col();
+  @include cell($grow: 0, $shrink: 0);
   transition: all 0.2s;
   
   &__content {
@@ -39,14 +55,50 @@ export default {
     margin-bottom: baseline(0.5);
   }
 
+  &__choices {
+    align-self: flex-end;
+    margin-bottom: baseline(0.5);
+  }
+
+  // TODO export it in its own file
+
+  &__choice {
+    background: transparent;
+    border: 1px solid color(brand);
+    border-radius: $border-radius;
+    cursor: pointer;
+    color: color(brand);
+    font-weight: bold;
+    outline: none;
+    padding: baseline(0.5);
+    transition: all 0.2s;
+
+    &:active,
+    &:focus {
+      box-shadow: 0 0 10px color(brand);
+    }
+
+    &:hover {
+      background-color: color(brand);
+      color: color(text-inverse);
+    }
+
+    &:active {
+      transform: scale(0.8);
+    }
+
+    & + & {
+      margin-left: baseline(0.5);
+    }
+  }
+
   &--server &__content {
     border: 1px solid color(divider);
   }
 
   &--client {
-    align-self: flex-end;
-
     .message__content {
+      align-self: flex-end;
       background-color: color(brand);
       border-bottom-left-radius: $border-radius;
       border-bottom-right-radius: 0;
@@ -54,7 +106,8 @@ export default {
     }
   }
 
-  &:last-child &__content {
+  &:last-child &__content,
+  &:last-child &__choices {
     margin-bottom: baseline();
   }
 }
