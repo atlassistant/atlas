@@ -1,9 +1,7 @@
 atlas
 ===
 
-![Photo Sphere by Denis Klyuchnikov from the Noun Project](documentation/logo.png)
-
-⚠️ This is an early version, so API may change in the future if this is needed! I'll try not to do so unless if there's no other possibilities.
+![banner](documentation/banner.png)
 
 **atlas** is a totally **open-source**, **self-hosted**, **interoperable** assistant written in Python 3 *(not tested with Python 2)*. It uses the MQTT protocol to communicate with third party skills.
 
@@ -79,5 +77,6 @@ You want to support **atlas** by giving some money? Head over to Liberapay with 
 ## Credits
 
 - [Photo Sphere by Denis Klyuchnikov from the Noun Project](https://thenounproject.com/denis.klyuchnikov.1/uploads/?i=569622) (Logo)
+- Banner icons made by Freepik, Good Ware and Skyclick from [flaticon](https://www.flaticon.com)
 - [snips-nlu](https://github.com/snipsco/snips-nlu) (base interpreter)
 - [transitions](https://github.com/pytransitions/transitions) (dialog management)
