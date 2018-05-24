@@ -1,10 +1,7 @@
 from setuptools import setup
 import os
 
-ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
-README = os.path.join(ROOT_PATH, 'README.md')
-
-with open(README, encoding='utf8') as f:
+with open('README.md', encoding='utf8') as f:
   readme = f.read()
 
 setup(
@@ -19,7 +16,7 @@ setup(
   packages=['atlas', 'atlas.client', 'atlas.interpreters', 'atlas.web'],
   include_package_data=True,
   install_requires=[
-    'atlas-sdk==1.1.1',
+    'atlas-sdk==1.1.3',
     'transitions==0.6.4',
     'Flask==0.12.2',
     'Flask-RESTful==0.3.6',

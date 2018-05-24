@@ -1,1 +1,2 @@
 include atlas/web/public/*
+include README.md
