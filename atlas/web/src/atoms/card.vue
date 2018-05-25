@@ -56,6 +56,7 @@ export default {
   &__text {
     color: color(text, 1);
     padding: baseline();
+    padding-top: baseline(0.5);
   }
 
   &__media {

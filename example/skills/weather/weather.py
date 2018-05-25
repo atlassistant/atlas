@@ -20,23 +20,26 @@ def get_forecasts(request):
 
   request.show(_("Well, I'm on it!")) # pylint: disable=E0602
 
-  time.sleep(3) # Simulate fetching
+  try:
+    time.sleep(3) # Simulate fetching
 
-  # Do something with the key
-  api_key = request.env('WEATHER_API_KEY') # pylint: disable=W0612
+    # Do something with the key
+    api_key = request.env('WEATHER_API_KEY') # pylint: disable=W0612
 
-  request.show(_("It's kinda sunny!"), 
-    cards=[{
-      "media": "https://image.flaticon.com/icons/svg/890/890347.svg",
-      "header": "24°C",
-      "subhead": date.strftime("%A %d %B"),
-      "text": "Looks like it's sunny outside!"
-    }, {
-      "media": "https://image.flaticon.com/icons/svg/890/890347.svg",
-      "header": "22°C",
-      "subhead": date.strftime("%A %d %B"),
-      "text": "Looks like it's sunny outside!"
-    }], terminate=True)  # pylint: disable=E0602
+    request.show(_("It's kinda sunny!"), 
+      cards=[{
+        "media": "https://image.flaticon.com/icons/svg/890/890347.svg",
+        "header": "24°C",
+        "subhead": date.strftime("%A %d %B"),
+        "text": "Looks like it's sunny outside!"
+      }, {
+        "media": "https://image.flaticon.com/icons/svg/890/890347.svg",
+        "header": "22°C",
+        "subhead": date.strftime("%A %d %B"),
+        "text": "Looks like it's sunny outside!"
+      }], terminate=True)  # pylint: disable=E0602
+  except Exception as e:
+    print(e)
 
 if __name__ == '__main__':
   weather_skill = SkillClient(
