@@ -5,7 +5,15 @@
     'message--server': !client,
     'message--client': client,
   }">
-    <div class="message__content">
+    <div v-if="cards" class="message__cards">
+      <card v-for="card in cards" :key="card.header" 
+        :media="card.media"
+        :header="card.header" 
+        :header_link="card.header_link"
+        :subhead="card.subhead"
+        :text="card.text" />
+    </div>
+    <div v-else class="message__content">
       {{text}}
     </div>
     <div class="message__choices" v-if="choices && current">
@@ -21,14 +29,21 @@
 </template>
 
 <script>
+import Card from './card.vue';
+
 export default {
   name: 'Message',
+  components: { Card },
   props: {
     text: {
       type: String,
       required: true,
     },
     choices: {
+      type: Array,
+      default: null,
+    },
+    cards: {
       type: Array,
       default: null,
     },
@@ -63,10 +78,18 @@ export default {
     overflow-x: auto;
   }
 
+  &__cards {
+    @include row($wrap: nowrap);
+    align-self: stretch;
+    margin-bottom: baseline(0.5);
+    overflow-x: auto;
+  }
+
   // TODO export it in its own file
 
   &__choice {
     @include cell($grow: 0, $shrink: 0);
+    @include type(body);
     background: transparent;
     border: 1px solid color(brand);
     border-radius: $border-radius;
@@ -111,6 +134,7 @@ export default {
   }
 
   &:last-child &__content,
+  &:last-child &__cards,
   &:last-child &__choices {
     margin-bottom: baseline();
   }

@@ -18,14 +18,25 @@ def get_forecasts(request):
   if not location:
     return request.ask('city', _('For where do you want the forecast?')) # pylint: disable=E0602
 
-  request.show(_("Well, I'll try to find the forecasts for %s on %s") % (location, date)) # pylint: disable=E0602
+  request.show(_("Well, I'm on it!")) # pylint: disable=E0602
 
-  time.sleep(3)
+  time.sleep(3) # Simulate fetching
 
   # Do something with the key
   api_key = request.env('WEATHER_API_KEY') # pylint: disable=W0612
 
-  request.show(_("Some real code should go here"), terminate=True)  # pylint: disable=E0602
+  request.show(_("It's kinda sunny!"), 
+    cards=[{
+      "media": "https://image.flaticon.com/icons/svg/890/890347.svg",
+      "header": "24°C",
+      "subhead": date.strftime("%A %d %B"),
+      "text": "Looks like it's sunny outside!"
+    }, {
+      "media": "https://image.flaticon.com/icons/svg/890/890347.svg",
+      "header": "22°C",
+      "subhead": date.strftime("%A %d %B"),
+      "text": "Looks like it's sunny outside!"
+    }], terminate=True)  # pylint: disable=E0602
 
 if __name__ == '__main__':
   weather_skill = SkillClient(

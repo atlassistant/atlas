@@ -77,18 +77,19 @@ class Server:
     """
 
     request_id = request.sid
+    user_id = 1337 # TODO Replace with a true user id
 
     # Generates the client id from the user agent, maybe we
     # should find a better way to uniquely identify a user session
     # on the same device
-    client_id = generate_checksum(request.user_agent.string)
+    client_id = generate_checksum(request.user_agent.string + str(user_id))
 
     # Stop all existing channels for the same client_id
     for existing_channel in self._channels.values():
       if existing_channel.client_id == client_id:
         existing_channel.stop(destroy=False)
     
-    channel = ChannelClient(client_id, 1337, # TODO Replace with a true user id
+    channel = ChannelClient(client_id, user_id, 
       on_ask=lambda d, _: socketio.emit('ask', d, room=request_id),
       on_show=lambda d, _: socketio.emit('show', d, room=request_id),
       on_terminate=lambda: socketio.emit('terminate', room=request_id),

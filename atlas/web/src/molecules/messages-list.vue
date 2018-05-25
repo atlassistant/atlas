@@ -5,6 +5,7 @@
       v-for="item in messages" 
       :key="item.id" 
       :text="item.text" 
+      :cards="item.cards"
       :choices="item.choices"
       :current="item.id === messages[messages.length -1].id" 
       :client="item.client" />

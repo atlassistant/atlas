@@ -69,11 +69,18 @@ Inform the channel that it has been destroyed by atlas.
 
 ## atlas/{sid}/channel/show
 
-Show a message to the channel. In the future more properties will be added to handle more complex UI.
+Show a message to the channel.
 
 ```json
 {
-  "text": "Message to show"
+  "text": "Message to show",
+  "cards": [{
+    "media": "optional media url", 
+    "header": "Card header", 
+    "header_link": "optional card header link", 
+    "subhead": "optional card subheader",
+    "text": "Content text"
+  }]
 }
 ```
 
@@ -143,7 +150,14 @@ Show a message to the channel by forwarding it.
 ```json
 {
   "__cid": "A unique conversation id representing a conversation lifetime",
-  "text": "Message to show"
+  "text": "Message to show",
+  "cards": [{
+    "media": "optional media url", 
+    "header": "Card header", 
+    "header_link": "optional card header link", 
+    "subhead": "optional card subheader",
+    "text": "Content text"
+  }]
 }
 ```
 
