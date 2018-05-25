@@ -16,7 +16,7 @@ setup(
   packages=['atlas', 'atlas.client', 'atlas.interpreters', 'atlas.web'],
   include_package_data=True,
   install_requires=[
-    'atlas-sdk==1.1.5',
+    'atlas-sdk==1.1.6',
     'transitions==0.6.4',
     'Flask==0.12.2',
     'Flask-RESTful==0.3.6',

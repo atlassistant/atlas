@@ -115,7 +115,7 @@ export default {
     }
 
     & + & {
-      margin-left: baseline(0.5);
+      margin-left: baseline();
     }
   }
 
