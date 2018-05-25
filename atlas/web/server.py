@@ -3,6 +3,7 @@ from flask_restful import Api, Resource
 from flask_socketio import SocketIO, Namespace, emit
 import logging, subprocess, os
 from ..version import __version__
+from ..utils import generate_checksum
 from atlas_sdk import BrokerConfig, ChannelClient
 
 app = Flask('atlas.web', static_folder='./public', template_folder='./public')
@@ -75,18 +76,28 @@ class Server:
     """Called when a connection has been made by a websocket.
     """
 
-    client_id = request.sid
+    request_id = request.sid
 
+    # Generates the client id from the user agent, maybe we
+    # should find a better way to uniquely identify a user session
+    # on the same device
+    client_id = generate_checksum(request.user_agent.string)
+
+    # Stop all existing channels for the same client_id
+    for existing_channel in self._channels.values():
+      if existing_channel.client_id == client_id:
+        existing_channel.stop(destroy=False)
+    
     channel = ChannelClient(client_id, 1337, # TODO Replace with a true user id
-      on_ask=lambda d, _: socketio.emit('ask', d, room=client_id),
-      on_show=lambda d, _: socketio.emit('show', d, room=client_id),
-      on_terminate=lambda: socketio.emit('terminate', room=client_id),
-      on_work=lambda: socketio.emit('work', room=client_id),
-      on_created=lambda d, _: socketio.emit('created', d, room=client_id),
-      on_destroyed=lambda: socketio.emit('destroyed', room=client_id),
+      on_ask=lambda d, _: socketio.emit('ask', d, room=request_id),
+      on_show=lambda d, _: socketio.emit('show', d, room=request_id),
+      on_terminate=lambda: socketio.emit('terminate', room=request_id),
+      on_work=lambda: socketio.emit('work', room=request_id),
+      on_created=lambda d, _: socketio.emit('created', d, room=request_id),
+      on_destroyed=lambda: socketio.emit('destroyed', room=request_id),
     )
     
-    self._channels[client_id] = channel
+    self._channels[request_id] = channel
 
     channel.start(self._config.broker)
 
@@ -94,7 +105,7 @@ class Server:
     """Called when a websocket has disconnected.
     """
 
-    self._channels[request.sid].stop()
+    self._channels[request.sid].stop(destroy=False)
 
     del self._channels[request.sid]
 

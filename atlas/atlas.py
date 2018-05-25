@@ -120,8 +120,12 @@ class Atlas:
     """
 
     if id:
-      if self.find_agent(id):
+      agt = self.find_agent(id)
+
+      if agt:
         self._log.info('Reusing existing agent %s for user %s' % (id, uid))
+
+        agt._client.created()
       else:
         self._log.info('🙌 Creating agent %s for user %s' % (id, uid))
               

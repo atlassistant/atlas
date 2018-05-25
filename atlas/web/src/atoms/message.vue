@@ -1,6 +1,7 @@
 <template>
   <div :class="{ 
     'message': true,
+    'message--has-choices': choices,
     'message--server': !client,
     'message--client': client,
   }">
@@ -56,13 +57,16 @@ export default {
   }
 
   &__choices {
+    @include row($wrap: nowrap);
     align-self: flex-end;
     margin-bottom: baseline(0.5);
+    overflow-x: auto;
   }
 
   // TODO export it in its own file
 
   &__choice {
+    @include cell($grow: 0, $shrink: 0);
     background: transparent;
     border: 1px solid color(brand);
     border-radius: $border-radius;
@@ -109,6 +113,10 @@ export default {
   &:last-child &__content,
   &:last-child &__choices {
     margin-bottom: baseline();
+  }
+
+  &:last-child.message--has-choices &__content {
+    margin-bottom: baseline(0.5);
   }
 }
 </style>
