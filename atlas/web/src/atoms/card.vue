@@ -34,7 +34,7 @@ export default {
 @import "./../_vars.scss";
 
 .card {
-  @include cell($shrink: 0);
+  @include cell($shrink: 0, $grow: 0);
   background-color: color(background, 1);
   box-shadow: 0 0 10px color(shadow);
   border: 1px solid color(divider);

@@ -29,14 +29,21 @@ export default {
   },
   mounted() {
     this.$el.addEventListener('DOMNodeInserted', 
-      () => this.$el.scroll({ 
-        top: this.$el.scrollHeight,
-        behavior: 'smooth',
-      }));
+      () => this.scrollToBottom());
+
+    setTimeout(() => this.scrollToBottom(), 300);
   },
   props: {
     messages: Array,
     showThinking: Boolean,
+  },
+  methods: {
+    scrollToBottom() {
+      this.$el.scroll({ 
+        top: this.$el.scrollHeight,
+        behavior: 'smooth',
+      });
+    },
   },
 }
 </script>

@@ -1,6 +1,9 @@
 from atlas_sdk import SkillClient, Intent, Slot, Env, Request
+from atlas_sdk.utils import svgs_to_data_uri
 import time
 from dateutil.parser import parse as dateParse
+
+b64_icons = svgs_to_data_uri('sunny.svg')
 
 def get_forecasts(request):
   """
@@ -20,26 +23,18 @@ def get_forecasts(request):
 
   request.show(_("Well, I'm on it!")) # pylint: disable=E0602
 
-  try:
-    time.sleep(3) # Simulate fetching
+  time.sleep(3) # Simulate fetching
 
-    # Do something with the key
-    api_key = request.env('WEATHER_API_KEY') # pylint: disable=W0612
+  # Do something with the key
+  api_key = request.env('WEATHER_API_KEY') # pylint: disable=W0612
 
-    request.show(_("It's kinda sunny!"), 
-      cards=[{
-        "media": "https://image.flaticon.com/icons/svg/890/890347.svg",
-        "header": "24°C",
-        "subhead": date.strftime("%A %d %B"),
-        "text": "Looks like it's sunny outside!"
-      }, {
-        "media": "https://image.flaticon.com/icons/svg/890/890347.svg",
-        "header": "22°C",
-        "subhead": date.strftime("%A %d %B"),
-        "text": "Looks like it's sunny outside!"
-      }], terminate=True)  # pylint: disable=E0602
-  except Exception as e:
-    print(e)
+  request.show(_("It's kinda sunny!"), # pylint: disable=E0602
+    cards=[{
+      "media": b64_icons['sunny'],
+      "header": "24°C",
+      "subhead": date.strftime("%A %d %B"),
+      "text": "Looks like it's sunny outside!"
+    }], terminate=True)  # pylint: disable=E0602
 
 if __name__ == '__main__':
   weather_skill = SkillClient(

@@ -67,6 +67,10 @@ export default {
   },
   methods: {
     sendParse() {
+      if (!this.text) {
+        return;
+      }
+      
       this.$emit('input', this.text);
       this.text = '';
     },
@@ -76,7 +80,7 @@ export default {
       this.isTextInput = true;
     },
     startListening() {
-      if (!this.recognition) {
+      if (!this.recognition || this.isTextInput) {
         return;
       }
 
