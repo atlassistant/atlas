@@ -5,7 +5,7 @@
     </form>
     <icon-button name="keyboard" secondary v-else @click.prevent="switchToTextInput" />
 
-    <icon-button v-if="!isListening" name="mic" @click.prevent="startListening" />
+    <icon-button v-if="!isListening" name="mic" @click.prevent="switchToVoiceInput" />
     <spinner v-else />
 
     <icon-button name="settings" secondary v-if="!isTextInput" />
@@ -78,6 +78,11 @@ export default {
       this.text = '';
       this.stopListening();
       this.isTextInput = true;
+    },
+    switchToVoiceInput() {
+      this.isTextInput = false;
+
+      this.startListening();
     },
     startListening() {
       if (!this.recognition || this.isTextInput) {
