@@ -86,12 +86,12 @@ Show a message to the channel.
 
 ## atlas/{sid}/channel/ask
 
-Ask for a user input. In the future more properties will be added to handle more complex UI.
+Ask for a user input.
 
 ```json
 {
   "text": "Question to ask",
-  "choices": ["Choice 1", "Choice 2"] // Optional valid choices, if set, the user should choose one of those
+  "choices": ["Choice 1", "Choice 2"]
 }
 ```
 
