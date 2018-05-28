@@ -3,9 +3,9 @@
     <form v-if="isTextInput" class="chat-input__form" @submit.prevent="sendParse">
       <text-input ref="input" borderless v-model="text" placeholder="What can I do for you?" />
     </form>
-    <icon-button name="keyboard" secondary v-else @click.prevent="switchToTextInput" />
+    <icon-button name="keyboard" secondary v-else @click.prevent="$emit('switch')" />
 
-    <icon-button v-if="!isListening" name="mic" @click.prevent="switchToVoiceInput" />
+    <icon-button v-if="!isListening" name="mic" @click.prevent="$emit('listen')" />
     <spinner v-else />
 
     <icon-button name="settings" secondary v-if="!isTextInput" />
@@ -29,41 +29,19 @@ export default {
     Spinner,
   },
   props: {
-    lang: {
-      type: String,
+    isListening: {
+      type: Boolean,
+      required: true,
+    },
+    isTextInput: {
+      type: Boolean,
       required: true,
     },
   },
   data() {
     return {
       text: '',
-      isListening: false,
-      isTextInput: false,
     };
-  },
-  mounted() {
-    if ('webkitSpeechRecognition' in window) {
-      this.start_sound = new Audio('/public/start_of_input.wav');
-      this.end_sound = new Audio('/public/end_of_input.wav');
-
-      this.recognition = new webkitSpeechRecognition();
-      this.recognition.lang = this.lang;
-      this.recognition.onend = this.recognition.onerror = () => {
-        this.isListening = false;
-        this.end_sound.play();
-      };
-      this.recognition.onresult = (evt) => {
-        // this.isListening = false;
-
-        if (evt.results.length > 0) {
-          const r = evt.results[0];
-
-          if (r.length > 0 && r.isFinal) {
-            this.$emit('input', r[0].transcript);
-          }
-        }
-      }
-    }
   },
   methods: {
     sendParse() {
@@ -73,34 +51,6 @@ export default {
       
       this.$emit('input', this.text);
       this.text = '';
-    },
-    switchToTextInput() {
-      this.text = '';
-      this.stopListening();
-      this.isTextInput = true;
-    },
-    switchToVoiceInput() {
-      this.isTextInput = false;
-
-      this.startListening();
-    },
-    startListening() {
-      if (!this.recognition || this.isTextInput) {
-        return;
-      }
-
-      this.isTextInput = false;
-      this.isListening = true;
-
-      this.start_sound.play();
-      this.recognition.start();
-    },
-    stopListening() {
-      this.isListening = false;
-
-      if (this.recognition) {
-        this.recognition.abort();
-      }
     },
   },
 }

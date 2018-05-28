@@ -1,8 +1,7 @@
 <template>
-  <div v-if="lang" class="chat">
-    <p class="chat__notice">You're using <strong>atlas v{{version}} PWA</strong>, it's an early preview that only works on Chrome for now!</p>
+  <div v-if="isConnected" class="chat">
     <messages-list 
-      @choose="onInput" 
+      @choose="parse" 
       v-if="messages.length" 
       :show-thinking="isThinking" 
       class="chat__list" 
@@ -10,7 +9,14 @@
     <blankslate v-else icon="explore">
       Looks like you do not have an history yet!<br />Start chatting with your assistant!
     </blankslate>
-    <chat-input :lang="lang" ref="chatInput" class="chat__input" @input="onInput" />
+    <chat-input
+      ref="chatInput"
+      class="chat__input"
+      @input="parse"
+      @listen="listen"
+      @switch="switchToTextInput"
+      :is-text-input="isTextInput"
+      :is-listening="isListening" />
   </div>
   <blankslate v-else icon="network_check">
     Connecting to your assistant
@@ -18,6 +24,8 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex';
+import { actions } from './../store';
 import {
   MessagesList,
   Blankslate,
@@ -25,7 +33,6 @@ import {
 import {
   ChatInput,
 } from './../organisms';
-import io from 'socket.io-client';
 
 export default {
   name: 'Chat',
@@ -34,70 +41,16 @@ export default {
     ChatInput,
     MessagesList,
   },
-  data() {
-    return {
-      isThinking: false,
-      lang: null,
-      version: window.VERSION,
-      messages: [],
-    };
-  },
-  mounted() {
-    this.socket = io();
-    this.socket.on('ask', (data) => this.processMessage(data, true));
-    this.socket.on('show', (data) => this.processMessage(data));
-    this.socket.on('terminate', () => this.onTerminate());
-    this.socket.on('work', () => this.onWork());
-    this.socket.on('destroyed', () => this.lang = null);
-    this.socket.on('disconnect', () => this.lang = null); // TODO proper disconnect indicator
-    this.socket.on('created', (data) => {
-      this.lang = data.lang;
-
-      this.speaker = new SpeechSynthesisUtterance();
-      this.speaker.lang = this.lang;
-    });
+  computed: {
+    ...mapGetters([
+        'messages', 'isConnected', 'isListening', 'isTextInput', 'isThinking',
+    ]),
   },
   methods: {
-    onInput(text) {
-      this.messages.push({
-        client: true,
-        id: this.messages.length + 1,
-        text,
-      });
-
-      this.socket.emit('parse', text);
-    },
-    onWork() {
-      this.isThinking = true;
-    },
-    onTerminate() {
-      this.$refs.chatInput.stopListening();
-      this.isThinking = false;
-    },
-    processMessage(data, requiresUserInput) {
-      this.messages.push({
-        id: this.messages.length + 1,
-        ...data,
-      });
-
-      if (data.text) {
-        this.speaker.text = data.text;
-
-        if (requiresUserInput) {
-          this.isThinking = false;
-          this.speaker.onend = () => {
-            this.$refs.chatInput.startListening();
-            this.speaker.onend = null;
-          };
-        }
-        
-        speechSynthesis.speak(this.speaker);
-      }
-    },
+    ...mapActions([actions.parse.name, actions.listen.name, actions.switchToTextInput.name]),
   },
 }
 </script>
-
 
 <style lang="scss">
 @import "./../_vars.scss";

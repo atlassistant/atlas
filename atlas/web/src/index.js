@@ -1,11 +1,17 @@
 import Vue from 'vue';
-import { Chat } from './pages';
+import createRouter from './router';
+import createStore from './store';
 
 import './_vars.scss';
 import './_main.scss';
 
+const router = createRouter();
+const store = createStore();
+
 const app = new Vue({
-    render: h => h(Chat),
+    router,
+    store,
+    render: h => h('router-view'),
 });
 
 app.$mount('#root');
