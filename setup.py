@@ -4,9 +4,12 @@ import os
 with open('README.md', encoding='utf8') as f:
   readme = f.read()
 
+with open('atlas/version.py') as f:
+  version = f.readline().strip()[15:-1]
+
 setup(
   name='atlas-core',
-  version='1.1.0',
+  version=version,
   description='An open-source assistant built for people',
   long_description_content_type='text/markdown',
   long_description=readme,
@@ -16,7 +19,7 @@ setup(
   packages=['atlas', 'atlas.client', 'atlas.interpreters', 'atlas.web'],
   include_package_data=True,
   install_requires=[
-    'atlas-sdk==1.1.6',
+    'atlas-sdk==1.1.7',
     'transitions==0.6.4',
     'Flask==0.12.2',
     'Flask-RESTful==0.3.6',
