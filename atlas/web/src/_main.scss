@@ -30,3 +30,7 @@ select,
 a {
   -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
+
+a {
+  @include link(color(brand));
+}

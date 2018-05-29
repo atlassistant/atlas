@@ -14,6 +14,7 @@
       class="chat__input"
       @input="parse"
       @listen="listen"
+      @settings="$router.push({ name: 'intents' })"
       @switch="switchToTextInput"
       :is-text-input="isTextInput"
       :is-listening="isListening" />

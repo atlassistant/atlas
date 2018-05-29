@@ -8,7 +8,7 @@
     <icon-button v-if="!isListening" name="mic" @click.prevent="$emit('listen')" />
     <spinner v-else />
 
-    <icon-button name="settings" secondary v-if="!isTextInput" />
+    <icon-button name="settings" secondary v-if="!isTextInput" @click.prevent="$emit('settings')" />
   </div>
 </template>
 

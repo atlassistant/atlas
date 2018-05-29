@@ -1,4 +1,8 @@
 import Vue from 'vue';
+import VueBreadcrumbs from 'vue-breadcrumbs';
+
+Vue.use(VueBreadcrumbs);
+
 import createRouter from './router';
 import createStore from './store';
 

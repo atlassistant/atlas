@@ -41,10 +41,6 @@ export default {
   border-radius: $border-radius;
   max-width: 100%;
 
-  &__content a {
-    @include link(color(brand));
-  }
-
   &__header {
     @include type(h4);
     padding: baseline();

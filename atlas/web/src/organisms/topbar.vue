@@ -9,7 +9,7 @@
 
       <div class="topbar__links">
         <router-link :to="{ name: 'intents' }" class="topbar__link">comprehension</router-link>
-        <router-link :to="{ name: 'intents' }" class="topbar__link">execution</router-link>
+        <router-link :to="{ name: 'skills' }" class="topbar__link">execution</router-link>
         <router-link :to="{ name: 'intents' }" class="topbar__link">settings</router-link>
       </div>
     </content-wrapper>

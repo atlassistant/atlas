@@ -1,11 +1,16 @@
 <template>
   <div class="administration">
     <topbar />
+    <breadcrumb />
     <router-view />
   </div>
 </template>
 
 <script>
+import {
+  Breadcrumb,
+} from './../molecules';
+
 import {
   Topbar,
 } from './../organisms';
@@ -14,6 +19,7 @@ export default {
   name: 'Administration',
   components: {
     Topbar,
+    Breadcrumb,
   },
 }
 </script>
