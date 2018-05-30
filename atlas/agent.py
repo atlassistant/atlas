@@ -34,15 +34,17 @@ def resolve_parametric_intent_name(name, slots):
 
   :param name: Name of the intent, may contain placeholders such as {slotName}
   :type name: str
-  :param slots: Dictionary of slots values
+  :param slots: Dictionary of slots as retrieved by the NLU
   :type slots: dict
 
   """
 
   # TODO what to do if a slot value is an array?
 
+  slots_flattened = { k: v[0].get('value') for (k, v) in slots.items() }
+
   try:
-    return name.format(**slots)
+    return name.format(**slots_flattened)
   except KeyError:
     return name
 
@@ -240,23 +242,33 @@ class Agent:
 
     self._client.ask(payload)
 
-  def _extract_choice(self, value):
-    """Extract choice with given message. It will use fuzzy match to determine
-    the valid one.
+  def extract_choices(self, values):
+    """Extract choices from given values. It will use fuzzy match to determine
+    the first valid one.
 
-    :param value: Value to use when searching
-    :type value: str
-    :rtype: str
+    :param values: Values to use when searching
+    :type values: list
+    :rtype: list
 
     """
 
-    # No choices available, just return the value
+    # No choices available, just return the values
     if not self._cur_choices:
-      return value
+      return values
 
-    match = process.extractOne(value, self._cur_choices, score_cutoff=60)
+    # Else, try to find one value matching with current choices
+    for value in values:
+      # Retrieve the inner slot value
+      slot_value = value.get('value')
 
-    return match[0] if match else None
+      if slot_value:
+        match = process.extractOne(slot_value, self._cur_choices, score_cutoff=60)
+
+        # If match, update the value prop for this slot but keep other informations
+        if match:
+          return [{ **value, 'value': match[0] }]
+
+    return None
 
   def parse(self, msg):
     """Parse a raw message.
@@ -277,12 +289,12 @@ class Agent:
       self.go(STATE_CANCEL)
     else:
       if self.state == STATE_ASK and self._cur_asked_slot: # pylint: disable=E1101
-        value = self.interpreter.parse_entity(msg, self._cur_intent, self._cur_asked_slot)
+        values = self.interpreter.parse_entity(msg, self._cur_intent, self._cur_asked_slot)
 
-        matched_value = self._extract_choice(value)
+        matched_values = self.extract_choices(values)
 
-        if matched_value:
-          self._cur_slots[self._cur_asked_slot] = matched_value
+        if matched_values:
+          self._cur_slots[self._cur_asked_slot] = matched_values
           self.go(self._cur_intent)
         else:
           self._log.warning('Not a valid input "%s", choices are %s' % (msg, self._cur_choices))
@@ -291,9 +303,8 @@ class Agent:
 
         if self.state == STATE_ASLEEP: # pylint: disable=E1101
           if len(data_without_cancel) == 0:
-            self._cur_slots = {
-              "text": msg,
-            }
+            self._cur_slots = { 'text': [{ 'value': msg }] }
+
             self.go(STATE_FALLBACK)
           else:
             self._process_next_intent()

@@ -7,7 +7,7 @@ from .web import Server, ServerConfig
 from .interpreters import Interpreter, InterpreterConfig
 from .client import AtlasClient
 from .executor import Executor, ExecutorConfig
-from .loader import Loader, LoaderConfig
+from .loader import Loader, LoaderConfig, DEFAULT_KEY
 import logging, yaml, os, configparser
 
 BROKER_CONFIG_KEY = 'broker'
@@ -118,8 +118,11 @@ class Atlas:
     :type uid: str
 
     """
-
+    
     if id:
+      # If no uid is provided, use the default one
+      uid = uid or DEFAULT_KEY
+
       agt = self.find_agent(id)
 
       if agt:
@@ -128,7 +131,7 @@ class Atlas:
         agt._client.created()
       else:
         self._log.info('🙌 Creating agent %s for user %s' % (id, uid))
-              
+
         agt = Agent(
           id,
           uid,

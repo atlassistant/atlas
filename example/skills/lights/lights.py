@@ -12,10 +12,7 @@ def turn_lights(request, switch):
   if not rooms:
     return request.ask('room', _('For which room?')) # pylint: disable=E0602
 
-  if type(rooms) is not list:
-    rooms = [rooms]
-
-  request.show(_('Turning lights %s in %s') % (switch, ', '.join(rooms)), terminate=True) # pylint: disable=E0602
+  request.show(_('Turning lights %s in %s') % (switch, ', '.join([r.value for r in rooms])), terminate=True) # pylint: disable=E0602
 
 def turn_lights_on(request):
   turn_lights(request, 'on')

@@ -11,12 +11,12 @@ def get_forecasts(request):
 
   """
 
-  date = request.slot('date', converter=dateParse)
+  date = request.slot('date').first().value
 
   if not date:
     return request.ask('date', _('For when do you want the forecast?')) # pylint: disable=E0602
   
-  location = request.slot('city')
+  location = request.slot('city').first().value
 
   if not location:
     return request.ask('city', _('For where do you want the forecast?')) # pylint: disable=E0602
@@ -32,7 +32,7 @@ def get_forecasts(request):
     cards=[{
       "media": b64_icons['sunny'],
       "header": "24°C",
-      "subhead": date.strftime("%A %d %B"),
+      "subhead": dateParse(date).strftime("%A %d %B"),
       "text": "Looks like it's sunny outside!"
     }], terminate=True)  # pylint: disable=E0602
 

@@ -15,14 +15,14 @@ def fallback(request):
   yes = _('Yes') # pylint: disable=E0602
   no = _('No') # pylint: disable=E0602
 
-  confirmation = request.slot('confirmation')
+  confirmation = request.slot('confirmation').first().value
+  text = request.slot('text').first().value
 
-  if confirmation == yes:
-    return request.show(_("Ok! I'll search the web for %s") % request.slot('text'), terminate=True) # pylint: disable=E0602
-  elif confirmation == no:
-    return request.terminate()
-
-  text = request.slot('text')
+  if confirmation:
+    if confirmation == yes:
+      return request.show(_("Ok! I'll search the web for %s") % text, terminate=True) # pylint: disable=E0602
+    elif confirmation == no:
+      return request.terminate()
 
   return request.ask('confirmation', [
     _('Do you want me to search for "%s"?') % text, # pylint: disable=E0602

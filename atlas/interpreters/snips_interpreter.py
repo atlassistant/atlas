@@ -3,18 +3,6 @@ from snips_nlu import load_resources, SnipsNLUEngine, __version__
 from snips_nlu.builtin_entities import BuiltinEntityParser, is_builtin_entity
 import io, json, os
 
-def get_entity_value(entity, default_value=None):
-  """Retrieve an entity value.
-  
-  :param entity: Dictionary wich contains results
-  :type entity: dict
-  :param default_value: Default value if not found
-  :type default_value: any
-
-  """
-
-  return entity.get('value', entity.get('from', default_value))
-
 class SnipsInterpreter(Interpreter):
 
   def __init__(self):
@@ -93,11 +81,11 @@ class SnipsInterpreter(Interpreter):
         parsed = self._entity_parser.parse(msg)
 
         if parsed:
-          return get_entity_value(parsed[0]['entity'], msg)
+          return [parsed[0]['entity']]
 
     # TODO if slot is not an auto-extensible, use fuzzy matching to match with restricted values
 
-    return msg
+    return super(SnipsInterpreter, self).parse_entity(msg, intent, slot)
 
   def parse(self, msg):
 
@@ -113,15 +101,12 @@ class SnipsInterpreter(Interpreter):
     # Constructs a slot dictionary with slot value as a list if multiples matched
     for slot in parsed['slots']:
       name = slot['slotName']
-      value = get_entity_value(slot['value'])
+      value = slot['value']
 
       if name in slots:
-        if type(slots[name]) is not list:
-          slots[name] = [slots[name]]
-
         slots[name].append(value)
       else:
-        slots[name] = value
+        slots[name] = [value]
 
     return [{
       'text': msg,

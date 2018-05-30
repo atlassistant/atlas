@@ -130,11 +130,16 @@ class Interpreter():
   def parse(self, msg):
     """Parses an incoming message and converts it to a list of dict that represents intents and slots.
 
-    If multiple values are found for the same slot, the interpreter should returns an array of values
-    instead of a single one.
+    Slots should always returns an array of dict since a slot could have many values in a sentence,
+    such as rooms when turning lights on.
+
+    The exact structure of the dict is related to the interpreter, but in general, try to follow the one
+    defined by the snips-nlu library.
+
+    The only mandatory key is "value" because it is used by atlas.
 
     Why a list of dict? Because you can return multiple intents for the same sentence if this is what
-    the user asked for.
+    the user asked for (something as "do something and this also").
 
     :param msg: Message to parse
     :type msg: str
@@ -148,7 +153,13 @@ class Interpreter():
   def parse_entity(self, msg, intent, slot):
     """Parses a message as an entity. This is useful when the skill is asking for mandatory parameters.
 
-    The interpreter should translate the given value into the appropriate entity type.
+    The interpreter should translate the given value into the appropriate entity type and returns a list
+    of dict.
+
+    The exact structure of the dict is related to the interpreter, but in general, try to follow the one
+    defined by the snips-nlu library.
+
+    The only mandatory key is "value" because it is used by atlas.
 
     :param msg: Raw message to parse
     :type msg: str
@@ -156,9 +167,10 @@ class Interpreter():
     :type intent: str
     :param slot: Slot requested
     :type slot: str
-
-    :rtype: str
+    :rtype: list
 
     """
 
-    return msg
+    return [{
+      'value': msg,
+    }]

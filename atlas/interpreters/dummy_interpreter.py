@@ -28,6 +28,6 @@ class DummyInterpreter(Interpreter):
       'text': msg,
       'intent': 'weatherForecast',
       'slots': {
-        'date': '2018-05-20',
+        'date': [{ 'value': '2018-05-20'}],
       }
     }]
