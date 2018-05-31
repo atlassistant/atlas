@@ -19,7 +19,7 @@ setup(
   packages=['atlas', 'atlas.client', 'atlas.interpreters', 'atlas.web'],
   include_package_data=True,
   install_requires=[
-    'atlas-sdk==1.1.7',
+    'atlas-sdk==1.1.8',
     'transitions==0.6.4',
     'Flask==0.12.2',
     'Flask-RESTful==0.3.6',
@@ -29,7 +29,7 @@ setup(
   ],
   extras_require={
     'snips': [
-      'snips-nlu==0.13.4',
+      'snips-nlu==0.13.5',
     ],
   },
   entry_points={
