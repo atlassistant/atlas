@@ -1,3 +1,2 @@
-include atlas/web/public/*
-include README.md
+include README.rst
 include atlas/version.py

@@ -1,7 +1,7 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 import os
 
-with open('README.md', encoding='utf8') as f:
+with open('README.rst', encoding='utf8') as f:
   readme = f.read()
 
 with open('atlas/version.py') as f:
@@ -11,25 +11,20 @@ setup(
   name='atlas-core',
   version=version,
   description='An open-source assistant built for people',
-  long_description_content_type='text/markdown',
   long_description=readme,
   url='https://github.com/atlassistant/atlas',
   author='Julien LEICHER',
   license='GPL-3.0',
-  packages=['atlas', 'atlas.client', 'atlas.interpreters', 'atlas.web'],
+  packages=find_packages(),
   include_package_data=True,
   install_requires=[
-    'atlas-sdk==1.1.8',
+    'atlas-sdk==2.0.0',
     'transitions==0.6.4',
-    'Flask==0.12.2',
-    'Flask-RESTful==0.3.6',
-    'Flask-SocketIO==2.9.6',
-    'PyYAML==3.12',
     'fuzzywuzzy==0.16.0',
   ],
   extras_require={
     'snips': [
-      'snips-nlu==0.13.5',
+      'snips-nlu==0.14.0',
     ],
   },
   entry_points={

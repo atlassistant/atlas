@@ -1,7 +1,6 @@
 .vscode
 __pycache__
-documentation
+docs
+tests
 example
-atlas/web/node_modules
-atlas/web/node_modules/**/*
 atlas.egg-info
