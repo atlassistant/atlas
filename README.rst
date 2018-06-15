@@ -21,7 +21,7 @@ source
 .. code-block:: bash
 
   $ git clone https://github.com/atlassistant/atlas.git
-  $ cd atlas-sdk
+  $ cd atlas
   $ python setup.py install
 
 Testing
