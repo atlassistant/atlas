@@ -1,8 +1,11 @@
 import unittest
 from unittest.mock import MagicMock
 from atlas_sdk.pubsubs import PubSub
-from atlas_sdk.topics import CHANNEL_CREATE_TOPIC, CHANNEL_DESTROY_TOPIC
+from atlas_sdk.topics import CHANNEL_CREATE_TOPIC, CHANNEL_DESTROY_TOPIC, \
+  ATLAS_STATUS_LOADING, ATLAS_STATUS_LOADED, ATLAS_STATUS_UNLOADING, ATLAS_STATUS_UNLOADED, \
+  CHANNEL_CREATED_TOPIC, CHANNEL_DESTROYED_TOPIC
 from atlas.adapters.atlas_adapter import AtlasAdapter
+from atlas.version import __version__
 
 class AtlasAdapterTests(unittest.TestCase):
 
@@ -30,3 +33,34 @@ class AtlasAdapterTests(unittest.TestCase):
     adapter.on_channel_destroy.assert_called_once_with({
       'sid': '+',
     })
+
+  def test_publications(self):
+    pb = PubSub()
+    pb.publish = MagicMock()
+    payload = '{"version": "%s"}' % __version__
+
+    adapter = AtlasAdapter(pb)
+
+    adapter.loading()
+    pb.publish.assert_called_once_with(ATLAS_STATUS_LOADING, payload)
+    pb.publish.reset_mock()
+
+    adapter.unloading()
+    pb.publish.assert_called_once_with(ATLAS_STATUS_UNLOADING)
+    pb.publish.reset_mock()
+
+    adapter.loaded()
+    pb.publish.assert_called_once_with(ATLAS_STATUS_LOADED, payload)
+    pb.publish.reset_mock()
+
+    adapter.unloaded()
+    pb.publish.assert_called_once_with(ATLAS_STATUS_UNLOADED)
+    pb.publish.reset_mock()
+
+    adapter.channel_created('test', '1337')
+    pb.publish.assert_called_once_with(CHANNEL_CREATED_TOPIC, '{"sid": "test", "uid": "1337"}')
+    pb.publish.reset_mock()
+
+    adapter.channel_destroyed('test', '1337')
+    pb.publish.assert_called_once_with(CHANNEL_DESTROYED_TOPIC, '{"sid": "test", "uid": "1337"}')
+    pb.publish.reset_mock()
