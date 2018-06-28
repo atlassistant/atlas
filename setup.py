@@ -30,9 +30,6 @@ setup(
   entry_points={
     'console_scripts': [
       'atlas = atlas.cli:main',
-      'atlas-check = atlas.cli:check',
-      'atlas-web = atlas.cli:web',
-      'atlas-client = atlas.cli:client',
     ]
   },
 )
