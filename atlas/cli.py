@@ -1,6 +1,7 @@
 from .version import __version__
 from .atlas import Atlas
-import argparse, sys
+from atlas_sdk.config import load_from_yaml
+import argparse, sys, os, logging
 
 def add_common_arguments(parser):
   """Add common arguments to the given parser.
@@ -16,6 +17,8 @@ def add_common_arguments(parser):
 class AtlasCLI:
   
   def __init__(self):
+    self._logger = logging.getLogger(self.__class__.__name__.lower())
+
     parser = argparse.ArgumentParser(
       description='atlas command line utility v%s' % __version__,
       usage='''atlas <command> [<args>]
@@ -37,7 +40,21 @@ Available commands:
 
     getattr(self, args.command)()
 
+  def _load_configuration(self, path):
+    fullpath = os.path.abspath(path)
+
+    try:
+      load_from_yaml(fullpath)
+      
+      self._logger.info('Using configuration file: "%s"' % fullpath)
+    except FileNotFoundError:
+      self._logger.error('Could not load the configuration file: "%s"!' % fullpath)
+      sys.exit(-1)
+
   def run(self):
+    """Runs the atlas instance by reading the configuration file.
+    """
+
     parser = argparse.ArgumentParser(
       description='Run the atlas server'
     )
@@ -45,6 +62,8 @@ Available commands:
     add_common_arguments(parser)
     
     args = parser.parse_args(sys.argv[2:])
+
+    self._load_configuration(args.config)
 
     print ("""
       `.-:::::::-.`      
@@ -65,6 +84,9 @@ Available commands:
       pass
 
   def accuracy(self):
+    """Computes engine accuracy and reports it.
+    """
+
     parser = argparse.ArgumentParser(
       description='Computes interpreter accuracy'
     )
@@ -72,6 +94,7 @@ Available commands:
     add_common_arguments(parser)
 
     args = parser.parse_args(sys.argv[2:])
+    self._load_configuration(args.config)
 
     print ('checking accuracy...')
 

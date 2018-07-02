@@ -48,7 +48,7 @@ class AtlasAdapter(PubSubAdapter):
   def _send_load_event_with_version(self, topic):
     self._pubsub.publish(topic, dumps({
       VERSION_KEY: __version__,
-    }))
+    }), ensure_delivery=True)
 
   def _send_channel_event(self, topic, id, uid):
     self._pubsub.publish(topic, dumps({
@@ -72,13 +72,13 @@ class AtlasAdapter(PubSubAdapter):
     """Inform that atlas is unloading.
     """
 
-    self._pubsub.publish(ATLAS_STATUS_UNLOADING)
+    self._pubsub.publish(ATLAS_STATUS_UNLOADING, ensure_delivery=True)
 
   def unloaded(self):
     """Inform that atlas has unloaded.
     """
 
-    self._pubsub.publish(ATLAS_STATUS_UNLOADED)
+    self._pubsub.publish(ATLAS_STATUS_UNLOADED, ensure_delivery=True)
 
   def channel_created(self, id, uid):
     """Inform the channel that an agent is ready for it.

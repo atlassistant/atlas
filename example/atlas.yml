@@ -5,7 +5,7 @@ discovery:
   timeout: 30
 executor:
   path: './skills'
-logs:
+logging:
   level: 'INFO'
 server:
   url: 'http://localhost:5000'

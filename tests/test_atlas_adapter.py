@@ -42,19 +42,19 @@ class AtlasAdapterTests(unittest.TestCase):
     adapter = AtlasAdapter(pb)
 
     adapter.loading()
-    pb.publish.assert_called_once_with(ATLAS_STATUS_LOADING, payload)
+    pb.publish.assert_called_once_with(ATLAS_STATUS_LOADING, payload, ensure_delivery=True)
     pb.publish.reset_mock()
 
     adapter.unloading()
-    pb.publish.assert_called_once_with(ATLAS_STATUS_UNLOADING)
+    pb.publish.assert_called_once_with(ATLAS_STATUS_UNLOADING, ensure_delivery=True)
     pb.publish.reset_mock()
 
     adapter.loaded()
-    pb.publish.assert_called_once_with(ATLAS_STATUS_LOADED, payload)
+    pb.publish.assert_called_once_with(ATLAS_STATUS_LOADED, payload, ensure_delivery=True)
     pb.publish.reset_mock()
 
     adapter.unloaded()
-    pb.publish.assert_called_once_with(ATLAS_STATUS_UNLOADED)
+    pb.publish.assert_called_once_with(ATLAS_STATUS_UNLOADED, ensure_delivery=True)
     pb.publish.reset_mock()
 
     adapter.channel_created('test', '1337')
