@@ -1,6 +1,8 @@
 atlas
 ===
 
+**⚠️ This project is mostly discontinued in favor of [pytlas](https://github.com/atlassistant/pytlas) ⚠️**
+
 ![banner](documentation/banner.png)
 
 **atlas v2 is currently being developed in the `next` branch. I have decided to rewrite it to make it more robust and easily testable.**
